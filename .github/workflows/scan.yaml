@@ -79,14 +79,20 @@ jobs:
       - name: Try to pull published image
         id: pull
         continue-on-error: true
-        run: docker pull "ghcr.io/${{ github.repository }}:latest-${{ matrix.suffix }}"
+        run: |
+          # lowercase: OCI repo names must be lowercase (owner may have uppercase).
+          # Emit the ref as an output (set before the pull so it exists even on failure)
+          # for the image-ref below, which is a with: block and can't use bash ${,,}.
+          IMAGE="ghcr.io/${GITHUB_REPOSITORY,,}:latest-${{ matrix.suffix }}"
+          echo "image=${IMAGE}" >> "$GITHUB_OUTPUT"
+          docker pull "${IMAGE}"
 
       # Full image scan — only when a published image is available
       - name: Trivy image scan
         if: steps.pull.outcome == 'success'
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
-          image-ref: ghcr.io/${{ github.repository }}:latest-${{ matrix.suffix }}
+          image-ref: ${{ steps.pull.outputs.image }}
           format: sarif
           output: trivy-results.sarif
           exit-code: "1"
