@@ -187,7 +187,10 @@ jobs:
 
       - name: Extract version tag
         id: version
-        run: echo "tag=${GITHUB_REF#refs/tags/v}" >> "$GITHUB_OUTPUT"
+        run: |
+          echo "tag=${GITHUB_REF#refs/tags/v}" >> "$GITHUB_OUTPUT"
+          # lowercase image ref for the manifest sources below (a with: block can't use bash ${,,})
+          echo "image=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
 
       - name: Generate manifest tags
         id: meta
@@ -203,5 +206,5 @@ jobs:
         with:
           tags: ${{ steps.meta.outputs.tags }}
           sources: |
-            ghcr.io/${{ github.repository }}:${{ steps.version.outputs.tag }}-linux-amd64
-            ghcr.io/${{ github.repository }}:${{ steps.version.outputs.tag }}-linux-arm64
+            ${{ steps.version.outputs.image }}:${{ steps.version.outputs.tag }}-linux-amd64
+            ${{ steps.version.outputs.image }}:${{ steps.version.outputs.tag }}-linux-arm64

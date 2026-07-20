@@ -141,7 +141,7 @@ jobs:
       # Push: build the clean final stage (no test artifacts)
       - name: Build & push final image
         run: |
-          IMAGE="ghcr.io/${{ github.repository }}"
+          IMAGE="ghcr.io/${GITHUB_REPOSITORY,,}"  # lowercase: OCI repo names must be lowercase (owner may have uppercase)
           if [ "${{ github.event_name }}" = "release" ]; then
             TAG="${{ github.event.release.tag_name }}"
           else
@@ -218,6 +218,8 @@ jobs:
           fi
           echo "tag=${TAG}" >> $GITHUB_OUTPUT
           echo "is_prerelease=${IS_PRERELEASE}" >> $GITHUB_OUTPUT
+          # lowercase image ref for the manifest sources below (a with: block can't use bash ${,,})
+          echo "image=ghcr.io/${GITHUB_REPOSITORY,,}" >> $GITHUB_OUTPUT
           echo "::notice::Tag=${TAG}, Pre-release=${IS_PRERELEASE}"
 
       - name: Docker metadata
@@ -234,5 +236,5 @@ jobs:
         with:
           tags: ${{ steps.meta.outputs.tags }}
           sources: |
-            ghcr.io/${{ github.repository }}:${{ steps.resolve.outputs.tag }}-linux-amd64
-            ghcr.io/${{ github.repository }}:${{ steps.resolve.outputs.tag }}-linux-arm64
+            ${{ steps.resolve.outputs.image }}:${{ steps.resolve.outputs.tag }}-linux-amd64
+            ${{ steps.resolve.outputs.image }}:${{ steps.resolve.outputs.tag }}-linux-arm64
