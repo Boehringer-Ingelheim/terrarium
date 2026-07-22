@@ -202,7 +202,7 @@ jobs:
             type=raw,value=latest
 
       - name: Create and push manifest
-        uses: int128/docker-manifest-create-action@fa55f72001a6c74b0f4997dca65c70d334905180 # v2.20.0
+        uses: int128/docker-manifest-create-action@a0bcb6430fe0047c0558deab102a6c66c373dae2 # v2.25.0
         with:
           tags: ${{ steps.meta.outputs.tags }}
           sources: |
