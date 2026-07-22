@@ -14,7 +14,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Release tag (e.g. v4.7.0)"
+        description: "Release tag with leading v (e.g. v4.7.0). The git tag keeps the v; the published image is normalized v-less (e.g. 4.7.0)."
         required: true
       debug_context:
         description: "Dump GitHub contexts for debugging"
@@ -61,6 +61,11 @@ jobs:
           else
             TAG="${{ inputs.tag }}"
           fi
+
+          # Tagging standard: git tags are ALWAYS v-prefixed (vX.Y.Z), image tags
+          # are published v-less (X.Y.Z — see the push & manifest steps). Normalize
+          # here so the git tag is canonical no matter how the operator typed it.
+          TAG="v${TAG#v}"
 
           # Validate tag for both Git and Docker usage
           if [ -z "$TAG" ]; then
@@ -147,6 +152,7 @@ jobs:
           else
             TAG="${{ inputs.tag }}"
           fi
+          IMAGE_TAG="${TAG#v}"  # git tag keeps the leading v; the published image is v-less
           GEMFILE_HASH=$(sha256sum docker/Gemfile.lock | cut -d' ' -f1)
           # Read Dockerfile ARG defaults (see comment on the tenv RUN in
           # docker/Dockerfile.terrarium for why these are forwarded).
@@ -168,7 +174,7 @@ jobs:
               --build-arg TERRAFORM_VERSION="${TERRAFORM_VERSION}" \
               --build-arg OPENTOFU_VERSION="${OPENTOFU_VERSION}" \
               --cache-from type=gha,scope=${{ matrix.platform }} \
-              --tag "${IMAGE}:${TAG}${{ matrix.suffix }}" \
+              --tag "${IMAGE}:${IMAGE_TAG}${{ matrix.suffix }}" \
               ./docker \
               && { echo "::endgroup::"; break; } \
               || { echo "::endgroup::"; echo "::warning::Push attempt $attempt failed"; }
@@ -217,6 +223,7 @@ jobs:
             fi
           fi
           echo "tag=${TAG}" >> $GITHUB_OUTPUT
+          echo "image_tag=${TAG#v}" >> $GITHUB_OUTPUT
           echo "is_prerelease=${IS_PRERELEASE}" >> $GITHUB_OUTPUT
           # lowercase image ref for the manifest sources below (a with: block can't use bash ${,,})
           echo "image=ghcr.io/${GITHUB_REPOSITORY,,}" >> $GITHUB_OUTPUT
@@ -228,7 +235,7 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository }}
           tags: |
-            type=raw,value=${{ steps.resolve.outputs.tag }}
+            type=raw,value=${{ steps.resolve.outputs.image_tag }}
             type=raw,value=latest,enable=${{ steps.resolve.outputs.is_prerelease != 'true' }}
 
       - name: Create and push manifest
@@ -236,5 +243,5 @@ jobs:
         with:
           tags: ${{ steps.meta.outputs.tags }}
           sources: |
-            ${{ steps.resolve.outputs.image }}:${{ steps.resolve.outputs.tag }}-linux-amd64
-            ${{ steps.resolve.outputs.image }}:${{ steps.resolve.outputs.tag }}-linux-arm64
+            ${{ steps.resolve.outputs.image }}:${{ steps.resolve.outputs.image_tag }}-linux-amd64
+            ${{ steps.resolve.outputs.image }}:${{ steps.resolve.outputs.image_tag }}-linux-arm64
