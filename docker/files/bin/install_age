@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+# install_age — download, verify, and install the age + age-keygen binaries.
+#
+# Lifted from the age half of the old sops+age RUN block (INFIAAS-11426 Phase 6);
+# the sops RPM install stays inline in the Dockerfile as a short RUN. Reads
+# AGE_VERSION and TARGETARCH from the environment. Verified-source-only and
+# fail-closed: a checksummed release tarball is preferred; the unverified
+# fallback is retained (with loud WARNs) exactly as before; if nothing verified
+# is available the build fails.
+#
+# AGE_BINDIR (default /usr/local/bin) is overridable so the helper is unit-testable.
+set -euo pipefail
+: "${AGE_VERSION:?AGE_VERSION must be set}"
+: "${TARGETARCH:?TARGETARCH must be set}"
+: "${AGE_BINDIR:=/usr/local/bin}"
+
+ARCH_SHORT=$([[ "$TARGETARCH" = "amd64" ]] && echo "amd64" || echo "arm64")
+BASE="https://github.com/FiloSottile/age/releases/download/v${AGE_VERSION}"
+tmp="$(mktemp -d)"; trap 'rm -rf "$tmp"' EXIT
+
+SUMS_URL=""
+for cand in "checksums.txt" "age-v${AGE_VERSION}-checksums.txt" "SHA256SUMS"; do
+  if fetch -o "$tmp/sums.txt" "${BASE}/${cand}"; then SUMS_URL="${BASE}/${cand}"; break; fi
+done
+if [ -z "$SUMS_URL" ]; then
+  API="https://api.github.com/repos/FiloSottile/age/releases/tags/v${AGE_VERSION}"
+  if [ -n "${GITHUB_TOKEN:-}" ]; then AUTH_HEADER="-H Authorization: Bearer ${GITHUB_TOKEN}"; else AUTH_HEADER=""; fi
+  if fetch $AUTH_HEADER -H "Accept: application/vnd.github+json" -o "$tmp/release.json" "$API"; then
+    SUMS_URL="$(jq -r '[.assets[] | select((.name|test("checksums|SHA256";"i")))][0].browser_download_url // empty' "$tmp/release.json")" || true
+  fi
+fi
+
+if [ -n "$SUMS_URL" ]; then
+  FNAME="$(awk '{print $2}' "$tmp/sums.txt" | grep -E "age-v${AGE_VERSION}-linux-${ARCH_SHORT}\.tar\.(gz|xz)$" | head -n1)"
+  if [ -z "$FNAME" ] && [ -f "$tmp/release.json" ]; then
+    FNAME="$(jq -r --arg arch "${ARCH_SHORT}" '.assets[].name | select(test("^age-v[0-9.]+-linux-\($arch)\.(tar\.gz|tar\.xz)$"))' "$tmp/release.json" | head -n1)"
+  fi
+  if [ -n "$FNAME" ]; then
+    fetch -o "$tmp/$FNAME" "${BASE}/${FNAME}" || fetch -o "$tmp/$FNAME" "$(dirname "$SUMS_URL")/$FNAME"
+    verify_sha256_from_checksums "$SUMS_URL" "$tmp/$FNAME"
+    case "$FNAME" in
+      *.tar.gz) tar -zxpf "$tmp/$FNAME" --strip-components=1 -C "$AGE_BINDIR" age/age age/age-keygen ;;
+      *.tar.xz) tar -Jxpf "$tmp/$FNAME" --strip-components=1 -C "$AGE_BINDIR" age/age age/age-keygen ;;
+    esac
+    "$AGE_BINDIR/age" --version
+    exit 0
+  fi
+fi
+
+echo "WARN: No checksums file for age v${AGE_VERSION}"
+FNAME="age-v${AGE_VERSION}-linux-${ARCH_SHORT}.tar.gz"
+if fetch -o "$tmp/$FNAME" "${BASE}/${FNAME}"; then
+  echo "WARN: Downloaded pre-built age tarball without checksum verification"
+  echo "WARN: Consider verifying via cosign .proof for supply-chain assurance"
+  tar -zxpf "$tmp/$FNAME" --strip-components=1 -C "$AGE_BINDIR" age/age age/age-keygen
+  "$AGE_BINDIR/age" --version
+  exit 0
+fi
+
+# Intentionally fail-closed: the previous `go install @latest` fallback was
+# removed as a supply-chain hardening measure — unverified builds are not
+# acceptable. If this fails, either the GitHub release is temporarily
+# unavailable (retry the build) or the version/architecture combination has no
+# pre-built tarball.
+echo "ERROR: Cannot install age v${AGE_VERSION} — no verified source available" >&2
+exit 1

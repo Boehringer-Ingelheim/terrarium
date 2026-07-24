@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+# import_node_keyring — build the Node.js release keyring from the pinned
+# NODE_RELEASE_FPRS allowlist (INFIAAS-11426 Phase 6; lifted from the node
+# keyring RUN block).
+#
+# Security model: NODE_RELEASE_FPRS is the trust anchor. Prefer the curated
+# keyring from nodejs/release-keys; fall back to per-fingerprint imports.
+# Whatever the source, ONLY allowlisted fingerprints are promoted into the
+# trusted final keyring. Fail-closed if none survive.
+#
+# Reads NODE_RELEASE_FPRS and GNUPGHOME from the environment. Ring paths are
+# overridable (NODE_TMP_RING, NODE_FINAL_RING) so the helper is unit-testable;
+# defaults match the build layout.
+set -euo pipefail
+: "${NODE_RELEASE_FPRS:?NODE_RELEASE_FPRS must be set}"
+: "${NODE_TMP_RING:=/opt/keys/tmp/node.kbx}"
+: "${NODE_FINAL_RING:=/opt/keys/gpg/node.gpg}"
+
+tmp_ring="$NODE_TMP_RING"
+final_ring="$NODE_FINAL_RING"
+install -d -m 0755 "$(dirname "$tmp_ring")" "$(dirname "$final_ring")"
+rm -f "$tmp_ring" "$final_ring"
+
+if fetch -o "$tmp_ring" https://github.com/nodejs/release-keys/raw/HEAD/gpg/pubring.kbx; then
+  echo "INFO: node: using curated release keyring"
+else
+  echo "WARN: node: curated keyring unavailable, importing from allowlist"
+  for f in $NODE_RELEASE_FPRS; do
+    asc="$(dirname "$tmp_ring")/node-${f}.asc"
+    if ! fetch -o "$asc" "https://keys.openpgp.org/vks/v1/by-fingerprint/${f}"; then
+      fetch -o "$asc" "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x${f}"
+    fi
+    gpg --batch ${GNUPGHOME:+--homedir "$GNUPGHOME"} --no-default-keyring \
+        --keyring "$tmp_ring" --import "$asc"
+  done
+fi
+
+# Promote only allowlisted fingerprints into the final keyring.
+for f in $NODE_RELEASE_FPRS; do
+  gpg --batch ${GNUPGHOME:+--homedir "$GNUPGHOME"} --no-default-keyring \
+      --keyring "$tmp_ring" --export "$f" 2>/dev/null \
+  | gpg --batch ${GNUPGHOME:+--homedir "$GNUPGHOME"} --no-default-keyring \
+      --keyring "$final_ring" --import 2>/dev/null || true
+done
+
+if ! gpg --batch ${GNUPGHOME:+--homedir "$GNUPGHOME"} --no-default-keyring \
+     --keyring "$final_ring" --with-colons --fingerprint 2>/dev/null \
+   | awk -F: '/^fpr:/{print $10}' | grep -q .; then
+  echo "ERROR: node: no allowlisted keys present after import (allowlist stale or source tampered?)" >&2
+  exit 1
+fi

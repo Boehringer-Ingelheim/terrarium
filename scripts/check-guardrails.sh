@@ -23,7 +23,7 @@ DF="${1:-docker/Dockerfile.terrarium}"
 #   heredocs:      baseline 10 → target 2 (the two config heredocs at :557,:642)
 #   longest RUN:   baseline 68 → target 20
 HEREDOC_MAX=2    # Phase 5: import_vendor_key extracted (3→2) — FINAL target: the 2 config heredocs (:557,:642)
-RUN_MAX=68       # final target: 20 (reached in Phase 6)
+RUN_MAX=20       # Phase 6: age/sops + node keyring decomposed — FINAL target reached
 
 fail=0
 chk() { # name actual op expected  (op ∈ -ge|-le|-eq; literal so shellcheck parses)
@@ -58,7 +58,15 @@ chk "unpinned actions"   "$(grep -rhoE 'uses: [^@]+@[^ ]+' .github/workflows/ | 
 
 # ── Ratchet metrics ──────────────────────────────────────────────────────────
 chk "helper heredocs"    "$(grep -cE '<<.?(EOF|EOS|EOT)' "$DF" || true)" -le "$HEREDOC_MAX"
-longest=$(awk '/^RUN /{n=1;next} /\\$/{n++;next} {if(n){if(n>m)m=n;n=0}} END{print m+0}' "$DF")
+# Measured ONLY over RUN blocks (a block is the RUN line plus any
+# trailing-backslash continuations). The earlier one-liner also counted
+# backslash-continued ENV blocks (e.g. the 63-entry NODE_RELEASE_FPRS list),
+# mis-reporting 68; this scopes to RUN and reports the true value.
+longest=$(awk '
+  /^RUN / {inrun=1; start=NR}
+  inrun && $0 !~ /\\[ \t]*$/ {if (NR-start+1 > m) m=NR-start+1; inrun=0}
+  END {print m+0}
+' "$DF")
 chk "longest RUN block"  "$longest" -le "$RUN_MAX"
 
 exit $fail
