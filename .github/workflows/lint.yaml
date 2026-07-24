@@ -40,9 +40,13 @@ jobs:
       - name: Helper unit suite ('helpers' stage)
         run: make docker-test-helpers
 
-      # Informational until the shell-heredocs are extracted (Phase 4/5) — until
-      # then hadolint 2.14 cannot parse Dockerfile.terrarium. Flip to blocking by
-      # removing continue-on-error once `make hadolint` exits 0 on this branch.
+      # Informational: hadolint 2.14 cannot parse Dockerfile.terrarium because of
+      # the two BY-DESIGN config heredocs (the google-cloud repo `<<EOF`, which
+      # must expand at write time, and the tenv profile) — a parser limitation,
+      # not a rule finding, that no ignore entry can suppress. The helper
+      # shell-heredocs were all removed by INFIAAS-11426; these two remain by
+      # design (out of scope). Flip to blocking if hadolint gains heredoc support
+      # or the config heredocs are ever restructured.
       - name: Hadolint (informational)
         continue-on-error: true
         run: make hadolint

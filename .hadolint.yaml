@@ -5,12 +5,13 @@
 # SHRINK as extraction phases land, never grow. Every entry must be understood
 # and justified; no blanket suppressions.
 #
-# NOTE: hadolint 2.14 cannot fully parse the Dockerfile while the chained
-# shell-heredocs (RUN cat >file <<'EOF' ...) remain — it reports a parse error,
-# not a rule finding, which no ignore entry can suppress. The hadolint gate is
-# therefore INFORMATIONAL in CI (continue-on-error) until INFIAAS-11426 Phase 4/5
-# extract those heredocs, after which it becomes blocking and this list is
-# populated with whatever real findings survive.
+# NOTE: hadolint 2.14 cannot parse this Dockerfile because of the two BY-DESIGN
+# config heredocs (the google-cloud repo `<<EOF`, which must expand at write
+# time, and the tenv profile heredoc). It reports a parse error — not a rule
+# finding — that no ignore entry can suppress. INFIAAS-11426 removed every helper
+# shell-heredoc; these two remain by design. The hadolint gate is therefore
+# INFORMATIONAL in CI (continue-on-error). It can become blocking only if
+# hadolint gains heredoc support or the config heredocs are restructured.
 
 failure-threshold: error
 

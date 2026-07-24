@@ -22,7 +22,7 @@ DF="${1:-docker/Dockerfile.terrarium}"
 # Tighten these as extraction phases land. Do not loosen.
 #   heredocs:      baseline 10 → target 2 (the two config heredocs at :557,:642)
 #   longest RUN:   baseline 68 → target 20
-HEREDOC_MAX=3    # Phase 4: fetch + 4 verify_* extracted (8→3); final target: 2 (Phase 6, after import_vendor_key)
+HEREDOC_MAX=2    # Phase 5: import_vendor_key extracted (3→2) — FINAL target: the 2 config heredocs (:557,:642)
 RUN_MAX=68       # final target: 20 (reached in Phase 6)
 
 fail=0
