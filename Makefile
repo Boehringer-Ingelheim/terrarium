@@ -59,7 +59,7 @@ define assert_file
 	test -f "$(1)" || { printf "$(RED)Error: missing file: $(1)$(RESET)\n" >&2; exit 1; }
 endef
 
-.PHONY: help verify-keys print-keys write-keys check-keys docker-build docker-build-test docker-test docker-test-exec test sbom guardrails lint shellcheck hadolint test-helpers docker-test-helpers
+.PHONY: help verify-keys print-keys write-keys check-keys docker-build docker-build-test docker-test docker-test-exec test sbom guardrails lint shellcheck hadolint test-helpers docker-test-helpers check-keys-drift
 
 # Files shellcheck lints (kept in sync with .github/workflows/lint.yaml)
 SHELLCHECK_TARGETS ?= scripts/*.sh docker/vendor-keys/*.sh docker/files/bin/*
@@ -70,6 +70,9 @@ HADOLINT_IMAGE   ?= hadolint/hadolint:latest
 # ================== Quality gates ==================
 guardrails: ## Mechanical do-not-regress + ratchet assertions on the Dockerfile
 	@bash scripts/check-guardrails.sh "$(DOCKERFILE)"
+
+check-keys-drift: ## Fail if vendor-key pins in $(ENV_FILE) drift from the Dockerfile ENV block (fingerprints only)
+	@bash scripts/check-vendor-key-drift.sh "$(DOCKERFILE)" "$(ENV_FILE)"
 
 shellcheck: ## Run shellcheck (severity=warning) over shell sources via stdin (bind-mount-free)
 	@$(assert_docker)

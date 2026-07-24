@@ -35,6 +35,11 @@ jobs:
       - name: Shellcheck (severity=warning)
         run: make shellcheck
 
+      # Fail if the vendor-key pins in vendor-keys.env drift from the Dockerfile
+      # ENV block (fingerprints only; no key material).
+      - name: Vendor-key drift
+        run: make check-keys-drift
+
       # Hermetic helper unit suite in the 'helpers' stage. Runs before the main
       # build (main.yaml) so a broken helper fails fast and cheap.
       - name: Helper unit suite ('helpers' stage)
