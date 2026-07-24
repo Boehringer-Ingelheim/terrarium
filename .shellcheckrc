@@ -1,0 +1,8 @@
+# shellcheck configuration for the terrarium repo.
+# Approved severity: warning (see plan Phase 2). Style/info notices are not
+# gated so the extracted helpers stay faithful to their heredoc originals.
+severity=warning
+
+# Follow `source`/`.` into external files where resolvable; do not fail when a
+# sourced path is only present at container-build time.
+external-sources=true

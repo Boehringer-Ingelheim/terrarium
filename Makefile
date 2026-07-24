@@ -59,7 +59,39 @@ define assert_file
 	test -f "$(1)" || { printf "$(RED)Error: missing file: $(1)$(RESET)\n" >&2; exit 1; }
 endef
 
-.PHONY: help verify-keys print-keys write-keys check-keys docker-build docker-build-test docker-test docker-test-exec test sbom
+.PHONY: help verify-keys print-keys write-keys check-keys docker-build docker-build-test docker-test docker-test-exec test sbom guardrails lint shellcheck hadolint
+
+# Files shellcheck lints (kept in sync with .github/workflows/lint.yaml)
+SHELLCHECK_TARGETS ?= scripts/*.sh docker/vendor-keys/*.sh docker/files/bin/*
+# Docker images for linters (no host install required; matches CI)
+SHELLCHECK_IMAGE ?= koalaman/shellcheck:stable
+HADOLINT_IMAGE   ?= hadolint/hadolint:latest
+
+# ================== Quality gates ==================
+guardrails: ## Mechanical do-not-regress + ratchet assertions on the Dockerfile
+	@bash scripts/check-guardrails.sh "$(DOCKERFILE)"
+
+shellcheck: ## Run shellcheck (severity=warning) over shell sources via stdin (bind-mount-free)
+	@$(assert_docker)
+	@printf "$(YELLOW)shellcheck: $(SHELLCHECK_TARGETS)$(RESET)\n"
+	@rc=0; found=0; \
+	 for f in $(SHELLCHECK_TARGETS); do \
+	   [ -f "$$f" ] || continue; found=1; \
+	   case "$$f" in *.md|*.env) continue;; esac; \
+	   out=$$(docker run --rm -i $(SHELLCHECK_IMAGE) --severity=warning --external-sources - < "$$f" 2>&1); \
+	   if [ -n "$$out" ]; then printf "$(RED)%s$(RESET)\n%s\n" "$$f" "$$out"; rc=1; \
+	   else printf "ok: %s\n" "$$f"; fi; \
+	 done; \
+	 [ "$$found" = 1 ] || printf "$(YELLOW)no shell files to check$(RESET)\n"; \
+	 exit $$rc
+
+hadolint: ## Run hadolint on the terrarium Dockerfile via stdin (ignores sourced from .hadolint.yaml)
+	@$(assert_docker)
+	@printf "$(YELLOW)hadolint: $(DOCKERFILE)$(RESET)\n"
+	@ign=$$(awk '/^ignored:/{f=1;next} f&&/^[[:space:]]*-[[:space:]]/{gsub(/[^A-Za-z0-9]/,"",$$2);printf "%s%s",s,$$2;s=","} f&&/^[^[:space:]-]/{f=0}' .hadolint.yaml 2>/dev/null); \
+	 docker run --rm -i -e HADOLINT_IGNORE="$$ign" -e HADOLINT_FAILURE_THRESHOLD=error $(HADOLINT_IMAGE) hadolint - < "$(DOCKERFILE)"
+
+lint: guardrails shellcheck hadolint ## Run all host-side lint gates (guardrails + shellcheck + hadolint)
 
 # ================== Meta ==================
 help: ## Show this help (default)

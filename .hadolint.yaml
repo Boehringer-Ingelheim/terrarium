@@ -1,0 +1,22 @@
+# hadolint configuration for docker/Dockerfile.terrarium
+#
+# Gate policy (plan Phase 2): fail the build on `error`-level findings. The
+# `ignored:` list below is the CONTRACT for the refactor — it may only ever
+# SHRINK as extraction phases land, never grow. Every entry must be understood
+# and justified; no blanket suppressions.
+#
+# NOTE: hadolint 2.14 cannot fully parse the Dockerfile while the chained
+# shell-heredocs (RUN cat >file <<'EOF' ...) remain — it reports a parse error,
+# not a rule finding, which no ignore entry can suppress. The hadolint gate is
+# therefore INFORMATIONAL in CI (continue-on-error) until INFIAAS-11426 Phase 4/5
+# extract those heredocs, after which it becomes blocking and this list is
+# populated with whatever real findings survive.
+
+failure-threshold: error
+
+# Base images come from these registries only.
+trustedRegistries:
+  - docker.io          # rockylinux (buildlang stage)
+  - registry.access.redhat.com  # ubi9 (builder/test stages)
+
+ignored: []
