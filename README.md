@@ -8,7 +8,7 @@
 </td>
 </tr></table>
 
-With **terrarium** we offer an immutable Developer Environment for developers working with **[OpenDevStack](https://www.opendevstack.org/)** projects. **terrarium** provides the same environment which is used to deploy AWS or AZURE components via ODS.
+With **terrarium** we offer an immutable Developer Environment for developers working with **[OpenDevStack](https://www.opendevstack.org/)** projects. **terrarium** provides the same environment which is used to deploy AWS or AZURE components via **[OpenDevStack](https://www.opendevstack.org/)**.
 
 By using the Visual Studio Code Remote - Containers extension it enables the developer to open cloud component repositories inside a container and take advantage of Visual Studio Code's full feature set.
 
@@ -20,7 +20,7 @@ If the Cloud Quickstarter does not contain it already simply create a [`.devcont
 
 ```json
 {
-  "image": "ghcr.io/nichtraunzer/terrarium:latest"
+  "image": "ghcr.io/boehringer-ingelheim/terrarium:latest"
 }
 ```
 
