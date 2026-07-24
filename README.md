@@ -8,7 +8,7 @@
 </td>
 </tr></table>
 
-With **terrarium** we offer an immutable Developer Environment for developers working with **[OpenDevStack](https://www.opendevstack.org/)** projects. **terrarium** provides the same environment which is used to deploy AWS or AZURE components via ODS.
+With **terrarium** we offer an immutable Developer Environment for developers working with **[OpenDevStack](https://www.opendevstack.org/)** projects. **terrarium** provides the same environment which is used to deploy AWS or AZURE components via **[OpenDevStack](https://www.opendevstack.org/)**.
 
 By using the Visual Studio Code Remote - Containers extension it enables the developer to open cloud component repositories inside a container and take advantage of Visual Studio Code's full feature set.
 
@@ -20,7 +20,7 @@ If the Cloud Quickstarter does not contain it already simply create a [`.devcont
 
 ```json
 {
-  "image": "ghcr.io/nichtraunzer/terrarium:latest"
+  "image": "ghcr.io/boehringer-ingelheim/terrarium:latest"
 }
 ```
 
@@ -46,12 +46,12 @@ The following steps have to be performed:
   `docker run -ti --user 1000 -v $HOME/.bash_history:/home/terrarium/.bash_history -v`pwd`:/workspace -v $HOME/.gitconfig:/home/terrarium/.gitconfig -v $HOME/.cache/git/credential/socket:/home/terrarium/.cache/git/credential/socket terrarium:tools-update /bin/bash`
 - commit & push changes & create pull request
 
-## Automated Tests with Bats
+## Automated Tests with Bats
 
 ### Why do we test the image?
 
 `terrarium` is an **immutable developer workstation** pre‑loaded with dozens of tools
-(Terraform, AWS CLIs, Packer, Ruby, Go, Node.js …).
+(Terraform, AWS CLIs, Packer, Ruby, Go, Node.js …).
 Whenever we upgrade one of those tools or tweak **`Dockerfile.terrarium`** we risk
 breaking somebody’s workflow.
 
@@ -60,7 +60,7 @@ runs _inside_ the container during local builds **and** in CI.
 If a single assertion fails, the build (and the GitHub Action) stops – before a
 faulty image can be pushed.
 
-- **Framework:** [Bats – Bash Automated Testing System](https://github.com/bats-core/bats-core) +
+- **Framework:** [Bats – Bash Automated Testing System](https://github.com/bats-core/bats-core) +
   helper libs **bats‑support** and **bats‑assert**
 - **Philosophy:** ultra‑fast _smoke_ tests – “does the binary exist and print the
   expected version?”
