@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# verify_gpg_signed_checksums <keyring.gpg> <checksums-url> <sig-url> <artifact-file>
+set -euo pipefail
+keyring="$1"; sums_url="$2"; sig_url="$3"; file="$4"
+tmp="$(mktemp -d)"; trap 'rm -rf "$tmp"' EXIT
+fetch -o "$tmp/sums.txt" "$sums_url"
+fetch -o "$tmp/sums.txt.sig" "$sig_url"
+gpg --batch ${GNUPGHOME:+--homedir "$GNUPGHOME"} --no-default-keyring --keyring "$keyring" --verify "$tmp/sums.txt.sig" "$tmp/sums.txt" >/dev/null
+
+# extract sha256 for file (supports formats with/without leading '*')
+expected="$(grep -E "([[:space:]]|[*])$(basename "$file")$" "$tmp/sums.txt" | awk '{print $1}')"
+[ -n "$expected" ] || { echo "checksum for $(basename "$file") not found"; exit 1; }
+echo "${expected}  ${file}" | sha256sum -c -

@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# verify_gpg_detached <keyring.gpg> <artifact-file> <sig-url>
+set -euo pipefail
+keyring="$1"; file="$2"; sig_url="$3"
+tmp="$(mktemp -d)"; trap 'rm -rf "$tmp"' EXIT
+fetch -o "$tmp/file.sig" "$sig_url"
+gpg --batch ${GNUPGHOME:+--homedir "$GNUPGHOME"} --no-default-keyring --keyring "$keyring" --verify "$tmp/file.sig" "$file" >/dev/null
+

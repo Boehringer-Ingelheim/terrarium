@@ -308,122 +308,19 @@ RUN set -x \
     && dnf -y install $RUNTIME_PKGS \
     && dnf clean all
 
-# Robust downloader with retries
-RUN cat >/usr/local/bin/fetch <<'EOF'
-#!/usr/bin/env bash
-set -euo pipefail
-: "${FETCH_RETRIES:=5}"
-: "${FETCH_RETRY_DELAY:=2}"
-: "${FETCH_CONNECT_TIMEOUT:=20}"
-: "${FETCH_MAX_TIME:=900}"
-exec curl --fail --silent --show-error --location \
-          --retry "$FETCH_RETRIES" --retry-connrefused \
-          --retry-delay "$FETCH_RETRY_DELAY" \
-          --connect-timeout "$FETCH_CONNECT_TIMEOUT" \
-          --max-time "$FETCH_MAX_TIME" \
-          "$@"
-EOF
-RUN chmod +x /usr/local/bin/fetch
+# Downloader + verification helpers now live in docker/files/bin/ as named,
+# shellcheck-clean, unit-tested files (fetch, verify_gpg_signed_checksums,
+# verify_gpg_detached, verify_sha256_from_url, verify_sha256_from_checksums).
+# Installed here, before their first use by import_vendor_key and the tool
+# installers below. kitchen + cinc-auditor ride along in the same COPY.
+# See INFIAAS-11426.
+COPY files/bin/ /usr/local/bin/
 
-# Verification helpers
-RUN cat >/usr/local/bin/verify_gpg_signed_checksums <<'EOF' \
-    && cat >/usr/local/bin/verify_gpg_detached <<'EOF2' \
-    && cat >/usr/local/bin/verify_sha256_from_url <<'EOF3' \
-    && cat >/usr/local/bin/verify_sha256_from_checksums <<'EOF4' \
-    && chmod +x /usr/local/bin/verify_*
-#!/usr/bin/env bash
-# verify_gpg_signed_checksums <keyring.gpg> <checksums-url> <sig-url> <artifact-file>
-set -euo pipefail
-keyring="$1"; sums_url="$2"; sig_url="$3"; file="$4"
-tmp="$(mktemp -d)"; trap 'rm -rf "$tmp"' EXIT
-fetch -o "$tmp/sums.txt" "$sums_url"
-fetch -o "$tmp/sums.txt.sig" "$sig_url"
-gpg --batch ${GNUPGHOME:+--homedir "$GNUPGHOME"} --no-default-keyring --keyring "$keyring" --verify "$tmp/sums.txt.sig" "$tmp/sums.txt" >/dev/null
-
-# extract sha256 for file (supports formats with/without leading '*')
-expected="$(grep -E "([[:space:]]|[*])$(basename "$file")$" "$tmp/sums.txt" | awk '{print $1}')"
-[ -n "$expected" ] || { echo "checksum for $(basename "$file") not found"; exit 1; }
-echo "${expected}  ${file}" | sha256sum -c -
-EOF
-#!/usr/bin/env bash
-# verify_gpg_detached <keyring.gpg> <artifact-file> <sig-url>
-set -euo pipefail
-keyring="$1"; file="$2"; sig_url="$3"
-tmp="$(mktemp -d)"; trap 'rm -rf "$tmp"' EXIT
-fetch -o "$tmp/file.sig" "$sig_url"
-gpg --batch ${GNUPGHOME:+--homedir "$GNUPGHOME"} --no-default-keyring --keyring "$keyring" --verify "$tmp/file.sig" "$file" >/dev/null
-
-EOF2
-#!/usr/bin/env bash
-# verify_sha256_from_url <sha256-url> <artifact-file>  (supports "hex" or "hex  filename")
-set -euo pipefail
-sha_url="$1"; file="$2"
-tmp="$(mktemp -d)"; trap 'rm -rf "$tmp"' EXIT
-fetch -o "$tmp/sha256" "$sha_url"
-sum="$(awk '{print $1}' "$tmp/sha256" | tr -d '\n\r')"
-echo "${sum}  ${file}" | sha256sum -c -
-EOF3
-#!/usr/bin/env bash
-# verify_sha256_from_checksums <checksums-url> <artifact-file>
-set -euo pipefail
-sums_url="$1"; file="$2"
-tmp="$(mktemp -d)"; trap 'rm -rf "$tmp"' EXIT
-fetch -o "$tmp/checksums.txt" "$sums_url"
-expected="$(grep -E "([[:space:]]|[*])$(basename "$file")$" "$tmp/checksums.txt" | awk '{print $1}')"
-[ -n "$expected" ] || { echo "checksum for $(basename "$file") not found in $sums_url"; exit 1; }
-echo "${expected}  ${file}" | sha256sum -c -
-EOF4
-
-# Vendor-key import helper
-#
-# Fetches a PGP public key, verifies it contains the pinned fingerprint, and
-# installs it to a trusted keyring. Fail-closed at every step. The trusted
-# keyring is only written once the pinned fingerprint has been confirmed in
-# a disposable temp keyring.
-RUN cat >/usr/local/bin/import_vendor_key <<'EOF' && chmod +x /usr/local/bin/import_vendor_key
-#!/usr/bin/env bash
-# import_vendor_key <name> <expected_fpr> <primary_url> <fallback_url> <out_asc> <out_ring>
-#
-# Tries <primary_url> first; if either fetch fails OR the imported key does not
-# contain <expected_fpr> (e.g. keys.openpgp.org strips UIDs for unverified
-# vendors, leaving a UID-less key that GPG refuses to import), falls back to
-# <fallback_url>. Fail-closed if neither source yields the pinned fingerprint.
-set -euo pipefail
-if [ "$#" -ne 6 ]; then
-  echo "usage: import_vendor_key <name> <fpr> <primary_url> <fallback_url> <out_asc> <out_ring>" >&2
-  exit 2
-fi
-name="$1"; fpr="$2"; primary="$3"; fallback="$4"; out_asc="$5"; out_ring="$6"
-
-tmp="$(mktemp -d)"; trap 'rm -rf "$tmp"' EXIT
-tmp_ring="${tmp}/${name}.kbx"
-
-install -d -m 0755 "$(dirname "$out_asc")" "$(dirname "$out_ring")"
-
-try_source() {
-  local url="$1"
-  rm -f "$out_asc" "$tmp_ring"
-  fetch -o "$out_asc" "$url" || return 1
-  gpg --batch ${GNUPGHOME:+--homedir "$GNUPGHOME"} --no-default-keyring \
-      --keyring "$tmp_ring" --import "$out_asc" || return 1
-  gpg --batch ${GNUPGHOME:+--homedir "$GNUPGHOME"} --no-default-keyring \
-      --keyring "$tmp_ring" --with-colons --fingerprint 2>/dev/null \
-  | awk -F: '/^fpr:/{print $10}' \
-  | grep -Fxq "$fpr"
-}
-
-echo "INFO: ${name}: trying primary source: ${primary}"
-if ! try_source "$primary"; then
-  echo "INFO: ${name}: primary did not yield key ${fpr}; trying fallback: ${fallback}"
-  if ! try_source "$fallback"; then
-    echo "ERROR: ${name}: neither primary nor fallback yielded a key with pinned fingerprint ${fpr}" >&2
-    exit 1
-  fi
-fi
-
-cp -f "$tmp_ring" "$out_ring"
-echo "INFO: ${name}: key verified; installed to ${out_ring}"
-EOF
+# Vendor-key import helper — now docker/files/bin/import_vendor_key, installed
+# by the COPY above. Fetches a PGP public key, verifies it contains the pinned
+# fingerprint, and installs it to a trusted keyring; fail-closed at every step,
+# the trusted keyring written only once the pinned fingerprint is confirmed in
+# a disposable temp keyring. See INFIAAS-11426.
 
 # Keyrings (deterministic bootstrap)
 RUN install -d -m 0755 /opt/keys/gpg /opt/keys/tmp
@@ -450,35 +347,7 @@ RUN import_vendor_key opentofu "$OPENTOFU_PGP_FPR" \
 # Security model: the pinned NODE_RELEASE_FPRS allowlist is the trust anchor.
 # Whatever the source (curated or fallback), only allowlisted fingerprints are
 # promoted into the trusted final keyring. Fail-closed if none survive.
-RUN set -euo pipefail; \
-    tmp_ring=/opt/keys/tmp/node.kbx; \
-    final_ring=/opt/keys/gpg/node.gpg; \
-    rm -f "$tmp_ring" "$final_ring"; \
-    if fetch -o "$tmp_ring" https://github.com/nodejs/release-keys/raw/HEAD/gpg/pubring.kbx; then \
-    echo "INFO: node: using curated release keyring"; \
-    else \
-    echo "WARN: node: curated keyring unavailable, importing from allowlist"; \
-    for f in $NODE_RELEASE_FPRS; do \
-    asc="/opt/keys/tmp/node-${f}.asc"; \
-    if ! fetch -o "$asc" "https://keys.openpgp.org/vks/v1/by-fingerprint/${f}"; then \
-    fetch -o "$asc" "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x${f}"; \
-    fi; \
-    gpg --batch --homedir "$GNUPGHOME" --no-default-keyring \
-    --keyring "$tmp_ring" --import "$asc"; \
-    done; \
-    fi; \
-    for f in $NODE_RELEASE_FPRS; do \
-    gpg --batch --homedir "$GNUPGHOME" --no-default-keyring \
-    --keyring "$tmp_ring" --export "$f" 2>/dev/null \
-    | gpg --batch --homedir "$GNUPGHOME" --no-default-keyring \
-    --keyring "$final_ring" --import 2>/dev/null || true; \
-    done; \
-    if ! gpg --batch --homedir "$GNUPGHOME" --no-default-keyring \
-    --keyring "$final_ring" --with-colons --fingerprint 2>/dev/null \
-    | awk -F: '/^fpr:/{print $10}' | grep -q .; then \
-    echo "ERROR: node: no allowlisted keys present after import (allowlist stale or source tampered?)" >&2; \
-    exit 1; \
-    fi
+RUN import_node_keyring
 
 
 # AWS CLI release key — vendor URL is primary because keys.openpgp.org strips
@@ -722,56 +591,14 @@ RUN fetch https://taskfile.dev/install.sh | sh -s -- -d v${TASK_VERSION} \
 
 
 
-# sops + age (verify official tarball if available; otherwise fall back to go install)
-RUN set -eux; \
-    ARCH_SHORT=$([[ "$TARGETARCH" = "amd64" ]] && echo "amd64" || echo "arm64"); \
-    ARCH_RPM=$([[ "$TARGETARCH" = "amd64" ]] && echo "x86_64" || echo "aarch64"); \
-    dnf -y install "https://github.com/getsops/sops/releases/download/v${SOPS_VERSION}/sops-${SOPS_VERSION}-1.${ARCH_RPM}.rpm"; \
-    BASE="https://github.com/FiloSottile/age/releases/download/v${AGE_VERSION}"; \
-    tmp="$(mktemp -d)"; \
-    SUMS_URL=""; \
-    for cand in "checksums.txt" "age-v${AGE_VERSION}-checksums.txt" "SHA256SUMS"; do \
-    if fetch -o "$tmp/sums.txt" "${BASE}/${cand}"; then SUMS_URL="${BASE}/${cand}"; break; fi; \
-    done; \
-    if [ -z "$SUMS_URL" ]; then \
-    API="https://api.github.com/repos/FiloSottile/age/releases/tags/v${AGE_VERSION}"; \
-    if [ -n "${GITHUB_TOKEN:-}" ]; then AUTH_HEADER="-H Authorization: Bearer ${GITHUB_TOKEN}"; else AUTH_HEADER=""; fi; \
-    if fetch $AUTH_HEADER -H "Accept: application/vnd.github+json" -o "$tmp/release.json" "$API"; then \
-    SUMS_URL="$(jq -r '[.assets[] | select((.name|test("checksums|SHA256";"i")))][0].browser_download_url // empty' "$tmp/release.json")" || true; \
-    fi; \
-    fi; \
-    if [ -n "$SUMS_URL" ]; then \
-    FNAME="$(awk '{print $2}' "$tmp/sums.txt" | grep -E "age-v${AGE_VERSION}-linux-${ARCH_SHORT}\\.tar\\.(gz|xz)$" | head -n1)"; \
-    if [ -z "$FNAME" ] && [ -f "$tmp/release.json" ]; then \
-    FNAME="$(jq -r --arg arch "${ARCH_SHORT}" '.assets[].name | select(test("^age-v[0-9.]+-linux-\\($arch)\\.(tar\\.gz|tar\\.xz)$"))' "$tmp/release.json" | head -n1)"; \
-    fi; \
-    if [ -n "$FNAME" ]; then \
-    fetch -o "$tmp/$FNAME" "${BASE}/${FNAME}" || fetch -o "$tmp/$FNAME" "$(dirname "$SUMS_URL")/$FNAME"; \
-    verify_sha256_from_checksums "$SUMS_URL" "$tmp/$FNAME"; \
-    case "$FNAME" in \
-    *.tar.gz) tar -zxpf "$tmp/$FNAME" --strip-components=1 -C /usr/local/bin age/age age/age-keygen ;; \
-    *.tar.xz) tar -Jxpf "$tmp/$FNAME" --strip-components=1 -C /usr/local/bin age/age age/age-keygen ;; \
-    esac; \
-    rm -rf "$tmp"; \
-    /usr/bin/sops --version; /usr/local/bin/age --version; dnf clean all; \
-    exit 0; \
-    fi; \
-    fi; \
-    echo "WARN: No checksums file for age v${AGE_VERSION}"; \
-    FNAME="age-v${AGE_VERSION}-linux-${ARCH_SHORT}.tar.gz"; \
-    if fetch -o "$tmp/$FNAME" "${BASE}/${FNAME}"; then \
-    echo "WARN: Downloaded pre-built age tarball without checksum verification"; \
-    echo "WARN: Consider verifying via cosign .proof for supply-chain assurance"; \
-    tar -zxpf "$tmp/$FNAME" --strip-components=1 -C /usr/local/bin age/age age/age-keygen; \
-    rm -rf "$tmp"; \
-    /usr/bin/sops --version; /usr/local/bin/age --version; dnf clean all; \
-    exit 0; \
-    fi; \
-    # Intentionally fail-closed: the previous `go install @latest` fallback was removed
-    # as a supply-chain hardening measure (Phase 8 T10) — unverified builds are not acceptable.
-    # If this fails, either the GitHub release is temporarily unavailable (retry the build)
-    # or the version/architecture combination doesn't have a pre-built tarball.
-    echo "ERROR: Cannot install age v${AGE_VERSION} — no verified source available"; exit 1
+# sops — install the signed RPM (short, self-contained)
+RUN ARCH_RPM=$([[ "$TARGETARCH" = "amd64" ]] && echo "x86_64" || echo "aarch64"); \
+    dnf -y install "https://github.com/getsops/sops/releases/download/v${SOPS_VERSION}/sops-${SOPS_VERSION}-1.${ARCH_RPM}.rpm" \
+    && /usr/bin/sops --version \
+    && dnf clean all
+
+# age — download, verify, install (helper: docker/files/bin/install_age)
+RUN install_age
 
 
 # terraform-config-inspect (support "latest" tag; use fetch wrapper for retries)
@@ -924,25 +751,9 @@ RUN chown -R 1001:0 ${HOME} && chmod -R g+rw ${HOME} \
 RUN dnf -y install perl-IPC-Cmd && dnf clean all
 
 # ---- Kitchen & Cinc wrappers (MANDATORY) -----------------------------------
-RUN install -d -m 0755 /usr/local/bin
-
-# kitchen wrapper
-RUN cat >/usr/local/bin/kitchen <<'EOF'
-#!/usr/bin/env bash
-export BUNDLE_GEMFILE=/opt/terrarium-gems/Gemfile
-export BUNDLE_PATH=/opt/bundle
-exec /opt/rbenv/shims/bundle exec kitchen "$@"
-EOF
-RUN chmod +x /usr/local/bin/kitchen
-
-# cinc-auditor wrapper
-RUN cat >/usr/local/bin/cinc-auditor <<'EOF'
-#!/usr/bin/env bash
-export BUNDLE_GEMFILE=/opt/terrarium-gems/Gemfile
-export BUNDLE_PATH=/opt/bundle
-exec /opt/rbenv/shims/bundle exec cinc-auditor "$@"
-EOF
-RUN chmod +x /usr/local/bin/cinc-auditor
+# kitchen + cinc-auditor are installed from docker/files/bin/ by the single
+# `COPY files/bin/ /usr/local/bin/` earlier in this stage (before the first
+# fetch/verify use). See INFIAAS-11426.
 
 # Smoke check
 RUN RBENV_VERSION=${RUBY_VERSION} \
@@ -1002,6 +813,27 @@ RUN find /home/terrarium/tests -type f -name "*.bats" -exec chmod +x {} \; \
 
 WORKDIR $HOME
 CMD ["/bin/bash", "-i", "-l"]
+
+# ================= Stage — helpers (hermetic unit tests for docker/files/bin) =================
+# Deliberately NOT in `builder`'s dependency chain (INFIAAS-11426 decision 5):
+# `builder` already COPYs files/bin/, so a helper edit invalidates it regardless
+# — welding `helpers` in would only inject the unit suite into every
+# `--target test` build (including downstream E2E and release) for no cache
+# benefit. CI runs this stage explicitly, before the main build, so it still
+# fails fast. Runs with bats core only; no network, nothing outside tmpdir.
+FROM registry.access.redhat.com/ubi9/ubi:${UBI9_VERSION} AS helpers
+ARG BATS_CORE_VERSION
+# Only `git` is missing from the ubi9 base (needed to clone bats). bash, gnupg2
+# and the coreutils multicall (via coreutils-single: cat/head/sha256sum/…) are
+# already present; installing `coreutils` would conflict with coreutils-single.
+RUN dnf -y install --setopt=install_weak_deps=False git \
+    && dnf clean all && rm -rf /var/cache/dnf
+RUN git clone --depth 1 --branch "v${BATS_CORE_VERSION}" \
+      https://github.com/bats-core/bats-core /tmp/bats \
+    && /tmp/bats/install.sh /usr/local && rm -rf /tmp/bats
+COPY files/bin/ /usr/local/bin/
+COPY tests/unit /opt/unit
+RUN bats /opt/unit
 
 # ================= Stage 2 — test (build-time gate, also the publish target) =================
 # `test` is the last stage by design: the bats suite is intentionally shipped

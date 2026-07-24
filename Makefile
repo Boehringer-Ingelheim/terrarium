@@ -59,7 +59,60 @@ define assert_file
 	test -f "$(1)" || { printf "$(RED)Error: missing file: $(1)$(RESET)\n" >&2; exit 1; }
 endef
 
-.PHONY: help verify-keys print-keys write-keys check-keys docker-build docker-build-test docker-test docker-test-exec test sbom
+.PHONY: help verify-keys print-keys write-keys check-keys docker-build docker-build-test docker-test docker-test-exec test sbom guardrails lint shellcheck hadolint test-helpers docker-test-helpers check-keys-drift
+
+# Files shellcheck lints (kept in sync with .github/workflows/lint.yaml)
+SHELLCHECK_TARGETS ?= scripts/*.sh docker/vendor-keys/*.sh docker/files/bin/*
+# Docker images for linters (no host install required; matches CI)
+SHELLCHECK_IMAGE ?= koalaman/shellcheck:stable
+HADOLINT_IMAGE   ?= hadolint/hadolint:latest
+
+# ================== Quality gates ==================
+guardrails: ## Mechanical do-not-regress + ratchet assertions on the Dockerfile
+	@bash scripts/check-guardrails.sh "$(DOCKERFILE)"
+
+check-keys-drift: ## Fail if vendor-key pins in $(ENV_FILE) drift from the Dockerfile ENV block (fingerprints only)
+	@bash scripts/check-vendor-key-drift.sh "$(DOCKERFILE)" "$(ENV_FILE)"
+
+shellcheck: ## Run shellcheck (severity=warning) over shell sources via stdin (bind-mount-free)
+	@$(assert_docker)
+	@printf "$(YELLOW)shellcheck: $(SHELLCHECK_TARGETS)$(RESET)\n"
+	@rc=0; found=0; \
+	 for f in $(SHELLCHECK_TARGETS); do \
+	   [ -f "$$f" ] || continue; found=1; \
+	   case "$$f" in *.md|*.env) continue;; esac; \
+	   out=$$(docker run --rm -i $(SHELLCHECK_IMAGE) --severity=warning --external-sources - < "$$f" 2>&1); \
+	   if [ -n "$$out" ]; then printf "$(RED)%s$(RESET)\n%s\n" "$$f" "$$out"; rc=1; \
+	   else printf "ok: %s\n" "$$f"; fi; \
+	 done; \
+	 [ "$$found" = 1 ] || printf "$(YELLOW)no shell files to check$(RESET)\n"; \
+	 exit $$rc
+
+hadolint: ## Run hadolint on the terrarium Dockerfile via stdin (ignores sourced from .hadolint.yaml)
+	@$(assert_docker)
+	@printf "$(YELLOW)hadolint: $(DOCKERFILE)$(RESET)\n"
+	@ign=$$(awk '/^ignored:/{f=1;next} f&&/^[[:space:]]*-[[:space:]]/{gsub(/[^A-Za-z0-9]/,"",$$2);printf "%s%s",s,$$2;s=","} f&&/^[^[:space:]-]/{f=0}' .hadolint.yaml 2>/dev/null); \
+	 docker run --rm -i -e HADOLINT_IGNORE="$$ign" -e HADOLINT_FAILURE_THRESHOLD=error $(HADOLINT_IMAGE) hadolint - < "$(DOCKERFILE)"
+
+lint: guardrails shellcheck hadolint ## Run all host-side lint gates (guardrails + shellcheck + hadolint)
+
+# ================== Helper unit tests ==================
+UNIT_TEST_DIR ?= docker/tests/unit
+
+test-helpers: ## Run the hermetic helper unit suite on the host (needs bats; no Docker, no network)
+	@command -v bats >/dev/null 2>&1 || { printf "$(RED)Error: bats not found on PATH. Install bats-core or use 'make docker-test-helpers'.$(RESET)\n" >&2; exit 127; }
+	@printf "$(YELLOW)Running helper unit suite: $(UNIT_TEST_DIR)$(RESET)\n"
+	@bats "$(UNIT_TEST_DIR)"
+
+docker-test-helpers: ## Build the 'helpers' stage, which runs the unit suite hermetically in the image
+	@$(assert_docker)
+	@$(call assert_file,$(DOCKERFILE))
+	@printf "$(YELLOW)Building 'helpers' stage (runs $(UNIT_TEST_DIR))...$(RESET)\n"
+	@DOCKER_BUILDKIT=1 docker build \
+		$(DOCKER_BUILD_OPTS) \
+		--target helpers \
+		-f "$(DOCKERFILE)" $(DOCKER_CONTEXT)
+	@printf "$(GREEN)helpers stage green$(RESET)\n"
 
 # ================== Meta ==================
 help: ## Show this help (default)

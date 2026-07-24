@@ -4,7 +4,9 @@ This file lists all tools bundled in the terrarium container image and their
 open-source licenses. Consumers of this image should review these licenses for
 compliance with their organization's policies.
 
-> **Last updated:** 2026-04-01
+> **Last updated:** 2026-07-24 (reviewed under INFIAAS-11426; `latest` rows
+> reflect tools installed unpinned — pyenv/rbenv/ruby-build/uv and the
+> dnf-repo/installer CLIs — and remain accurate)
 > For a machine-readable SBOM, see the BuildKit SBOM attestation attached to
 > published images (`--sbom=true`), or generate one locally with
 > `make sbom` (requires [Syft](https://github.com/anchore/syft)).

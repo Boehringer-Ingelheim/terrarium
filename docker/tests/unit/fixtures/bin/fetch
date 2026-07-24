@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+# Hermetic 'fetch' shim for the unit test tier.
+#
+# Mirrors the real docker/files/bin/fetch CLI surface:
+#     fetch [-H header]... [-o outpath] <URL>
+# but serves bytes from local fixtures instead of the network. An unmapped URL
+# is a hard error (exit 1) — that is exactly what proves a unit test never
+# reached out to the network.
+#
+# URL -> fixture resolution, in order:
+#   1. If $FIXTURE_MAP is set and contains a line "<URL><TAB><relpath>",
+#      serve $FIXTURE_DIR/<relpath>.
+#   2. Else serve $FIXTURE_DIR/<basename-of-URL-path>.
+# A resolved-but-missing fixture file is exit 3 (test-authoring error, distinct
+# from the exit 1 "unmapped/network" signal).
+set -euo pipefail
+
+out=""
+url=""
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    -o) out="${2:?fetch shim: -o needs an argument}"; shift 2 ;;
+    -o*) out="${1#-o}"; shift ;;
+    -H) shift 2 ;;                 # headers are irrelevant to the shim
+    -H*) shift ;;
+    --) shift ;;
+    -*) shift ;;                   # ignore any other curl-style flag
+    *) url="$1"; shift ;;          # last bare arg wins as the URL
+  esac
+done
+
+[ -n "$url" ] || { echo "fetch shim: no URL given" >&2; exit 2; }
+: "${FIXTURE_DIR:?fetch shim: FIXTURE_DIR must be set by the test}"
+
+rel=""
+if [ -n "${FIXTURE_MAP:-}" ] && [ -f "$FIXTURE_MAP" ]; then
+  # Exact-URL lookup; first column is the URL, remainder (after a tab) the path.
+  rel="$(awk -F'\t' -v u="$url" '$1==u {print $2; exit}' "$FIXTURE_MAP")"
+fi
+if [ -z "$rel" ]; then
+  # Fall back to the URL's basename, but only if that fixture actually exists;
+  # otherwise treat the URL as unmapped (network) and fail closed.
+  base="${url##*/}"
+  if [ -n "$base" ] && [ -f "$FIXTURE_DIR/$base" ]; then
+    rel="$base"
+  fi
+fi
+
+[ -n "$rel" ] || { echo "fetch shim: unmapped URL (would hit network): $url" >&2; exit 1; }
+src="$FIXTURE_DIR/$rel"
+[ -f "$src" ] || { echo "fetch shim: mapped fixture missing: $src" >&2; exit 3; }
+
+if [ -n "$out" ]; then
+  cat "$src" > "$out"
+else
+  cat "$src"
+fi

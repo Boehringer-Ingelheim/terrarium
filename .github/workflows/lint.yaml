@@ -1,0 +1,57 @@
+---
+# Lint & mechanical guardrails.
+# Runs the same targets as `make lint` so local and CI enforcement never drift:
+#   - guardrails : do-not-regress security counts + ratchet metrics (blocking)
+#   - shellcheck : severity=warning over shell sources (blocking)
+#   - hadolint   : Dockerfile lint (INFORMATIONAL until INFIAAS-11426 heredoc
+#                  extraction lets hadolint parse the file; then made blocking)
+name: Lint
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: Guardrails, shellcheck, hadolint
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Mechanical guardrails
+        run: make guardrails
+
+      - name: Shellcheck (severity=warning)
+        run: make shellcheck
+
+      # Fail if the vendor-key pins in vendor-keys.env drift from the Dockerfile
+      # ENV block (fingerprints only; no key material).
+      - name: Vendor-key drift
+        run: make check-keys-drift
+
+      # Hermetic helper unit suite in the 'helpers' stage. Runs before the main
+      # build (main.yaml) so a broken helper fails fast and cheap.
+      - name: Helper unit suite ('helpers' stage)
+        run: make docker-test-helpers
+
+      # Informational: hadolint 2.14 cannot parse Dockerfile.terrarium because of
+      # the two BY-DESIGN config heredocs (the google-cloud repo `<<EOF`, which
+      # must expand at write time, and the tenv profile) — a parser limitation,
+      # not a rule finding, that no ignore entry can suppress. The helper
+      # shell-heredocs were all removed by INFIAAS-11426; these two remain by
+      # design (out of scope). Flip to blocking if hadolint gains heredoc support
+      # or the config heredocs are ever restructured.
+      - name: Hadolint (informational)
+        continue-on-error: true
+        run: make hadolint
