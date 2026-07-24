@@ -924,25 +924,11 @@ RUN chown -R 1001:0 ${HOME} && chmod -R g+rw ${HOME} \
 RUN dnf -y install perl-IPC-Cmd && dnf clean all
 
 # ---- Kitchen & Cinc wrappers (MANDATORY) -----------------------------------
-RUN install -d -m 0755 /usr/local/bin
-
-# kitchen wrapper
-RUN cat >/usr/local/bin/kitchen <<'EOF'
-#!/usr/bin/env bash
-export BUNDLE_GEMFILE=/opt/terrarium-gems/Gemfile
-export BUNDLE_PATH=/opt/bundle
-exec /opt/rbenv/shims/bundle exec kitchen "$@"
-EOF
-RUN chmod +x /usr/local/bin/kitchen
-
-# cinc-auditor wrapper
-RUN cat >/usr/local/bin/cinc-auditor <<'EOF'
-#!/usr/bin/env bash
-export BUNDLE_GEMFILE=/opt/terrarium-gems/Gemfile
-export BUNDLE_PATH=/opt/bundle
-exec /opt/rbenv/shims/bundle exec cinc-auditor "$@"
-EOF
-RUN chmod +x /usr/local/bin/cinc-auditor
+# Wrappers now live as named, shellcheck-clean, unit-tested files under
+# docker/files/bin/ (kitchen, cinc-auditor) and are installed by COPY.
+# See INFIAAS-11426 (helper extraction). In Phase 4 the fetch/verify_* helpers
+# join them here and this COPY moves earlier, before their first use.
+COPY files/bin/ /usr/local/bin/
 
 # Smoke check
 RUN RBENV_VERSION=${RUBY_VERSION} \
@@ -1002,6 +988,27 @@ RUN find /home/terrarium/tests -type f -name "*.bats" -exec chmod +x {} \; \
 
 WORKDIR $HOME
 CMD ["/bin/bash", "-i", "-l"]
+
+# ================= Stage — helpers (hermetic unit tests for docker/files/bin) =================
+# Deliberately NOT in `builder`'s dependency chain (INFIAAS-11426 decision 5):
+# `builder` already COPYs files/bin/, so a helper edit invalidates it regardless
+# — welding `helpers` in would only inject the unit suite into every
+# `--target test` build (including downstream E2E and release) for no cache
+# benefit. CI runs this stage explicitly, before the main build, so it still
+# fails fast. Runs with bats core only; no network, nothing outside tmpdir.
+FROM registry.access.redhat.com/ubi9/ubi:${UBI9_VERSION} AS helpers
+ARG BATS_CORE_VERSION
+# Only `git` is missing from the ubi9 base (needed to clone bats). bash, gnupg2
+# and the coreutils multicall (via coreutils-single: cat/head/sha256sum/…) are
+# already present; installing `coreutils` would conflict with coreutils-single.
+RUN dnf -y install --setopt=install_weak_deps=False git \
+    && dnf clean all && rm -rf /var/cache/dnf
+RUN git clone --depth 1 --branch "v${BATS_CORE_VERSION}" \
+      https://github.com/bats-core/bats-core /tmp/bats \
+    && /tmp/bats/install.sh /usr/local && rm -rf /tmp/bats
+COPY files/bin/ /usr/local/bin/
+COPY tests/unit /opt/unit
+RUN bats /opt/unit
 
 # ================= Stage 2 — test (build-time gate, also the publish target) =================
 # `test` is the last stage by design: the bats suite is intentionally shipped

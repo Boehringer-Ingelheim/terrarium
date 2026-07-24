@@ -22,7 +22,7 @@ DF="${1:-docker/Dockerfile.terrarium}"
 # Tighten these as extraction phases land. Do not loosen.
 #   heredocs:      baseline 10 → target 2 (the two config heredocs at :557,:642)
 #   longest RUN:   baseline 68 → target 20
-HEREDOC_MAX=10   # final target: 2  (reached in Phase 6)
+HEREDOC_MAX=8    # Phase 3: kitchen+cinc-auditor extracted (10→8); final target: 2 (Phase 6)
 RUN_MAX=68       # final target: 20 (reached in Phase 6)
 
 fail=0

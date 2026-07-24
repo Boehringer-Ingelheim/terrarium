@@ -59,7 +59,7 @@ define assert_file
 	test -f "$(1)" || { printf "$(RED)Error: missing file: $(1)$(RESET)\n" >&2; exit 1; }
 endef
 
-.PHONY: help verify-keys print-keys write-keys check-keys docker-build docker-build-test docker-test docker-test-exec test sbom guardrails lint shellcheck hadolint
+.PHONY: help verify-keys print-keys write-keys check-keys docker-build docker-build-test docker-test docker-test-exec test sbom guardrails lint shellcheck hadolint test-helpers docker-test-helpers
 
 # Files shellcheck lints (kept in sync with .github/workflows/lint.yaml)
 SHELLCHECK_TARGETS ?= scripts/*.sh docker/vendor-keys/*.sh docker/files/bin/*
@@ -92,6 +92,24 @@ hadolint: ## Run hadolint on the terrarium Dockerfile via stdin (ignores sourced
 	 docker run --rm -i -e HADOLINT_IGNORE="$$ign" -e HADOLINT_FAILURE_THRESHOLD=error $(HADOLINT_IMAGE) hadolint - < "$(DOCKERFILE)"
 
 lint: guardrails shellcheck hadolint ## Run all host-side lint gates (guardrails + shellcheck + hadolint)
+
+# ================== Helper unit tests ==================
+UNIT_TEST_DIR ?= docker/tests/unit
+
+test-helpers: ## Run the hermetic helper unit suite on the host (needs bats; no Docker, no network)
+	@command -v bats >/dev/null 2>&1 || { printf "$(RED)Error: bats not found on PATH. Install bats-core or use 'make docker-test-helpers'.$(RESET)\n" >&2; exit 127; }
+	@printf "$(YELLOW)Running helper unit suite: $(UNIT_TEST_DIR)$(RESET)\n"
+	@bats "$(UNIT_TEST_DIR)"
+
+docker-test-helpers: ## Build the 'helpers' stage, which runs the unit suite hermetically in the image
+	@$(assert_docker)
+	@$(call assert_file,$(DOCKERFILE))
+	@printf "$(YELLOW)Building 'helpers' stage (runs $(UNIT_TEST_DIR))...$(RESET)\n"
+	@DOCKER_BUILDKIT=1 docker build \
+		$(DOCKER_BUILD_OPTS) \
+		--target helpers \
+		-f "$(DOCKERFILE)" $(DOCKER_CONTEXT)
+	@printf "$(GREEN)helpers stage green$(RESET)\n"
 
 # ================== Meta ==================
 help: ## Show this help (default)

@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+export BUNDLE_GEMFILE=/opt/terrarium-gems/Gemfile
+export BUNDLE_PATH=/opt/bundle
+exec /opt/rbenv/shims/bundle exec cinc-auditor "$@"
