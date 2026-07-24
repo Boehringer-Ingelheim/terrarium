@@ -308,71 +308,13 @@ RUN set -x \
     && dnf -y install $RUNTIME_PKGS \
     && dnf clean all
 
-# Robust downloader with retries
-RUN cat >/usr/local/bin/fetch <<'EOF'
-#!/usr/bin/env bash
-set -euo pipefail
-: "${FETCH_RETRIES:=5}"
-: "${FETCH_RETRY_DELAY:=2}"
-: "${FETCH_CONNECT_TIMEOUT:=20}"
-: "${FETCH_MAX_TIME:=900}"
-exec curl --fail --silent --show-error --location \
-          --retry "$FETCH_RETRIES" --retry-connrefused \
-          --retry-delay "$FETCH_RETRY_DELAY" \
-          --connect-timeout "$FETCH_CONNECT_TIMEOUT" \
-          --max-time "$FETCH_MAX_TIME" \
-          "$@"
-EOF
-RUN chmod +x /usr/local/bin/fetch
-
-# Verification helpers
-RUN cat >/usr/local/bin/verify_gpg_signed_checksums <<'EOF' \
-    && cat >/usr/local/bin/verify_gpg_detached <<'EOF2' \
-    && cat >/usr/local/bin/verify_sha256_from_url <<'EOF3' \
-    && cat >/usr/local/bin/verify_sha256_from_checksums <<'EOF4' \
-    && chmod +x /usr/local/bin/verify_*
-#!/usr/bin/env bash
-# verify_gpg_signed_checksums <keyring.gpg> <checksums-url> <sig-url> <artifact-file>
-set -euo pipefail
-keyring="$1"; sums_url="$2"; sig_url="$3"; file="$4"
-tmp="$(mktemp -d)"; trap 'rm -rf "$tmp"' EXIT
-fetch -o "$tmp/sums.txt" "$sums_url"
-fetch -o "$tmp/sums.txt.sig" "$sig_url"
-gpg --batch ${GNUPGHOME:+--homedir "$GNUPGHOME"} --no-default-keyring --keyring "$keyring" --verify "$tmp/sums.txt.sig" "$tmp/sums.txt" >/dev/null
-
-# extract sha256 for file (supports formats with/without leading '*')
-expected="$(grep -E "([[:space:]]|[*])$(basename "$file")$" "$tmp/sums.txt" | awk '{print $1}')"
-[ -n "$expected" ] || { echo "checksum for $(basename "$file") not found"; exit 1; }
-echo "${expected}  ${file}" | sha256sum -c -
-EOF
-#!/usr/bin/env bash
-# verify_gpg_detached <keyring.gpg> <artifact-file> <sig-url>
-set -euo pipefail
-keyring="$1"; file="$2"; sig_url="$3"
-tmp="$(mktemp -d)"; trap 'rm -rf "$tmp"' EXIT
-fetch -o "$tmp/file.sig" "$sig_url"
-gpg --batch ${GNUPGHOME:+--homedir "$GNUPGHOME"} --no-default-keyring --keyring "$keyring" --verify "$tmp/file.sig" "$file" >/dev/null
-
-EOF2
-#!/usr/bin/env bash
-# verify_sha256_from_url <sha256-url> <artifact-file>  (supports "hex" or "hex  filename")
-set -euo pipefail
-sha_url="$1"; file="$2"
-tmp="$(mktemp -d)"; trap 'rm -rf "$tmp"' EXIT
-fetch -o "$tmp/sha256" "$sha_url"
-sum="$(awk '{print $1}' "$tmp/sha256" | tr -d '\n\r')"
-echo "${sum}  ${file}" | sha256sum -c -
-EOF3
-#!/usr/bin/env bash
-# verify_sha256_from_checksums <checksums-url> <artifact-file>
-set -euo pipefail
-sums_url="$1"; file="$2"
-tmp="$(mktemp -d)"; trap 'rm -rf "$tmp"' EXIT
-fetch -o "$tmp/checksums.txt" "$sums_url"
-expected="$(grep -E "([[:space:]]|[*])$(basename "$file")$" "$tmp/checksums.txt" | awk '{print $1}')"
-[ -n "$expected" ] || { echo "checksum for $(basename "$file") not found in $sums_url"; exit 1; }
-echo "${expected}  ${file}" | sha256sum -c -
-EOF4
+# Downloader + verification helpers now live in docker/files/bin/ as named,
+# shellcheck-clean, unit-tested files (fetch, verify_gpg_signed_checksums,
+# verify_gpg_detached, verify_sha256_from_url, verify_sha256_from_checksums).
+# Installed here, before their first use by import_vendor_key and the tool
+# installers below. kitchen + cinc-auditor ride along in the same COPY.
+# See INFIAAS-11426.
+COPY files/bin/ /usr/local/bin/
 
 # Vendor-key import helper
 #
@@ -924,11 +866,9 @@ RUN chown -R 1001:0 ${HOME} && chmod -R g+rw ${HOME} \
 RUN dnf -y install perl-IPC-Cmd && dnf clean all
 
 # ---- Kitchen & Cinc wrappers (MANDATORY) -----------------------------------
-# Wrappers now live as named, shellcheck-clean, unit-tested files under
-# docker/files/bin/ (kitchen, cinc-auditor) and are installed by COPY.
-# See INFIAAS-11426 (helper extraction). In Phase 4 the fetch/verify_* helpers
-# join them here and this COPY moves earlier, before their first use.
-COPY files/bin/ /usr/local/bin/
+# kitchen + cinc-auditor are installed from docker/files/bin/ by the single
+# `COPY files/bin/ /usr/local/bin/` earlier in this stage (before the first
+# fetch/verify use). See INFIAAS-11426.
 
 # Smoke check
 RUN RBENV_VERSION=${RUBY_VERSION} \

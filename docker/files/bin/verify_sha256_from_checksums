@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# verify_sha256_from_checksums <checksums-url> <artifact-file>
+set -euo pipefail
+sums_url="$1"; file="$2"
+tmp="$(mktemp -d)"; trap 'rm -rf "$tmp"' EXIT
+fetch -o "$tmp/checksums.txt" "$sums_url"
+expected="$(grep -E "([[:space:]]|[*])$(basename "$file")$" "$tmp/checksums.txt" | awk '{print $1}')"
+[ -n "$expected" ] || { echo "checksum for $(basename "$file") not found in $sums_url"; exit 1; }
+echo "${expected}  ${file}" | sha256sum -c -

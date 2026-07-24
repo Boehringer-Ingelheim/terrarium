@@ -22,7 +22,7 @@ DF="${1:-docker/Dockerfile.terrarium}"
 # Tighten these as extraction phases land. Do not loosen.
 #   heredocs:      baseline 10 → target 2 (the two config heredocs at :557,:642)
 #   longest RUN:   baseline 68 → target 20
-HEREDOC_MAX=8    # Phase 3: kitchen+cinc-auditor extracted (10→8); final target: 2 (Phase 6)
+HEREDOC_MAX=3    # Phase 4: fetch + 4 verify_* extracted (8→3); final target: 2 (Phase 6, after import_vendor_key)
 RUN_MAX=68       # final target: 20 (reached in Phase 6)
 
 fail=0
@@ -42,8 +42,15 @@ chk() { # name actual op expected  (op ∈ -ge|-le|-eq; literal so shellcheck pa
 }
 
 # ── Do-not-regress security invariants ───────────────────────────────────────
-chk "sha256 refs"        "$(grep -c sha256 "$DF")"                     -ge 23
-chk "gpg/pgp refs"       "$(grep -ciE 'gpg|pgp' "$DF")"                -ge 66
+# Verification logic is being extracted from the Dockerfile into
+# docker/files/bin/. Count sha256/gpg references across BOTH so extraction (which
+# only MOVES the logic) does not read as a regression — a genuine drop still
+# fails. The `.sha`/`.gpg`-generating heredocs are gone, so this is the union.
+BIN_DIR="$(dirname "$DF")/files/bin"
+VSRC=("$DF")
+for f in "$BIN_DIR"/*; do [ -f "$f" ] && VSRC+=("$f"); done
+chk "sha256 refs"        "$(grep -h sha256 "${VSRC[@]}" 2>/dev/null | grep -c sha256 || true)"        -ge 23
+chk "gpg/pgp refs"       "$(grep -hiE 'gpg|pgp' "${VSRC[@]}" 2>/dev/null | grep -ciE 'gpg|pgp' || true)" -ge 66
 chk "ARG pins"           "$(grep -cE '^ARG ' "$DF")"                   -ge 42
 chk "node fingerprints"  "$(sed -n '/NODE_RELEASE_FPRS/,/^$/p' "$DF" | grep -cE '^[[:space:]]*[0-9A-F]{40}')" -eq 63
 chk "curl-pipe-to-shell" "$(grep -cE 'curl[^|]*\|[[:space:]]*(ba)?sh' "$DF" || true)" -eq 0
