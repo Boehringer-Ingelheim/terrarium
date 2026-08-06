@@ -1824,7 +1824,8 @@ GEM
     ed25519 (1.4.0)
     erb (6.0.4)
     erubi (1.13.1)
-    excon (0.112.0)
+    excon (1.5.0)
+      logger
     faraday (1.10.5)
       faraday-em_http (~> 1.0)
       faraday-em_synchrony (~> 1.0)
@@ -1915,12 +1916,12 @@ GEM
       multi_json
     jwt (2.10.2)
       base64
-    k8s-ruby (0.17.2)
+    k8s-ruby (0.18.0)
       base64
       dry-configurable
       dry-struct
       dry-types
-      excon (~> 0.71)
+      excon (~> 1.5)
       hashdiff (~> 1.0)
       jsonpath (~> 1.1)
       recursive-open-struct (~> 1.1, >= 1.1.3)
