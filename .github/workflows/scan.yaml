@@ -98,6 +98,10 @@ jobs:
         if: steps.pull.outcome == 'success'
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
+          # The pinned action defaults to Trivy v0.70.0; pin the scanner
+          # explicitly so the version is visible and reviewable here rather
+          # than moving whenever the action's default changes.
+          version: v0.74.0
           image-ref: ${{ steps.pull.outputs.image }}
           format: sarif
           output: trivy-results.sarif
@@ -121,6 +125,8 @@ jobs:
           steps.pull.outcome != 'success'
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
+          # See note above: keep both scan paths on the same Trivy version.
+          version: v0.74.0
           scan-type: fs
           scan-ref: docker/
           format: sarif
