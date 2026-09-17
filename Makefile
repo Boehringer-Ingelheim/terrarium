@@ -77,6 +77,11 @@ check-keys-drift: ## Fail if vendor-key pins in $(ENV_FILE) drift from the Docke
 shellcheck: ## Run shellcheck (severity=warning) over shell sources via stdin (bind-mount-free)
 	@$(assert_docker)
 	@printf "$(YELLOW)shellcheck: $(SHELLCHECK_TARGETS)$(RESET)\n"
+	@# Pre-pull the image. The loop below captures `2>&1` so that shellcheck's own
+	@# errors surface, which also captures Docker's pull progress (written to
+	@# stderr). On a cold cache that non-empty output is indistinguishable from
+	@# findings, so the first file checked always fails. CI runners are always cold.
+	@docker image inspect $(SHELLCHECK_IMAGE) >/dev/null 2>&1 || docker pull -q $(SHELLCHECK_IMAGE) >/dev/null
 	@rc=0; found=0; \
 	 for f in $(SHELLCHECK_TARGETS); do \
 	   [ -f "$$f" ] || continue; found=1; \
