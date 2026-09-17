@@ -76,8 +76,14 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      # PR and push events don't publish an image for this workflow to scan.
+      # Force those events down the filesystem-scan path so they don't
+      # accidentally scan a stale shared `latest-*` image from GHCR.
       - name: Try to pull published image
         id: pull
+        if: >-
+          github.event_name != 'pull_request' &&
+          github.event_name != 'push'
         continue-on-error: true
         run: |
           # lowercase: OCI repo names must be lowercase (owner may have uppercase).
@@ -100,10 +106,14 @@ jobs:
           vuln-type: os,library
           severity: CRITICAL,HIGH,MEDIUM
 
-      # Filesystem scan of Dockerfile + config — when no image is available
+      # Filesystem scan of Dockerfile + config — for PR/push validation and
+      # whenever no published image is available.
       # (avoids building the full image which times out the runner)
       - name: Trivy filesystem scan (no published image)
-        if: steps.pull.outcome != 'success'
+        if: >-
+          github.event_name == 'pull_request' ||
+          github.event_name == 'push' ||
+          steps.pull.outcome != 'success'
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           scan-type: fs
