@@ -98,6 +98,10 @@ jobs:
         if: steps.pull.outcome == 'success'
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
+          # The pinned action defaults to Trivy v0.70.0; pin the scanner
+          # explicitly so the version is visible and reviewable here rather
+          # than moving whenever the action's default changes.
+          version: v0.74.0
           image-ref: ${{ steps.pull.outputs.image }}
           format: sarif
           output: trivy-results.sarif
@@ -105,6 +109,11 @@ jobs:
           ignore-unfixed: true
           vuln-type: os,library
           severity: CRITICAL,HIGH,MEDIUM
+          # Without this, trivy-action unsets TRIVY_SEVERITY whenever
+          # format is sarif ("Building SARIF report with all severities"),
+          # so the severity gate above is ignored and a LOW/UNKNOWN finding
+          # fails the build via exit-code: 1.
+          limit-severities-for-sarif: true
 
       # Filesystem scan of Dockerfile + config — for PR/push validation and
       # whenever no published image is available.
@@ -116,6 +125,8 @@ jobs:
           steps.pull.outcome != 'success'
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
+          # See note above: keep both scan paths on the same Trivy version.
+          version: v0.74.0
           scan-type: fs
           scan-ref: docker/
           format: sarif
@@ -124,6 +135,8 @@ jobs:
           ignore-unfixed: true
           severity: CRITICAL,HIGH,MEDIUM
           scanners: misconfig,secret
+          # See note above: required for `severity` to actually gate the build.
+          limit-severities-for-sarif: true
 
       - name: Upload Trivy results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@68bde559dea0fdcac2102bfdf6230c5f70eb485e # v4.35.4
