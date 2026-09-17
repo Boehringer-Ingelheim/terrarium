@@ -14,8 +14,7 @@ ARG HELM_VERSION=3.20.1
 ARG KUBECTL_VERSION=1.35.3
 ARG NODEJS_VERSION=24.14.0
 ARG OC_VERSION=4.19.0
-ARG OPENSTACK_BARBICAN_VERSION=7.3.0
-ARG OPENSTACK_CLIENT_VERSION=7.1.5
+ARG OPENSTACK_RELEASE=2025.1
 ARG OPENSTACK_VENV=/opt/openstack
 ARG OPENTOFU_VERSION=1.11.5
 ARG PACKER_VERSION=1.11.2
@@ -99,7 +98,7 @@ ARG TARGETPLATFORM TARGETOS TARGETARCH TARGETVARIANT BUILDPLATFORM BUILDOS BUILD
 # Pull in global args needed in this stage
 ARG AGE_VERSION AWS_CDK_VERSION BATS_CORE_VERSION BUNDLER_VERSION GEM_HOME
 ARG GO_VERSION HELM_VERSION KUBECTL_VERSION NODEJS_VERSION
-ARG OC_VERSION OPENSTACK_BARBICAN_VERSION OPENSTACK_CLIENT_VERSION OPENSTACK_VENV
+ARG OC_VERSION OPENSTACK_RELEASE OPENSTACK_VENV
 ARG OPENTOFU_VERSION PACKER_VERSION PYTHON_VERSION RUBY_VERSION
 ARG SOPS_VERSION STARSHIP_VERSION TASK_VERSION TENV_VERSION
 ARG TERRAFORM_CONFIG_INSPECT_VERSION TERRAFORM_DOCS_VERSION TERRAFORM_VERSION
@@ -115,6 +114,7 @@ ENV AGE_VERSION=${AGE_VERSION} \
     HELM_VERSION=${HELM_VERSION} \
     KUBECTL_VERSION=${KUBECTL_VERSION} \
     NODEJS_VERSION=${NODEJS_VERSION} \
+    OPENSTACK_RELEASE=${OPENSTACK_RELEASE} \
     OPENTOFU_VERSION=${OPENTOFU_VERSION} \
     PACKER_VERSION=${PACKER_VERSION} \
     RBENV_ROOT=/opt/rbenv \
@@ -858,11 +858,12 @@ RUN arch="${TARGETARCH:-$(echo "${TARGETPLATFORM:-linux/amd64}" | cut -d/ -f2)}"
     && oc version --client
 
 # --- OpenStack CLI -----------------------------------------------------------
-# Versions should match upper constraints https://opendev.org/openstack/requirements/src/branch/master/upper-constraints.txt
+# Versions should match upper constraints https://opendev.org/openstack/requirements/src/branch/stable/${OPENSTACK_RELEASE}/upper-constraints.txt
 RUN python -m venv ${OPENSTACK_VENV} \
     && ${OPENSTACK_VENV}/bin/pip install --no-cache-dir \
-    python-openstackclient==${OPENSTACK_CLIENT_VERSION} \
-    python-barbicanclient==${OPENSTACK_BARBICAN_VERSION} \
+    python-openstackclient \
+    python-barbicanclient \
+    --constraint https://opendev.org/openstack/requirements/raw/branch/stable/${OPENSTACK_RELEASE}/upper-constraints.txt \
     && ln -s ${OPENSTACK_VENV}/bin/openstack /usr/local/bin/openstack \
     && openstack --version
 
