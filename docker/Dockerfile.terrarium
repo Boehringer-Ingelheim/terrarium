@@ -276,7 +276,7 @@ RUN echo "I am running on ${BUILDPLATFORM}, ${BUILDOS}, ${BUILDARCH}, ${BUILDVAR
 
 # OS update + dnf hardening
 RUN . /etc/os-release && echo "Base image: $PRETTY_NAME" \
-    && dnf -y update \
+    && dnf -y upgrade \
     && dnf clean all
 RUN printf '\nmax_parallel_downloads=10\nretries=10\ntsflags=nodocs\n' >> /etc/dnf/dnf.conf
 
