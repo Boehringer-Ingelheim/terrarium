@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+# import_vendor_key <name> <expected_fpr> <primary_url> <fallback_url> <out_asc> <out_ring>
+#
+# Tries <primary_url> first; if either fetch fails OR the imported key does not
+# contain <expected_fpr> (e.g. keys.openpgp.org strips UIDs for unverified
+# vendors, leaving a UID-less key that GPG refuses to import), falls back to
+# <fallback_url>. Fail-closed if neither source yields the pinned fingerprint.
+set -euo pipefail
+if [ "$#" -ne 6 ]; then
+  echo "usage: import_vendor_key <name> <fpr> <primary_url> <fallback_url> <out_asc> <out_ring>" >&2
+  exit 2
+fi
+name="$1"; fpr="$2"; primary="$3"; fallback="$4"; out_asc="$5"; out_ring="$6"
+
+tmp="$(mktemp -d)"; trap 'rm -rf "$tmp"' EXIT
+tmp_ring="${tmp}/${name}.kbx"
+
+install -d -m 0755 "$(dirname "$out_asc")" "$(dirname "$out_ring")"
+
+try_source() {
+  local url="$1"
+  rm -f "$out_asc" "$tmp_ring"
+  fetch -o "$out_asc" "$url" || return 1
+  gpg --batch ${GNUPGHOME:+--homedir "$GNUPGHOME"} --no-default-keyring \
+      --keyring "$tmp_ring" --import "$out_asc" || return 1
+  gpg --batch ${GNUPGHOME:+--homedir "$GNUPGHOME"} --no-default-keyring \
+      --keyring "$tmp_ring" --with-colons --fingerprint 2>/dev/null \
+  | awk -F: '/^fpr:/{print $10}' \
+  | grep -Fxq "$fpr"
+}
+
+echo "INFO: ${name}: trying primary source: ${primary}"
+if ! try_source "$primary"; then
+  echo "INFO: ${name}: primary did not yield key ${fpr}; trying fallback: ${fallback}"
+  if ! try_source "$fallback"; then
+    echo "ERROR: ${name}: neither primary nor fallback yielded a key with pinned fingerprint ${fpr}" >&2
+    exit 1
+  fi
+fi
+
+cp -f "$tmp_ring" "$out_ring"
+echo "INFO: ${name}: key verified; installed to ${out_ring}"

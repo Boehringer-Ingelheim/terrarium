@@ -88,10 +88,9 @@ jobs:
           # cache-from honours version bumps as a cache-key change (without
           # this, stale cached layers for the tenv/terraform/opentofu install
           # step can satisfy cache-from hits and mask version updates).
-          arg_val() { grep -m1 "^ARG $1=" docker/Dockerfile.terrarium | cut -d= -f2; }
-          TENV_VERSION=$(arg_val TENV_VERSION)
-          TERRAFORM_VERSION=$(arg_val TERRAFORM_VERSION)
-          OPENTOFU_VERSION=$(arg_val OPENTOFU_VERSION)
+          TENV_VERSION=$(scripts/dockerfile-arg.sh TENV_VERSION)
+          TERRAFORM_VERSION=$(scripts/dockerfile-arg.sh TERRAFORM_VERSION)
+          OPENTOFU_VERSION=$(scripts/dockerfile-arg.sh OPENTOFU_VERSION)
           for attempt in 1 2 3; do
             echo "::group::Attempt $attempt of 3"
             docker buildx build \
@@ -135,10 +134,9 @@ jobs:
           # Read Dockerfile ARG defaults — passed as --build-arg so buildkit's
           # cache-from honours version bumps (see comment on the tenv RUN in
           # docker/Dockerfile.terrarium).
-          arg_val() { grep -m1 "^ARG $1=" docker/Dockerfile.terrarium | cut -d= -f2; }
-          TENV_VERSION=$(arg_val TENV_VERSION)
-          TERRAFORM_VERSION=$(arg_val TERRAFORM_VERSION)
-          OPENTOFU_VERSION=$(arg_val OPENTOFU_VERSION)
+          TENV_VERSION=$(scripts/dockerfile-arg.sh TENV_VERSION)
+          TERRAFORM_VERSION=$(scripts/dockerfile-arg.sh TERRAFORM_VERSION)
+          OPENTOFU_VERSION=$(scripts/dockerfile-arg.sh OPENTOFU_VERSION)
           for attempt in 1 2 3; do
             echo "::group::Attempt $attempt of 3"
             docker buildx build \

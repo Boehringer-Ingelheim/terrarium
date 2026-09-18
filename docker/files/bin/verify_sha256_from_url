@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# verify_sha256_from_url <sha256-url> <artifact-file>  (supports "hex" or "hex  filename")
+set -euo pipefail
+sha_url="$1"; file="$2"
+tmp="$(mktemp -d)"; trap 'rm -rf "$tmp"' EXIT
+fetch -o "$tmp/sha256" "$sha_url"
+sum="$(awk '{print $1}' "$tmp/sha256" | tr -d '\n\r')"
+echo "${sum}  ${file}" | sha256sum -c -

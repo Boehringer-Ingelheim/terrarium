@@ -2,6 +2,60 @@
 
 ## [Unreleased]
 
+## [4.8.3-pre] 2026-07-24 — Helper extraction, CI gates, installer decomposition — INFIAAS-11426
+
+### Added
+
+- **Named, unit-tested helper scripts.** The eight shell programs previously
+  embedded as Dockerfile heredocs are now files under `docker/files/bin/`:
+  `fetch`, `verify_gpg_signed_checksums`, `verify_gpg_detached`,
+  `verify_sha256_from_url`, `verify_sha256_from_checksums`, `import_vendor_key`,
+  `install_age`, `import_node_keyring`, plus the `kitchen` / `cinc-auditor`
+  wrappers. Installed into the image with a single `COPY files/bin/`.
+- **Hermetic unit-test tier** under `docker/tests/unit/` (bats-core only, no
+  network, nothing outside `$BATS_TEST_TMPDIR`) covering every helper's success
+  path and documented failure exits — 35 tests. Runnable via `make test-helpers`
+  (host) or the new `helpers` build stage (`make docker-test-helpers`).
+- **CI quality gates** (`.github/workflows/lint.yaml`): `make guardrails`
+  (mechanical do-not-regress security counts + ratchet metrics), `make
+  shellcheck` (severity=warning), `make check-keys-drift` (vendor-key pins vs the
+  Dockerfile `ENV` block, fingerprints only), and the helper unit stage.
+  `.hadolint.yaml` + `.shellcheckrc` added; hadolint runs informationally
+  (blocked only by the two by-design config heredocs).
+- `scripts/dockerfile-arg.sh` — single hardened replacement for the four
+  duplicated inline `arg_val()` one-liners in the workflows; fails loudly on a
+  missing/empty ARG.
+
+### Changed
+
+- **Dockerfile decomposition** — zero helper-writing heredocs remain (only the
+  two by-design config heredocs); no `RUN` block exceeds 20 lines (the age/sops
+  and Node keyring installers are now `install_age` and `import_node_keyring`).
+- Absorbed Dependabot bumps: `faraday` 1.10.5 → 1.10.6, `jwt` 2.10.2 → 2.10.3.
+- Repointed the remaining `ghcr.io/nichtraunzer/terrarium` image references in
+  the docs/examples/devcontainer to `ghcr.io/boehringer-ingelheim/terrarium`.
+
+### Removed
+
+- Deleted five orphaned, unreferenced files under `docker/files/` (`bashrc`,
+  `envs.sh`, `gitconfig_skel`, `prompt.sh`, `setup.sh`).
+
+## [4.8.2-pre] 2026-07-22 — Migration to the Boehringer-Ingelheim GitHub org + Dependabot integration — INFIAAS-11425 / INFIAAS-11440
+
+### Changed
+
+- **Repository migrated** into the Boehringer-Ingelheim GitHub org; image
+  references and CI updated accordingly (lowercased GHCR owner for the
+  mixed-case org).
+- **Release tags standardised** (INFIAAS-11425): v-prefixed git tags,
+  v-less image tags in `release.yaml`.
+- **Dependabot backlog integrated** (INFIAAS-11440) — bundler: `chef-config`,
+  `chef-utils` 19.2.12 → 19.3.14; uv: `setuptools` 80.9.0 → 83.0.0, `uv`
+  0.11.7 → 0.11.15, `urllib3` 2.6.3 → 2.7.0, `idna` 3.10 → 3.15, `pyjwt`
+  2.12.0 → 2.13.0; github-actions: `checkout` → 7.0.1, `setup-buildx-action`
+  → 4.2.0, `metadata-action` → 6.2.0, `docker-manifest-create-action` → 2.25.0,
+  `harden-runner` → 2.20.0.
+
 ## [4.8.1] 2026-04-22 - Housekeeping PR  - PR #72
 
 4.8.1-pre has been tested and appears to be in good shape for a release.

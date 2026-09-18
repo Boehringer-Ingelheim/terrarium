@@ -1,5 +1,5 @@
 export DOCKER_BUILDKIT=1
-# export TERRARIUM_BASE_IMAGE=ghcr.io/nichtraunzer/terrarium
+# export TERRARIUM_BASE_IMAGE=ghcr.io/boehringer-ingelheim/terrarium
 export TERRARIUM_BASE_IMAGE=ghcr.io/effektiv-ai/terrarium-security-hardening
 # BASE_TAG=4.6.4
 BASE_TAG=latest-linux-amd64

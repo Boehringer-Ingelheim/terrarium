@@ -36,22 +36,40 @@ If the Cloud Quickstarter does not contain it already simply create a [`.devcont
 The tools and libraries of the terrarium toolset have to be updated from time to time.
 The following steps have to be performed:
 
-- Check for new versions of tool variables \*\_VERSION in [Dockerfile.terrarium](./docker/Dockerfile.terrarium)
+- Check for new versions of tool variables `*_VERSION` in [Dockerfile.terrarium](./docker/Dockerfile.terrarium)
 - Check for new versions of python libraries in [docker/pyproject.toml](./docker/pyproject.toml) and refresh [docker/uv.lock](./docker/uv.lock) via `uv lock` (might depend on Python Version)
 - Check for new versions of the ruby Gems in [Gemfile](./docker/Gemfile)
-- Rebuild the container image
-  `$ DOCKER_BUILDKIT=1 docker build -t terrarium:update-tools -f ./Dockerfile.terrarium .`
-- Mount the folder with the new toolset and rebuild Gemfile.lock from scratch using `bundle install --jobs=22`
-- verify updates with ods-quickstarters/inf-terraform-[aws|azure]
-  `docker run -ti --user 1000 -v $HOME/.bash_history:/home/terrarium/.bash_history -v`pwd`:/workspace -v $HOME/.gitconfig:/home/terrarium/.gitconfig -v $HOME/.cache/git/credential/socket:/home/terrarium/.cache/git/credential/socket terrarium:tools-update /bin/bash`
+- Rebuild the container image and run the bats suite in one step:
+  `make docker-build-test` (equivalently `make test`). It builds through the
+  `test` stage from `docker/Dockerfile.terrarium` with context `./docker`.
+- Run the fast quality gates before pushing: `make guardrails` (mechanical
+  do-not-regress + ratchet assertions), `make shellcheck`, `make hadolint`, and
+  `make check-keys-drift` (vendor-key pins vs the Dockerfile `ENV` block) —
+  or all of them via `make lint`. These need Docker available locally
+  (shellcheck/hadolint run as containers).
 - commit & push changes & create pull request
 
-## Automated Tests with Bats
+> **Helper scripts.** The container's shell helpers — `fetch`, the `verify_*`
+> checksum/PGP verifiers, `import_vendor_key`, `install_age`,
+> `import_node_keyring`, and the `kitchen` / `cinc-auditor` wrappers — live as
+> named, shellcheck-clean files under [`docker/files/bin/`](./docker/files/bin/),
+> installed into the image with a single `COPY`. Each is covered by a hermetic
+> unit test under [`docker/tests/unit/`](./docker/tests/unit/) that runs with no
+> Docker and no network:
+>
+> - `make test-helpers` — run the unit suite on the host (needs only `bats`).
+> - `make docker-test-helpers` — run the same suite inside the `helpers` build
+>   stage.
+>
+> Edit a helper as a normal file; do not re-inline it as a Dockerfile heredoc
+> (the `make guardrails` heredoc ratchet enforces this).
+
+## Automated Tests with Bats
 
 ### Why do we test the image?
 
 `terrarium` is an **immutable developer workstation** pre‑loaded with dozens of tools
-(Terraform, AWS CLIs, Packer, Ruby, Go, Node.js …).
+(Terraform, AWS CLIs, Packer, Ruby, Go, Node.js …).
 Whenever we upgrade one of those tools or tweak **`Dockerfile.terrarium`** we risk
 breaking somebody’s workflow.
 
@@ -60,7 +78,7 @@ runs _inside_ the container during local builds **and** in CI.
 If a single assertion fails, the build (and the GitHub Action) stops – before a
 faulty image can be pushed.
 
-- **Framework:** [Bats – Bash Automated Testing System](https://github.com/bats-core/bats-core) +
+- **Framework:** [Bats – Bash Automated Testing System](https://github.com/bats-core/bats-core) +
   helper libs **bats‑support** and **bats‑assert**
 - **Philosophy:** ultra‑fast _smoke_ tests – “does the binary exist and print the
   expected version?”
@@ -121,7 +139,7 @@ To also run the suite in a disposable container and collect JUnit reports on the
 
 #### 2 – Test an already‑built image
 
-docker run --rm -it ghcr.io/nichtraunzer/terrarium:latest \
+docker run --rm -it ghcr.io/boehringer-ingelheim/terrarium:latest \
  bash -lc "bats --report-formatter pretty /home/terrarium/tests"
 
 ### What exactly gets checked?

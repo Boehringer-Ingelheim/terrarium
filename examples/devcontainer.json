@@ -1,5 +1,5 @@
 {
-  "image": "ghcr.io/nichtraunzer/terrarium:latest",
+  "image": "ghcr.io/boehringer-ingelheim/terrarium:latest",
   "postStartCommand" : "wget -O $HOME/.git-completion.bash https://raw.githubusercontent.com/git/git/270e10ad6dda3379ea0da7efd11e4fbf2cd7a325/contrib/completion/git-completion.bash",
   "containerEnv": {
     "AWS_DEFAULT_REGION": "eu-west-1",
