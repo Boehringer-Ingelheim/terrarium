@@ -58,7 +58,7 @@ GEM
 GEM
   remote: https://rubygems.org/
   specs:
-    activesupport (7.2.3.1)
+    activesupport (7.2.3.2)
       base64
       benchmark (>= 0.3)
       bigdecimal
@@ -1771,7 +1771,7 @@ GEM
     connection_pool (3.0.2)
     cookstyle (8.6.10)
       rubocop (= 1.84.2)
-    csv (3.3.5)
+    csv (3.3.6)
     date (3.5.1)
     declarative (0.0.20)
     delegate (0.3.1)
@@ -1824,7 +1824,8 @@ GEM
     ed25519 (1.4.0)
     erb (6.0.4)
     erubi (1.13.1)
-    excon (0.112.0)
+    excon (1.5.0)
+      logger
     faraday (1.10.6)
       faraday-em_http (~> 1.0)
       faraday-em_synchrony (~> 1.0)
@@ -1899,7 +1900,7 @@ GEM
       domain_name (~> 0.5)
     httpclient (2.9.0)
       mutex_m
-    i18n (1.14.8)
+    i18n (1.15.2)
       concurrent-ruby (~> 1.0)
     ice_nine (0.11.2)
     inifile (3.0.0)
@@ -1910,17 +1911,17 @@ GEM
       rdoc (>= 4.0.0)
       reline (>= 0.4.2)
     jmespath (1.6.2)
-    json (2.19.3)
+    json (2.19.9)
     jsonpath (1.1.5)
       multi_json
     jwt (2.10.3)
       base64
-    k8s-ruby (0.17.2)
+    k8s-ruby (0.18.0)
       base64
       dry-configurable
       dry-struct
       dry-types
-      excon (~> 0.71)
+      excon (~> 1.5)
       hashdiff (~> 1.0)
       jsonpath (~> 1.1)
       recursive-open-struct (~> 1.1, >= 1.1.3)
