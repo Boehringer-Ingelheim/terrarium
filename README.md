@@ -38,7 +38,6 @@ The following steps have to be performed:
 
 - Check for new versions of tool variables `*_VERSION` in [Dockerfile.terrarium](./docker/Dockerfile.terrarium)
 - Check for new versions of python libraries in [docker/pyproject.toml](./docker/pyproject.toml) and refresh [docker/uv.lock](./docker/uv.lock) via `uv lock` (might depend on Python Version)
-- Check for new versions of the ruby Gems in [Gemfile](./docker/Gemfile)
 - Rebuild the container image and run the bats suite in one step:
   `make docker-build-test` (equivalently `make test`). It builds through the
   `test` stage from `docker/Dockerfile.terrarium` with context `./docker`.
@@ -51,7 +50,7 @@ The following steps have to be performed:
 
 > **Helper scripts.** The container's shell helpers — `fetch`, the `verify_*`
 > checksum/PGP verifiers, `import_vendor_key`, `install_age`,
-> `import_node_keyring`, and the `kitchen` / `cinc-auditor` wrappers — live as
+> and `import_node_keyring` — live as
 > named, shellcheck-clean files under [`docker/files/bin/`](./docker/files/bin/),
 > installed into the image with a single `COPY`. Each is covered by a hermetic
 > unit test under [`docker/tests/unit/`](./docker/tests/unit/) that runs with no
@@ -69,7 +68,7 @@ The following steps have to be performed:
 ### Why do we test the image?
 
 `terrarium` is an **immutable developer workstation** pre‑loaded with dozens of tools
-(Terraform, AWS CLIs, Packer, Ruby, Go, Node.js …).
+(Terraform, AWS CLIs, Packer, Python, Go, Node.js …).
 Whenever we upgrade one of those tools or tweak **`Dockerfile.terrarium`** we risk
 breaking somebody’s workflow.
 
@@ -97,10 +96,9 @@ docker/tests/
 ├── 20_infra.bats              # Packer, Sops, age‑keygen …
 ├── 30_cloud_platforms.bats    # aws, sam, cdk, az, gcloud CLIs
 ├── 40_terraform.bats          # Terraform via tenv, tflint, terraform‑docs, trivy …
-├── 50_ruby_ecosystem.bats     # rbenv, Ruby, Bundler, Kitchen, Cinc …
 ├── 60_k8s.bats                # kubectl, helm (skipped if absent)
 ├── 90_extras.bats             # Go, go‑task, starship, yq, zoxide
-└── 95_slimdown.bats           # Image slimdown verification
+└── 95_slimdown.bats           # Image slimdown verification (build deps, docs, Ruby toolchain absent)
 
 ```
 
@@ -151,7 +149,7 @@ docker run --rm -it ghcr.io/boehringer-ingelheim/terrarium:latest \
 | **Cloud CLIs**  | `az --version`, `gcloud version`                                      |
 | **Terraform**   | Required TF versions installed via **tenv**, `tflint`, `trivy`    |
 | **Infra/Sec**   | `sops --version`, `age-keygen` creates a keyfile                  |
-| **Ruby stack**  | `ruby`, `bundler`, `kitchen` CLI present                          |
+| **Slimdown**    | No compiler toolchain, docs, or Ruby toolchain in the final image |
 | **Extras**      | `starship`, `yq`, `zoxide`, `go-task` print their version strings |
 
 These fast, deterministic checks give us confidence to publish multi‑arch images

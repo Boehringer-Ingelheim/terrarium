@@ -2,6 +2,24 @@
 
 ## [Unreleased]
 
+### ⚠ BREAKING / Removed
+
+- **Ruby toolchain removed (INFIAAS-11797).** rbenv, ruby-build, Ruby 3.3.4,
+  bundler and the whole `docker/Gemfile` gem set (test-kitchen,
+  kitchen-terraform, InSpec/cinc-auditor, aws-sdk …) are gone, together with
+  `/opt/rbenv`, `/opt/bundle`, `/opt/terrarium-gems`, the `kitchen` and
+  `cinc-auditor` wrappers, the `GEM_HOME`/`RUBY_VERSION`/`BUNDLER_VERSION`/
+  `RBENV_ROOT` environment and the rbenv/bundle `PATH` entries. `perl-IPC-Cmd`
+  (only needed by ruby-build) is dropped too. `libyaml`/`libyaml-devel` stay
+  for Python PyYAML.
+  - **Migration:** ODS Quickstarters test with `tofu test` + pytest. If you
+    still need InSpec or test-kitchen, stay on `4.8.1`, or derive an image
+    that installs `ruby ruby-devel gcc make` (gcc is not in the image).
+  - Derived Dockerfiles that `chgrp`/`chmod` `/opt/bundle` or `/opt/rbenv`,
+    or add them to sudo `secure_path`, must drop those paths.
+  - CI no longer computes or passes `GEMFILE_HASH`; dependabot no longer
+    watches bundler; the guardrail ARG floor is 38 (was 42).
+
 ### Fixed
 
 - **GHCR publishing restored (INFIAAS-11804).** Every publish since 2026-09-17
