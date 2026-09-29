@@ -213,6 +213,16 @@ jobs:
           # lowercase image ref for the manifest sources below (a with: block can't use bash ${,,})
           echo "image=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
 
+      # INFIAAS-11804 (B4): a pushed pre-release tag (vX.Y.Z-<suffix>) must never
+      # move `latest`. Same classifier as release.yaml; an unrecognised tag
+      # fails this step (exit 2), so it can never move `latest` either.
+      - name: Classify pre-release
+        id: pre
+        run: |
+          is_pre="$(scripts/is-prerelease.sh "$GITHUB_REF_NAME")"
+          echo "is_prerelease=${is_pre}" >> "$GITHUB_OUTPUT"
+          echo "::notice::Tag=${GITHUB_REF_NAME}, Pre-release=${is_pre}"
+
       - name: Generate manifest tags
         id: meta
         uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
@@ -220,7 +230,7 @@ jobs:
           images: ghcr.io/${{ github.repository }}
           tags: |
             type=semver,pattern={{version}}
-            type=raw,value=latest
+            type=raw,value=latest,enable=${{ steps.pre.outputs.is_prerelease == 'false' }}
 
       - name: Create and push manifest
         uses: int128/docker-manifest-create-action@5e40f15c10aaa54f5d2bc91864e2708e11ad629f # v2.27.0

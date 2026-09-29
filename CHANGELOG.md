@@ -11,6 +11,24 @@
   undocumented 40 MiB attestation cap ([moby/buildkit#7044]). Our SBOM has been
   ~66 MiB since at least 4.8.1; the image did not grow.
 
+- **A pushed pre-release tag can no longer move `latest` (INFIAAS-11804, B4).**
+  `main.yaml`'s tag-push manifest added `latest` for every `v*` tag. Both
+  workflows now classify the tag with `scripts/is-prerelease.sh`, which replaces
+  `release.yaml`'s unanchored `-(pre|alpha|beta|rc)` regex, and add `latest`
+  only for a plain `vX.Y.Z`. An unrecognised tag fails the manifest job, and a
+  new guardrail rejects any unconditional `value=latest`.
+
+- **Released images are actually scanned (INFIAAS-11804).** `scan.yaml`'s
+  `release: published` trigger scanned `latest-<arch>`, never fired for a
+  `workflow_dispatch` cut (no GitHub Release), and raced the build for UI
+  releases. `release.yaml` now calls `scan.yaml` (`workflow_call`,
+  `image-tag` input) after its manifest job, so the exact published
+  `<ver>-linux-<arch>` images are scanned. A release scan fails hard if the
+  image can't be pulled, instead of silently falling back to a filesystem
+  scan. Release results use their own SARIF category (`trivy-release-<arch>`).
+  A table-format Trivy step prints the findings in the job log; it is
+  informational, and the SARIF scan still gates.
+
 ### Changed
 
 - **BuildKit pinned** to `v0.33.0@sha256:6c2fa84a…` in `main.yaml` and
@@ -36,7 +54,7 @@
 ### Added
 
 - `scripts/tests/` — hermetic bats suite for CI scripts (`publish_sbom.bats`,
-  `check_guardrails.bats`), run by `make test-scripts` / `make test-helpers` and
+  `check_guardrails.bats`, `is_prerelease.bats`, `release_scan_wiring.bats`), run by `make test-scripts` / `make test-helpers` and
   in `lint.yaml` ("CI-script unit suite").
 
 [moby/buildkit#7044]: https://github.com/moby/buildkit/issues/7044

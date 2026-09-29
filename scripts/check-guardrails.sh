@@ -72,6 +72,10 @@ buildx_setups="$(wf_all | grep -cE 'uses: docker/setup-buildx-action@' || true)"
 buildkit_pins="$(wf_all | grep -cE 'driver-opts:.*image=moby/buildkit:v[0-9]+\.[0-9]+\.[0-9]+@sha256:[0-9a-f]{64}' || true)"
 chk "buildx setups"      "$buildx_setups" -ge 1
 chk "buildkit pinned"    "$buildkit_pins" -eq "$buildx_setups"
+# INFIAAS-11804 (B4): every `latest` tag rule must be conditional, so a
+# pre-release tag can never move `latest` (tag-driven rules use
+# scripts/is-prerelease.sh; the branch rule uses {{is_default_branch}}).
+chk "unguarded latest"   "$(wf_all | grep -E 'value=latest' | grep -cv 'enable=' || true)" -eq 0
 
 # ── Ratchet metrics ──────────────────────────────────────────────────────────
 chk "helper heredocs"    "$(grep -cE '<<.?(EOF|EOS|EOT)' "$DF" || true)" -le "$HEREDOC_MAX"

@@ -92,6 +92,22 @@ PINNED="driver-opts: image=moby/buildkit:v0.33.0@sha256:$(printf 'b%.0s' $(seq 1
   [ "$status" -eq 0 ]
 }
 
+@test "latest: an unconditional value=latest fails" {
+  wf main.yaml "$PINNED"
+  printf '          tags: |\n            type=raw,value=latest\n' >> "$WF_DIR/main.yaml"
+  run "$GUARD" "$DF"
+  [ "$status" -eq 1 ]
+  [[ "$output" == *"GUARDRAIL FAIL: unguarded latest = 1"* ]]
+}
+
+@test "latest: value=latest with an enable= guard passes" {
+  wf main.yaml "$PINNED"
+  printf '          tags: |\n            type=raw,value=latest,enable=${{ steps.pre.outputs.is_prerelease == %s }}\n' "'false'" >> "$WF_DIR/main.yaml"
+  run "$GUARD" "$DF"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"ok: unguarded latest = 0"* ]]
+}
+
 @test "workflows: a missing WF_DIR is an error, not a silent pass" {
   WF_DIR="$BATS_TEST_TMPDIR/does-not-exist" run "$GUARD" "$DF"
   [ "$status" -eq 1 ]
