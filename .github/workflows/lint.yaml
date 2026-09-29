@@ -45,6 +45,18 @@ jobs:
       - name: Helper unit suite ('helpers' stage)
         run: make docker-test-helpers
 
+      # CI-script unit suite (scripts/tests: publish-sbom.sh, guardrails). Runs
+      # on the host because the 'helpers' stage builds from ./docker and cannot
+      # see scripts/. bats-core is cloned at the Dockerfile's pinned version,
+      # exactly as the 'helpers' stage does; jq is preinstalled on the runner.
+      - name: CI-script unit suite
+        run: |
+          BATS_CORE_VERSION=$(scripts/dockerfile-arg.sh BATS_CORE_VERSION)
+          git clone --depth 1 --branch "v${BATS_CORE_VERSION}" \
+            https://github.com/bats-core/bats-core "$RUNNER_TEMP/bats"
+          "$RUNNER_TEMP/bats/install.sh" "$HOME/.local"
+          PATH="$HOME/.local/bin:$PATH" make test-scripts
+
       # Informational: hadolint 2.14 cannot parse Dockerfile.terrarium because of
       # the two BY-DESIGN config heredocs (the google-cloud repo `<<EOF`, which
       # must expand at write time, and the tenv profile) — a parser limitation,

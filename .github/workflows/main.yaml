@@ -2,6 +2,8 @@
 # ── Permissions policy ──────────────────────────────────────────────────────
 # Default: contents:read (workflow level).
 # packages:write — build/manifest jobs only (GHCR push).
+# id-token:write — build job only: keyless cosign signature of the SBOM
+#                  (INFIAAS-11804; fork PRs never receive an OIDC token).
 # ── Secret isolation policy ─────────────────────────────────────────────────
 # No secrets in global env: blocks.
 # GITHUB_TOKEN scoped to docker/login-action steps only.
@@ -34,7 +36,7 @@ jobs:
   build:
     name: Build & test (${{ matrix.platform }})
     runs-on: ${{ matrix.runner }}
-    permissions: { contents: read, packages: write }
+    permissions: { contents: read, packages: write, id-token: write }
     strategy:
       fail-fast: true
       matrix:
@@ -42,9 +44,11 @@ jobs:
           - platform: linux/amd64
             runner: ubuntu-24.04
             suffix: -linux-amd64
+            arch: amd64
           - platform: linux/arm64
             runner: ubuntu-24.04-arm
             suffix: -linux-arm64
+            arch: arm64
 
     steps:
       - uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
@@ -55,6 +59,13 @@ jobs:
       - uses: ./.github/actions/dump-context
         if: github.event_name == 'workflow_dispatch' && github.event.inputs.debug_context == 'true'
       - uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4.3.0
+        with:
+          # INFIAAS-11804: pin BuildKit. The default `buildx-stable-1` floated to
+          # v0.32.2 (undocumented 40 MiB attestation cap) and silently broke every
+          # publish from 2026-09-17. Dependabot cannot see this pin: bump it
+          # deliberately (tag + digest) and re-run a feature-branch dispatch.
+          # Enforced by scripts/check-guardrails.sh ("buildkit pinned").
+          driver-opts: image=moby/buildkit:v0.33.0@sha256:6c2fa84a6b61ccd72899dde4239f8d5717f05f9a8ca6f3cad185fb1a95a94de3
 
       - name: Docker metadata
         id: meta
@@ -144,7 +155,8 @@ jobs:
               --target test \
               --platform ${{ matrix.platform }} \
               --push \
-              --sbom=true \
+              --sbom=false \
+              --metadata-file "$RUNNER_TEMP/build-meta.json" \
               --build-arg GEMFILE_HASH="${GEMFILE_HASH}" \
               --build-arg TENV_VERSION="${TENV_VERSION}" \
               --build-arg TERRAFORM_VERSION="${TERRAFORM_VERSION}" \
@@ -157,6 +169,17 @@ jobs:
             if [ "$attempt" -eq 3 ]; then echo "::error::All 3 push attempts failed"; exit 1; fi
             sleep 30
           done
+
+      # INFIAAS-11804: BuildKit's own SBOM (--sbom=true) is off — it is
+      # size-capped (40 MiB in v0.32.x, 80 MiB from v0.33.0; ours is ~66 MiB)
+      # and unsigned. Publish a full Syft SBOM instead, attached to the image
+      # digest in GHCR and signed keyless. Fails closed: no SBOM, red build.
+      - name: Publish signed SBOM
+        if: github.event_name != 'pull_request'
+        uses: ./.github/actions/publish-sbom
+        with:
+          metadata-file: ${{ runner.temp }}/build-meta.json
+          arch: ${{ matrix.arch }}
 
   ################################################################################
   # 2 ────────── Create multi‑arch manifest ────────────────────────────────────
