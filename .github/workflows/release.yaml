@@ -3,9 +3,12 @@
 # Default: contents:read (workflow level).
 # contents:write — release job only (auto-create tag if missing).
 # packages:write — release/manifest jobs only (GHCR push).
+# id-token:write — release job only: keyless cosign signature of the SBOM
+#                  (INFIAAS-11804).
 # ── Secret isolation policy ─────────────────────────────────────────────────
 # No secrets in global env: blocks.
-# GITHUB_TOKEN scoped to docker/login-action steps only.
+# GITHUB_TOKEN scoped to docker/login-action steps, plus GH_TOKEN on the
+# "Attach SBOM to the GitHub Release" step (gh release view/upload).
 name: Release terrarium (manual)
 
 on:
@@ -31,7 +34,7 @@ jobs:
   release:
     name: Build & release (${{ matrix.platform }})
     runs-on: ${{ matrix.runner }}
-    permissions: { contents: write, packages: write }
+    permissions: { contents: write, packages: write, id-token: write }
     strategy:
       fail-fast: true
       matrix:
@@ -39,9 +42,11 @@ jobs:
           - platform: linux/amd64
             runner: ubuntu-24.04
             suffix: -linux-amd64
+            arch: amd64
           - platform: linux/arm64
             runner: ubuntu-24.04-arm
             suffix: -linux-arm64
+            arch: arm64
 
     steps:
       - uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
@@ -104,6 +109,10 @@ jobs:
         if: github.event.inputs.debug_context == 'true'
 
       - uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4.3.0
+        with:
+          # INFIAAS-11804: pin BuildKit (see main.yaml for the full rationale;
+          # enforced by scripts/check-guardrails.sh "buildkit pinned").
+          driver-opts: image=moby/buildkit:v0.33.0@sha256:6c2fa84a6b61ccd72899dde4239f8d5717f05f9a8ca6f3cad185fb1a95a94de3
 
       - name: Login to GHCR
         uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
@@ -166,7 +175,8 @@ jobs:
               --target test \
               --platform ${{ matrix.platform }} \
               --push \
-              --sbom=true \
+              --sbom=false \
+              --metadata-file "$RUNNER_TEMP/build-meta.json" \
               --build-arg GEMFILE_HASH="${GEMFILE_HASH}" \
               --build-arg TENV_VERSION="${TENV_VERSION}" \
               --build-arg TERRAFORM_VERSION="${TERRAFORM_VERSION}" \
@@ -179,6 +189,36 @@ jobs:
             if [ "$attempt" -eq 3 ]; then echo "::error::All 3 push attempts failed"; exit 1; fi
             sleep 30
           done
+
+      # INFIAAS-11804: BuildKit's own SBOM (--sbom=true) is off (size-capped,
+      # unsigned). Publish a full Syft SBOM attached to the image digest in GHCR
+      # and signed keyless. Fails closed: a failure here stops the manifest job,
+      # so the :<ver> tag is never published without an SBOM.
+      - name: Publish signed SBOM
+        id: sbom
+        uses: ./.github/actions/publish-sbom
+        with:
+          metadata-file: ${{ runner.temp }}/build-meta.json
+          arch: ${{ matrix.arch }}
+
+      # A workflow_dispatch cut (e.g. v4.9.0-pre) creates only the git tag, not a
+      # GitHub Release, so upload only when a Release exists for the tag.
+      - name: Attach SBOM to the GitHub Release (if one exists)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          EVENT_TAG: ${{ github.event.release.tag_name }}
+          INPUT_TAG: ${{ inputs.tag }}
+          SBOM_DIR: ${{ steps.sbom.outputs.sbom-dir }}
+          ARCH: ${{ matrix.arch }}
+        run: |
+          TAG="${EVENT_TAG:-$INPUT_TAG}"
+          TAG="v${TAG#v}"  # canonical v-prefixed git tag, as in "Ensure tag exists"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" "$SBOM_DIR/sbom-${ARCH}.spdx.json" "$SBOM_DIR/sbom-${ARCH}.txt" --clobber
+            echo "::notice::SBOM (${ARCH}) attached to GitHub Release ${TAG}"
+          else
+            echo "::notice::No GitHub Release for ${TAG} (dispatch cut) — SBOM (${ARCH}) is in GHCR and the sbom-${ARCH} workflow artifact"
+          fi
 
   ################################################################################
   # 2 ────────── Create multi‑arch manifest ────────────────────────────────────

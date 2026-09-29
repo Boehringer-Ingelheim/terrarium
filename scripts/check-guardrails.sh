@@ -17,6 +17,13 @@ set -euo pipefail
 
 DF="${1:-docker/Dockerfile.terrarium}"
 [ -f "$DF" ] || { echo "ERROR: dockerfile not found: ${DF}" >&2; exit 1; }
+# Overridable so scripts/tests can point the workflow checks at fixtures.
+# ACTIONS_DIR holds local composite actions; their `uses:` must be pinned too.
+WF_DIR="${WF_DIR:-.github/workflows}"
+ACTIONS_DIR="${ACTIONS_DIR:-.github/actions}"
+[ -d "$WF_DIR" ] || { echo "ERROR: workflow dir not found: ${WF_DIR}" >&2; exit 1; }
+PIN_DIRS=("$WF_DIR")
+[ -d "$ACTIONS_DIR" ] && PIN_DIRS+=("$ACTIONS_DIR")
 
 # ── Ratchet thresholds ───────────────────────────────────────────────────────
 # Tighten these as extraction phases land. Do not loosen.
@@ -54,7 +61,17 @@ chk "gpg/pgp refs"       "$(grep -hiE 'gpg|pgp' "${VSRC[@]}" 2>/dev/null | grep 
 chk "ARG pins"           "$(grep -cE '^ARG ' "$DF")"                   -ge 42
 chk "node fingerprints"  "$(sed -n '/NODE_RELEASE_FPRS/,/^$/p' "$DF" | grep -cE '^[[:space:]]*[0-9A-F]{40}')" -eq 63
 chk "curl-pipe-to-shell" "$(grep -cE 'curl[^|]*\|[[:space:]]*(ba)?sh' "$DF" || true)" -eq 0
-chk "unpinned actions"   "$(grep -rhoE 'uses: [^@]+@[^ ]+' .github/workflows/ | grep -cvE '@[0-9a-f]{40}' || true)" -eq 0
+chk "unpinned actions"   "$(grep -rhoE 'uses: [^@]+@[^ ]+' "${PIN_DIRS[@]}" | grep -cvE '@[0-9a-f]{40}' || true)" -eq 0
+# INFIAAS-11804: every buildx setup pins its BuildKit image by tag AND digest.
+# The default `buildx-stable-1` floated to v0.32.2 (40 MiB attestation cap) and
+# silently broke every GHCR publish from 2026-09-17. Dependabot can't see this
+# pin, so it is enforced here. `buildx setups >= 1` stops a wrong path from
+# passing as 0 == 0.
+wf_all() { find "$WF_DIR" -type f \( -name '*.yml' -o -name '*.yaml' \) -exec cat {} +; }
+buildx_setups="$(wf_all | grep -cE 'uses: docker/setup-buildx-action@' || true)"
+buildkit_pins="$(wf_all | grep -cE 'driver-opts:.*image=moby/buildkit:v[0-9]+\.[0-9]+\.[0-9]+@sha256:[0-9a-f]{64}' || true)"
+chk "buildx setups"      "$buildx_setups" -ge 1
+chk "buildkit pinned"    "$buildkit_pins" -eq "$buildx_setups"
 
 # ── Ratchet metrics ──────────────────────────────────────────────────────────
 chk "helper heredocs"    "$(grep -cE '<<.?(EOF|EOS|EOT)' "$DF" || true)" -le "$HEREDOC_MAX"

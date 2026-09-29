@@ -49,4 +49,9 @@ industry norm and needs none of that — the whole difference is one determinist
    (enter `v4.9.0`; a bare `4.9.0` is normalized to the same result).
 2. Verify the published image is **v-less**: `ghcr.io/boehringer-ingelheim/terrarium:4.9.0`
    (+ `latest` for non-pre-releases).
-3. `ccg-terrarium` resolves `v4.9.0`, pulls `:4.9.0`, and pushes `bi-terrarium:4.9.0`.
+3. Verify each arch has a signed SBOM (see [SECURITY.md → SBOM](../SECURITY.md#sbom-software-bill-of-materials)).
+   A *Release terrarium (manual)* dispatch creates only the git tag, not a GitHub
+   Release; the SBOM is then in GHCR and the `sbom-<arch>` workflow artifacts. When
+   you publish the GitHub Release later, attach them:
+   `gh release upload v4.9.0 sbom-amd64.spdx.json sbom-arm64.spdx.json`.
+4. `ccg-terrarium` resolves `v4.9.0`, pulls `:4.9.0`, and pushes `bi-terrarium:4.9.0`.

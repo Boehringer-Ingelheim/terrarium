@@ -59,10 +59,10 @@ define assert_file
 	test -f "$(1)" || { printf "$(RED)Error: missing file: $(1)$(RESET)\n" >&2; exit 1; }
 endef
 
-.PHONY: help verify-keys print-keys write-keys check-keys docker-build docker-build-test docker-test docker-test-exec test sbom guardrails lint shellcheck hadolint test-helpers docker-test-helpers check-keys-drift
+.PHONY: help verify-keys print-keys write-keys check-keys docker-build docker-build-test docker-test docker-test-exec test sbom install-syft guardrails lint shellcheck hadolint test-helpers test-scripts docker-test-helpers check-keys-drift
 
 # Files shellcheck lints (kept in sync with .github/workflows/lint.yaml)
-SHELLCHECK_TARGETS ?= scripts/*.sh docker/vendor-keys/*.sh docker/files/bin/*
+SHELLCHECK_TARGETS ?= scripts/*.sh scripts/tests/fixtures/bin/* docker/vendor-keys/*.sh docker/files/bin/*
 # Docker images for linters (no host install required; matches CI)
 SHELLCHECK_IMAGE ?= koalaman/shellcheck:stable
 HADOLINT_IMAGE   ?= hadolint/hadolint:latest
@@ -102,12 +102,24 @@ hadolint: ## Run hadolint on the terrarium Dockerfile via stdin (ignores sourced
 lint: guardrails shellcheck hadolint ## Run all host-side lint gates (guardrails + shellcheck + hadolint)
 
 # ================== Helper unit tests ==================
-UNIT_TEST_DIR ?= docker/tests/unit
+UNIT_TEST_DIR   ?= docker/tests/unit
+# CI-script tests (scripts/*.sh). Host-only: the `helpers` stage builds from
+# ./docker and cannot see scripts/, so lint.yaml runs `make test-scripts`.
+SCRIPT_TEST_DIR ?= scripts/tests
 
-test-helpers: ## Run the hermetic helper unit suite on the host (needs bats; no Docker, no network)
-	@command -v bats >/dev/null 2>&1 || { printf "$(RED)Error: bats not found on PATH. Install bats-core or use 'make docker-test-helpers'.$(RESET)\n" >&2; exit 127; }
-	@printf "$(YELLOW)Running helper unit suite: $(UNIT_TEST_DIR)$(RESET)\n"
-	@bats "$(UNIT_TEST_DIR)"
+define assert_bats
+	command -v bats >/dev/null 2>&1 || { printf "$(RED)Error: bats not found on PATH. Install bats-core or use 'make docker-test-helpers'.$(RESET)\n" >&2; exit 127; }
+endef
+
+test-helpers: ## Run the hermetic helper AND CI-script unit suites on the host (needs bats + jq; no Docker, no network)
+	@$(assert_bats)
+	@printf "$(YELLOW)Running unit suites: $(UNIT_TEST_DIR) $(SCRIPT_TEST_DIR)$(RESET)\n"
+	@bats "$(UNIT_TEST_DIR)" "$(SCRIPT_TEST_DIR)"
+
+test-scripts: ## Run only the CI-script unit suite ($(SCRIPT_TEST_DIR)) on the host (needs bats + jq)
+	@$(assert_bats)
+	@printf "$(YELLOW)Running CI-script unit suite: $(SCRIPT_TEST_DIR)$(RESET)\n"
+	@bats "$(SCRIPT_TEST_DIR)"
 
 docker-test-helpers: ## Build the 'helpers' stage, which runs the unit suite hermetically in the image
 	@$(assert_docker)
@@ -210,30 +222,46 @@ docker-test-exec: ## Run bats *inside an already-running* container $(CONTAINER_
 SBOM_IMAGE ?= $(IMAGE):$(TAG)
 SBOM_DIR   ?= artifacts
 
-# Syft: pinned version + SHA256 for reproducible, tamper-evident installs.
-# To upgrade: update SYFT_VERSION and SYFT_SHA256 from the checksums file at
-#   https://github.com/anchore/syft/releases/download/v<VERSION>/syft_<VERSION>_checksums.txt
-SYFT_VERSION ?= 1.42.3
-SYFT_SHA256  ?= 0d6be741479eddd2c8644a288990c04f3df0d609bbc1599a005532a9dff63509
-SYFT_BIN_DIR ?= /usr/local/bin
+# Optional --platform for a multi-arch tag. Prefer scanning a per-arch digest.
+SBOM_PLATFORM ?=
 
-sbom: ## Generate SBOM for $(SBOM_IMAGE) using Syft (SPDX JSON + human-readable table)
-	@command -v syft >/dev/null 2>&1 || { \
-		printf "$(YELLOW)syft not found — installing v$(SYFT_VERSION) with checksum verification...$(RESET)\n"; \
-		tmpdir=$$(mktemp -d) && \
-		curl -sSfL "https://github.com/anchore/syft/releases/download/v$(SYFT_VERSION)/syft_$(SYFT_VERSION)_linux_amd64.tar.gz" \
-			-o "$$tmpdir/syft.tar.gz" && \
-		printf '%s  %s\n' "$(SYFT_SHA256)" "$$tmpdir/syft.tar.gz" | sha256sum -c - >/dev/null 2>&1 || \
-			{ printf "$(RED)Error: SHA256 checksum verification failed for syft v$(SYFT_VERSION)$(RESET)\n" >&2; rm -rf "$$tmpdir"; exit 127; } && \
-		tar -xzf "$$tmpdir/syft.tar.gz" -C "$$tmpdir" syft && \
-		install -m 0755 "$$tmpdir/syft" "$(SYFT_BIN_DIR)/syft" && \
-		rm -rf "$$tmpdir" && \
-		printf "$(GREEN)Installed syft v$(SYFT_VERSION)$(RESET)\n"; \
-	}
+# Syft: pinned version + per-arch SHA256 for reproducible, tamper-evident installs.
+# CI installs it on both amd64 and arm64 runners (scripts/publish-sbom.sh).
+# To upgrade: update SYFT_VERSION and both SHA256s from the checksums file at
+#   https://github.com/anchore/syft/releases/download/v<VERSION>/syft_<VERSION>_checksums.txt
+SYFT_VERSION      ?= 1.42.3
+SYFT_SHA256_AMD64 ?= 0d6be741479eddd2c8644a288990c04f3df0d609bbc1599a005532a9dff63509
+SYFT_SHA256_ARM64 ?= dc630590c953347789d08f8ebf57c7d8094db89100785fcd94b1cddeac791804
+SYFT_BIN_DIR      ?= /usr/local/bin
+
+install-syft: ## Install the pinned, checksum-verified Syft into $(SYFT_BIN_DIR) (no-op if that version is on PATH)
+	@set -e; PATH="$(SYFT_BIN_DIR):$$PATH"; \
+	 if command -v syft >/dev/null 2>&1 && syft version 2>/dev/null | grep -qE '^Version:[[:space:]]+$(SYFT_VERSION)$$'; then \
+	   printf "syft v$(SYFT_VERSION) already installed: %s\n" "$$(command -v syft)"; exit 0; \
+	 fi; \
+	 case "$$(uname -m)" in \
+	   x86_64|amd64)  arch=amd64; sum="$(SYFT_SHA256_AMD64)" ;; \
+	   aarch64|arm64) arch=arm64; sum="$(SYFT_SHA256_ARM64)" ;; \
+	   *) printf "$(RED)Error: no pinned syft checksum for architecture %s$(RESET)\n" "$$(uname -m)" >&2; exit 1 ;; \
+	 esac; \
+	 printf "$(YELLOW)Installing syft v$(SYFT_VERSION) (linux_$$arch) with checksum verification...$(RESET)\n"; \
+	 tmpdir=$$(mktemp -d); trap 'rm -rf "$$tmpdir"' EXIT; \
+	 curl -sSfL --retry 3 -o "$$tmpdir/syft.tar.gz" \
+	   "https://github.com/anchore/syft/releases/download/v$(SYFT_VERSION)/syft_$(SYFT_VERSION)_linux_$$arch.tar.gz" \
+	   || { printf "$(RED)Error: download of syft v$(SYFT_VERSION) (linux_$$arch) failed$(RESET)\n" >&2; exit 1; }; \
+	 printf '%s  %s\n' "$$sum" "$$tmpdir/syft.tar.gz" | sha256sum -c - >/dev/null 2>&1 \
+	   || { printf "$(RED)Error: SHA256 checksum verification failed for syft v$(SYFT_VERSION) (linux_$$arch)$(RESET)\n" >&2; exit 127; }; \
+	 tar -xzf "$$tmpdir/syft.tar.gz" -C "$$tmpdir" syft; \
+	 mkdir -p "$(SYFT_BIN_DIR)"; install -m 0755 "$$tmpdir/syft" "$(SYFT_BIN_DIR)/syft"; \
+	 printf "$(GREEN)Installed syft v$(SYFT_VERSION) to $(SYFT_BIN_DIR)$(RESET)\n"
+
+sbom: install-syft ## SBOM for $(SBOM_IMAGE) in ONE Syft scan (SPDX JSON + table); SBOM_IMAGE=registry:<ref> needs no Docker
+ifeq ($(filter registry:%,$(SBOM_IMAGE)),)
 	@$(assert_docker)
+endif
 	@mkdir -p "$(SBOM_DIR)"
 	@printf "$(YELLOW)Generating SBOM for $(SBOM_IMAGE)...$(RESET)\n"
-	@syft "$(SBOM_IMAGE)" -o spdx-json > "$(SBOM_DIR)/sbom-syft.json"
-	@syft "$(SBOM_IMAGE)" -o table > "$(SBOM_DIR)/sbom-syft.txt"
+	@PATH="$(SYFT_BIN_DIR):$$PATH" syft scan "$(SBOM_IMAGE)" $(if $(SBOM_PLATFORM),--platform "$(SBOM_PLATFORM)") \
+		-o spdx-json="$(SBOM_DIR)/sbom-syft.json" -o syft-table="$(SBOM_DIR)/sbom-syft.txt"
 	@printf "$(GREEN)SBOM written to $(SBOM_DIR)/sbom-syft.json (SPDX) and $(SBOM_DIR)/sbom-syft.txt (table)$(RESET)\n"
 
