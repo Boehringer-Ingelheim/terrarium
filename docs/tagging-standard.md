@@ -30,6 +30,13 @@ there is exactly one correct tag on each surface for a given release.
   - images → `IMAGE_TAG="${TAG#v}"` (always v-less) for the per-arch `--tag`, the
     manifest `metadata-action`, and the manifest `sources`.
   So both `v4.8.1` and `4.8.1` inputs yield git `v4.8.1` + image `4.8.1`.
+- **`latest` never moves on a pre-release.** `scripts/is-prerelease.sh` is the single
+  classifier for both workflows: `vX.Y.Z` is a release; `vX.Y.Z-<suffix>` (`-pre`,
+  `-alpha.N`, `-beta.N`, `-rc.N`, …) is a pre-release. Anything else fails the
+  manifest job, so it can't move `latest` either. `release.yaml` also honours the
+  GitHub Release's pre-release flag. `latest` is enabled only on an explicit
+  "release" result, and `make guardrails` ("unguarded latest") fails on any
+  unconditional `value=latest`.
 - **`ccg-terrarium` `Jenkinsfile`** — resolves upstream **git** tags with the
   `^v\d+\.\d+\.\d+$` (v-prefixed) pattern, then `replaceFirst(/(?i)^v/, '')` to
   pull the **v-less** base image and push the **v-less** Nexus tag.

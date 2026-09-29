@@ -5,6 +5,8 @@
 # packages:write — release/manifest jobs only (GHCR push).
 # id-token:write — release job only: keyless cosign signature of the SBOM
 #                  (INFIAAS-11804).
+# packages:read + security-events:write — scan job only (calls scan.yaml to
+#                  Trivy-scan the published image and upload SARIF).
 # ── Secret isolation policy ─────────────────────────────────────────────────
 # No secrets in global env: blocks.
 # GITHUB_TOKEN scoped to docker/login-action steps, plus GH_TOKEN on the
@@ -228,6 +230,8 @@ jobs:
     needs: [release]
     runs-on: ubuntu-24.04
     permissions: { contents: read, packages: write }
+    outputs:
+      image_tag: ${{ steps.resolve.outputs.image_tag }}
 
     steps:
       - uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
@@ -247,24 +251,34 @@ jobs:
 
       - name: Determine tag and latest eligibility
         id: resolve
+        env:
+          EVENT_TAG: ${{ github.event.release.tag_name }}
+          EVENT_PRERELEASE: ${{ github.event.release.prerelease }}
+          INPUT_TAG: ${{ inputs.tag }}
         run: |
           # Resolve tag from release event or workflow_dispatch input
           if [ "${{ github.event_name }}" = "release" ]; then
-            TAG="${{ github.event.release.tag_name }}"
-            IS_PRERELEASE="${{ github.event.release.prerelease }}"
+            TAG="${EVENT_TAG}"
+            FLAG_PRERELEASE="${EVENT_PRERELEASE}"
           else
-            TAG="${{ inputs.tag }}"
-            IS_PRERELEASE="false"
-            # Auto-detect pre-release from tag name
-            if [[ "$TAG" =~ -(pre|alpha|beta|rc) ]]; then
-              IS_PRERELEASE="true"
-            fi
+            TAG="${INPUT_TAG}"
+            FLAG_PRERELEASE="false"
           fi
-          echo "tag=${TAG}" >> $GITHUB_OUTPUT
-          echo "image_tag=${TAG#v}" >> $GITHUB_OUTPUT
-          echo "is_prerelease=${IS_PRERELEASE}" >> $GITHUB_OUTPUT
+          # INFIAAS-11804 (B4): classify by tag name with the shared script (same
+          # rule as main.yaml; exit 2 on an unrecognised tag, so `latest` can't
+          # move). A release is a pre-release if EITHER the GitHub Release is
+          # flagged as one OR its tag name says so (e.g. a UI release of
+          # v4.9.0-pre published without the pre-release box ticked).
+          NAME_PRERELEASE="$(scripts/is-prerelease.sh "v${TAG#v}")"
+          IS_PRERELEASE="false"
+          if [ "$FLAG_PRERELEASE" = "true" ] || [ "$NAME_PRERELEASE" = "true" ]; then
+            IS_PRERELEASE="true"
+          fi
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "image_tag=${TAG#v}" >> "$GITHUB_OUTPUT"
+          echo "is_prerelease=${IS_PRERELEASE}" >> "$GITHUB_OUTPUT"
           # lowercase image ref for the manifest sources below (a with: block can't use bash ${,,})
-          echo "image=ghcr.io/${GITHUB_REPOSITORY,,}" >> $GITHUB_OUTPUT
+          echo "image=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
           echo "::notice::Tag=${TAG}, Pre-release=${IS_PRERELEASE}"
 
       - name: Docker metadata
@@ -274,7 +288,7 @@ jobs:
           images: ghcr.io/${{ github.repository }}
           tags: |
             type=raw,value=${{ steps.resolve.outputs.image_tag }}
-            type=raw,value=latest,enable=${{ steps.resolve.outputs.is_prerelease != 'true' }}
+            type=raw,value=latest,enable=${{ steps.resolve.outputs.is_prerelease == 'false' }}
 
       - name: Create and push manifest
         uses: int128/docker-manifest-create-action@6edb43463bd4878b8cee224ca274378a3635d78f # v2.28.0
@@ -283,3 +297,17 @@ jobs:
           sources: |
             ${{ steps.resolve.outputs.image }}:${{ steps.resolve.outputs.image_tag }}-linux-amd64
             ${{ steps.resolve.outputs.image }}:${{ steps.resolve.outputs.image_tag }}-linux-arm64
+
+  ################################################################################
+  # 3 ────────── Scan the released image (INFIAAS-11804) ─────────────────────────
+  ################################################################################
+  # Runs after the manifest, so it scans exactly the published <ver>-linux-<arch>
+  # images, for dispatch cuts and UI releases alike. A finding turns this run red
+  # (the image is already published): visible, not blocking.
+  scan:
+    name: Scan released image
+    needs: [manifest]
+    permissions: { contents: read, packages: read, security-events: write }
+    uses: ./.github/workflows/scan.yaml
+    with:
+      image-tag: ${{ needs.manifest.outputs.image_tag }}
