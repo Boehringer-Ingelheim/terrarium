@@ -94,7 +94,6 @@ jobs:
       # Uses a retry loop to handle transient 502 errors from GHA cache / GHCR
       - name: Build & run tests
         run: |
-          GEMFILE_HASH=$(sha256sum docker/Gemfile.lock | cut -d' ' -f1)
           # Read Dockerfile ARG defaults and pass as --build-arg so buildkit's
           # cache-from honours version bumps as a cache-key change (without
           # this, stale cached layers for the tenv/terraform/opentofu install
@@ -108,7 +107,6 @@ jobs:
               --file docker/Dockerfile.terrarium \
               --target test \
               --platform ${{ matrix.platform }} \
-              --build-arg GEMFILE_HASH="${GEMFILE_HASH}" \
               --build-arg TENV_VERSION="${TENV_VERSION}" \
               --build-arg TERRAFORM_VERSION="${TERRAFORM_VERSION}" \
               --build-arg OPENTOFU_VERSION="${OPENTOFU_VERSION}" \
@@ -141,7 +139,6 @@ jobs:
             [ -n "$label" ] && label_args+=(--label "$label")
           done <<< "$META_LABELS"
 
-          GEMFILE_HASH=$(sha256sum docker/Gemfile.lock | cut -d' ' -f1)
           # Read Dockerfile ARG defaults — passed as --build-arg so buildkit's
           # cache-from honours version bumps (see comment on the tenv RUN in
           # docker/Dockerfile.terrarium).
@@ -157,7 +154,6 @@ jobs:
               --push \
               --sbom=false \
               --metadata-file "$RUNNER_TEMP/build-meta.json" \
-              --build-arg GEMFILE_HASH="${GEMFILE_HASH}" \
               --build-arg TENV_VERSION="${TENV_VERSION}" \
               --build-arg TERRAFORM_VERSION="${TERRAFORM_VERSION}" \
               --build-arg OPENTOFU_VERSION="${OPENTOFU_VERSION}" \

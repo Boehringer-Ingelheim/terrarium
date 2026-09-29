@@ -126,7 +126,6 @@ jobs:
       # Gate: build through the test stage — bats must pass
       - name: Build & run tests
         run: |
-          GEMFILE_HASH=$(sha256sum docker/Gemfile.lock | cut -d' ' -f1)
           # Read Dockerfile ARG defaults and pass as --build-arg so buildkit's
           # cache-from honours version bumps as a cache-key change (without
           # this, stale cached layers for the tenv/terraform/opentofu install
@@ -140,7 +139,6 @@ jobs:
               --file docker/Dockerfile.terrarium \
               --target test \
               --platform ${{ matrix.platform }} \
-              --build-arg GEMFILE_HASH="${GEMFILE_HASH}" \
               --build-arg TENV_VERSION="${TENV_VERSION}" \
               --build-arg TERRAFORM_VERSION="${TERRAFORM_VERSION}" \
               --build-arg OPENTOFU_VERSION="${OPENTOFU_VERSION}" \
@@ -163,7 +161,6 @@ jobs:
             TAG="${{ inputs.tag }}"
           fi
           IMAGE_TAG="${TAG#v}"  # git tag keeps the leading v; the published image is v-less
-          GEMFILE_HASH=$(sha256sum docker/Gemfile.lock | cut -d' ' -f1)
           # Read Dockerfile ARG defaults (see comment on the tenv RUN in
           # docker/Dockerfile.terrarium for why these are forwarded).
           TENV_VERSION=$(scripts/dockerfile-arg.sh TENV_VERSION)
@@ -179,7 +176,6 @@ jobs:
               --push \
               --sbom=false \
               --metadata-file "$RUNNER_TEMP/build-meta.json" \
-              --build-arg GEMFILE_HASH="${GEMFILE_HASH}" \
               --build-arg TENV_VERSION="${TENV_VERSION}" \
               --build-arg TERRAFORM_VERSION="${TERRAFORM_VERSION}" \
               --build-arg OPENTOFU_VERSION="${OPENTOFU_VERSION}" \

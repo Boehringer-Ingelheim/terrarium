@@ -13,8 +13,6 @@
 # Container build — dependency graph, verification, runtime security
 
 docker/Dockerfile.terrarium @tbugfinder
-docker/Gemfile              @tbugfinder
-docker/Gemfile.lock         @tbugfinder
 
 # Security configuration
 
