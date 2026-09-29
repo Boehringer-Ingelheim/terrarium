@@ -125,6 +125,8 @@ jobs:
 
       # Gate: build through the test stage — bats must pass
       - name: Build & run tests
+        env:
+          TENV_GITHUB_TOKEN: ${{ secrets.TENV_GITHUB_TOKEN }}
         run: |
           # Read Dockerfile ARG defaults and pass as --build-arg so buildkit's
           # cache-from honours version bumps as a cache-key change (without
@@ -139,6 +141,7 @@ jobs:
               --file docker/Dockerfile.terrarium \
               --target test \
               --platform ${{ matrix.platform }} \
+              --secret id=tenv_github_token,env=TENV_GITHUB_TOKEN \
               --build-arg TENV_VERSION="${TENV_VERSION}" \
               --build-arg TERRAFORM_VERSION="${TERRAFORM_VERSION}" \
               --build-arg OPENTOFU_VERSION="${OPENTOFU_VERSION}" \
@@ -153,6 +156,8 @@ jobs:
 
       # Push: build the clean final stage (no test artifacts)
       - name: Build & push final image
+        env:
+          TENV_GITHUB_TOKEN: ${{ secrets.TENV_GITHUB_TOKEN }}
         run: |
           IMAGE="ghcr.io/${GITHUB_REPOSITORY,,}"  # lowercase: OCI repo names must be lowercase (owner may have uppercase)
           if [ "${{ github.event_name }}" = "release" ]; then
@@ -173,6 +178,7 @@ jobs:
               --file docker/Dockerfile.terrarium \
               --target test \
               --platform ${{ matrix.platform }} \
+              --secret id=tenv_github_token,env=TENV_GITHUB_TOKEN \
               --push \
               --sbom=false \
               --metadata-file "$RUNNER_TEMP/build-meta.json" \

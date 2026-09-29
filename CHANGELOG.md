@@ -22,6 +22,18 @@
 
 ### Fixed
 
+- **Builds no longer fail on GitHub's anonymous API rate limit (INFIAAS-11804).**
+  `tenv tofu install` looks up OpenTofu releases through `api.github.com`,
+  which allows 60 anonymous requests per hour per IP. CI runners share IPs, so
+  the `v4.9.1-pre` release failed on all three build attempts
+  (`you are rate-limited by GitHub`). CI now passes an optional, dedicated
+  read-only token (repo secret `TENV_GITHUB_TOKEN`) as the BuildKit secret
+  `tenv_github_token`, handed to that one command only. It is never a
+  build-arg or `ENV`, so it is not in any layer, cache key or the image, and
+  `GITHUB_TOKEN` stays scoped to the login steps. Without the secret (forks,
+  local builds) tenv runs anonymously, as before. Local builds can opt in with
+  `TENV_GITHUB_TOKEN=… make docker-build-test`.
+
 - **GHCR publishing restored (INFIAAS-11804).** Every publish since 2026-09-17
   (incl. the `v4.8.3` release, which was never published) failed with
   `sbom.spdx.json exceeds 41943040 bytes`. Cause: CI did not pin BuildKit, and
