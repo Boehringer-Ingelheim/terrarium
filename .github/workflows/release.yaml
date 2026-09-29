@@ -1,16 +1,23 @@
 ---
 # ── Permissions policy ──────────────────────────────────────────────────────
 # Default: contents:read (workflow level).
-# contents:write — release job only (auto-create tag if missing).
+# contents:write — tag job (auto-create the tag if missing) and release-assets
+#                  job (attach SBOMs to a GitHub Release) only. The build jobs
+#                  never hold it (INFIAAS-11804), because they run third-party
+#                  build tooling that receives the token (see below).
 # packages:write — release/manifest jobs only (GHCR push).
 # id-token:write — release job only: keyless cosign signature of the SBOM
 #                  (INFIAAS-11804).
+# actions:read   — release-assets job only (download the sbom-<arch> artifacts).
 # packages:read + security-events:write — scan job only (calls scan.yaml to
 #                  Trivy-scan the published image and upload SARIF).
 # ── Secret isolation policy ─────────────────────────────────────────────────
 # No secrets in global env: blocks.
-# GITHUB_TOKEN scoped to docker/login-action steps, plus GH_TOKEN on the
-# "Attach SBOM to the GitHub Release" step (gh release view/upload).
+# GITHUB_TOKEN is used by: docker/login-action; the build steps, as the BuildKit
+# secret `tenv_github_token` (only `tenv tofu install` reads it, to avoid the
+# anonymous api.github.com rate limit; the release job's token is contents:read
+# + packages:write + id-token:write); and GH_TOKEN in the tag and
+# release-assets jobs (git push of the tag; gh run download / release upload).
 name: Release terrarium (manual)
 
 on:
@@ -33,10 +40,76 @@ permissions:
 # 1 ────────── Build, test & push (matrix: amd64 + arm64) ───────────────────
 ################################################################################
 jobs:
+  tag:
+    name: Resolve & ensure tag
+    runs-on: ubuntu-24.04
+    permissions: { contents: write }
+    outputs:
+      tag: ${{ steps.ensure.outputs.tag }}
+    steps:
+      - uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Ensure tag exists (create on HEAD if missing)
+        id: ensure
+        env:
+          EVENT_TAG: ${{ github.event.release.tag_name }}
+          INPUT_TAG: ${{ inputs.tag }}
+        run: |
+          # Resolve tag from release event or workflow_dispatch input
+          if [ "${{ github.event_name }}" = "release" ]; then
+            TAG="${EVENT_TAG}"
+          else
+            TAG="${INPUT_TAG}"
+          fi
+
+          # Tagging standard: git tags are ALWAYS v-prefixed (vX.Y.Z), image tags
+          # are published v-less (X.Y.Z — see the push & manifest steps). Normalize
+          # here so the git tag is canonical no matter how the operator typed it.
+          TAG="v${TAG#v}"
+
+          # Validate tag for both Git and Docker usage
+          if [ "$TAG" = "v" ]; then
+            echo "::error::Tag input must not be empty"; exit 1
+          fi
+          if [ "${#TAG}" -gt 128 ]; then
+            echo "::error::Tag '${TAG}' is too long (max 128 characters)"; exit 1
+          fi
+          case "$TAG" in
+            -*) echo "::error::Tag '${TAG}' must not start with '-'"; exit 1 ;;
+            *[!0-9A-Za-z_.-]*) echo "::error::Tag '${TAG}' contains invalid characters. Allowed: A-Z, a-z, 0-9, '_', '-', '.'"; exit 1 ;;
+          esac
+
+          if git rev-parse "refs/tags/${TAG}" >/dev/null 2>&1; then
+            echo "Tag '${TAG}' already exists at $(git rev-parse "refs/tags/${TAG}")"
+          else
+            echo "Tag '${TAG}' does not exist — creating on HEAD ($(git rev-parse HEAD))"
+            git tag -- "${TAG}"
+            # Race-safe: if a concurrent run pushed first, accept the existing tag
+            if git push origin "refs/tags/${TAG}"; then
+              echo "Tag '${TAG}' pushed to origin"
+            elif git ls-remote --exit-code origin "refs/tags/${TAG}" >/dev/null 2>&1; then
+              echo "::warning::Tag '${TAG}' already exists on origin (concurrent run) — using it"
+            else
+              echo "::error::Failed to push tag '${TAG}' to origin and tag does not exist on origin"
+              exit 1
+            fi
+          fi
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+
   release:
     name: Build & release (${{ matrix.platform }})
+    needs: [tag]
     runs-on: ${{ matrix.runner }}
-    permissions: { contents: write, packages: write, id-token: write }
+    # No contents:write here (INFIAAS-11804): this job's GITHUB_TOKEN reaches
+    # third-party build tooling (tenv) as a BuildKit secret.
+    permissions: { contents: read, packages: write, id-token: write }
     strategy:
       fail-fast: true
       matrix:
@@ -57,55 +130,7 @@ jobs:
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          fetch-depth: 0
-          fetch-tags: true
-
-      - name: Ensure tag exists (create on HEAD if missing)
-        run: |
-          # Resolve tag from release event or workflow_dispatch input
-          if [ "${{ github.event_name }}" = "release" ]; then
-            TAG="${{ github.event.release.tag_name }}"
-          else
-            TAG="${{ inputs.tag }}"
-          fi
-
-          # Tagging standard: git tags are ALWAYS v-prefixed (vX.Y.Z), image tags
-          # are published v-less (X.Y.Z — see the push & manifest steps). Normalize
-          # here so the git tag is canonical no matter how the operator typed it.
-          TAG="v${TAG#v}"
-
-          # Validate tag for both Git and Docker usage
-          if [ -z "$TAG" ]; then
-            echo "::error::Tag input must not be empty"; exit 1
-          fi
-          if [ "${#TAG}" -gt 128 ]; then
-            echo "::error::Tag '${TAG}' is too long (max 128 characters)"; exit 1
-          fi
-          case "$TAG" in
-            -*) echo "::error::Tag '${TAG}' must not start with '-'"; exit 1 ;;
-            *[!0-9A-Za-z_.-]*) echo "::error::Tag '${TAG}' contains invalid characters. Allowed: A-Z, a-z, 0-9, '_', '-', '.'"; exit 1 ;;
-          esac
-
-          if git rev-parse "refs/tags/${TAG}" >/dev/null 2>&1; then
-            echo "Tag '${TAG}' already exists at $(git rev-parse "refs/tags/${TAG}")"
-          else
-            echo "Tag '${TAG}' does not exist — creating on HEAD ($(git rev-parse HEAD))"
-            git tag -- "${TAG}"
-            # Race-safe: if the other matrix leg pushed first, detect and fetch; otherwise fail
-            if git push origin "refs/tags/${TAG}"; then
-              echo "Tag '${TAG}' pushed to origin"
-            else
-              echo "::warning::git push for tag '${TAG}' failed, checking if tag already exists on origin"
-              if git ls-remote --exit-code origin "refs/tags/${TAG}" >/dev/null 2>&1; then
-                echo "Tag '${TAG}' already exists on origin (likely created by parallel job) — fetching"
-                git fetch origin "refs/tags/${TAG}"
-              else
-                echo "::error::Failed to push tag '${TAG}' to origin and tag does not exist on origin"
-                exit 1
-              fi
-            fi
-          fi
-          git checkout "refs/tags/${TAG}"
+          ref: refs/tags/${{ needs.tag.outputs.tag }}
 
       - uses: ./.github/actions/dump-context
         if: github.event.inputs.debug_context == 'true'
@@ -126,7 +151,7 @@ jobs:
       # Gate: build through the test stage — bats must pass
       - name: Build & run tests
         env:
-          TENV_GITHUB_TOKEN: ${{ secrets.TENV_GITHUB_TOKEN }}
+          TENV_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # Read Dockerfile ARG defaults and pass as --build-arg so buildkit's
           # cache-from honours version bumps as a cache-key change (without
@@ -157,7 +182,7 @@ jobs:
       # Push: build the clean final stage (no test artifacts)
       - name: Build & push final image
         env:
-          TENV_GITHUB_TOKEN: ${{ secrets.TENV_GITHUB_TOKEN }}
+          TENV_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           IMAGE="ghcr.io/${GITHUB_REPOSITORY,,}"  # lowercase: OCI repo names must be lowercase (owner may have uppercase)
           if [ "${{ github.event_name }}" = "release" ]; then
@@ -205,24 +230,39 @@ jobs:
           metadata-file: ${{ runner.temp }}/build-meta.json
           arch: ${{ matrix.arch }}
 
-      # A workflow_dispatch cut (e.g. v4.9.0-pre) creates only the git tag, not a
-      # GitHub Release, so upload only when a Release exists for the tag.
-      - name: Attach SBOM to the GitHub Release (if one exists)
+  ################################################################################
+  # 1b ───────── Attach SBOMs to the GitHub Release (if one exists) ─────────────
+  ################################################################################
+  # Separate job so the build jobs never hold contents:write (INFIAAS-11804). A
+  # workflow_dispatch cut (e.g. v4.9.2-pre) creates only the git tag, not a
+  # GitHub Release, so upload only when a Release exists for the tag.
+  release-assets:
+    name: Attach SBOMs to the GitHub Release
+    needs: [tag, release]
+    runs-on: ubuntu-24.04
+    permissions: { contents: write, actions: read }
+    steps:
+      - uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
+        with:
+          egress-policy: audit
+
+      - name: Attach SBOMs (if a GitHub Release exists)
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          EVENT_TAG: ${{ github.event.release.tag_name }}
-          INPUT_TAG: ${{ inputs.tag }}
-          SBOM_DIR: ${{ steps.sbom.outputs.sbom-dir }}
-          ARCH: ${{ matrix.arch }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ needs.tag.outputs.tag }}
+          RUN_ID: ${{ github.run_id }}
         run: |
-          TAG="${EVENT_TAG:-$INPUT_TAG}"
-          TAG="v${TAG#v}"  # canonical v-prefixed git tag, as in "Ensure tag exists"
-          if gh release view "$TAG" >/dev/null 2>&1; then
-            gh release upload "$TAG" "$SBOM_DIR/sbom-${ARCH}.spdx.json" "$SBOM_DIR/sbom-${ARCH}.txt" --clobber
-            echo "::notice::SBOM (${ARCH}) attached to GitHub Release ${TAG}"
-          else
-            echo "::notice::No GitHub Release for ${TAG} (dispatch cut) — SBOM (${ARCH}) is in GHCR and the sbom-${ARCH} workflow artifact"
+          if ! gh release view "$TAG" >/dev/null 2>&1; then
+            echo "::notice::No GitHub Release for ${TAG} (dispatch cut) — SBOMs are in GHCR and the sbom-<arch> workflow artifacts"
+            exit 0
           fi
+          d="$(mktemp -d)"
+          for ARCH in amd64 arm64; do
+            gh run download "$RUN_ID" --name "sbom-${ARCH}" --dir "$d/${ARCH}"
+            gh release upload "$TAG" "$d/${ARCH}/sbom-${ARCH}.spdx.json" "$d/${ARCH}/sbom-${ARCH}.txt" --clobber
+            echo "::notice::SBOM (${ARCH}) attached to GitHub Release ${TAG}"
+          done
 
   ################################################################################
   # 2 ────────── Create multi‑arch manifest ────────────────────────────────────

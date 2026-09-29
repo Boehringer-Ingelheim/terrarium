@@ -6,7 +6,10 @@
 #                  (INFIAAS-11804; fork PRs never receive an OIDC token).
 # ── Secret isolation policy ─────────────────────────────────────────────────
 # No secrets in global env: blocks.
-# GITHUB_TOKEN scoped to docker/login-action steps only.
+# GITHUB_TOKEN is used by docker/login-action and, in the build steps, as the
+# BuildKit secret `tenv_github_token`: only `tenv tofu install` reads it, to
+# avoid the anonymous api.github.com rate limit (INFIAAS-11804). The build
+# job's token is contents:read + packages:write + id-token:write.
 name: Build, test & publish terrarium
 
 on:
@@ -94,7 +97,7 @@ jobs:
       # Uses a retry loop to handle transient 502 errors from GHA cache / GHCR
       - name: Build & run tests
         env:
-          TENV_GITHUB_TOKEN: ${{ secrets.TENV_GITHUB_TOKEN }}
+          TENV_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # Read Dockerfile ARG defaults and pass as --build-arg so buildkit's
           # cache-from honours version bumps as a cache-key change (without
@@ -129,7 +132,7 @@ jobs:
         env:
           META_TAGS: ${{ steps.meta.outputs.tags }}
           META_LABELS: ${{ steps.meta.outputs.labels }}
-          TENV_GITHUB_TOKEN: ${{ secrets.TENV_GITHUB_TOKEN }}
+          TENV_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # Build --tag and --label flag arrays from newline-separated metadata outputs.
           # Arrays preserve values that contain spaces (e.g. label descriptions).
