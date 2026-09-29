@@ -49,7 +49,7 @@ jobs:
             arch: arm64
 
     steps:
-      - uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
+      - uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
         with:
           egress-policy: audit
 
@@ -108,7 +108,7 @@ jobs:
       - uses: ./.github/actions/dump-context
         if: github.event.inputs.debug_context == 'true'
 
-      - uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4.3.0
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
         with:
           # INFIAAS-11804: pin BuildKit (see main.yaml for the full rationale;
           # enforced by scripts/check-guardrails.sh "buildkit pinned").
@@ -230,7 +230,7 @@ jobs:
     permissions: { contents: read, packages: write }
 
     steps:
-      - uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
+      - uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
         with:
           egress-policy: audit
 
@@ -277,7 +277,7 @@ jobs:
             type=raw,value=latest,enable=${{ steps.resolve.outputs.is_prerelease != 'true' }}
 
       - name: Create and push manifest
-        uses: int128/docker-manifest-create-action@5e40f15c10aaa54f5d2bc91864e2708e11ad629f # v2.27.0
+        uses: int128/docker-manifest-create-action@6edb43463bd4878b8cee224ca274378a3635d78f # v2.28.0
         with:
           tags: ${{ steps.meta.outputs.tags }}
           sources: |
