@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# Test stub for oras (scripts/tests only). Records argv (and cwd for attach).
+#   discover: prints $STUB_ORAS_DISCOVER_JSON (default: no referrers);
+#             STUB_ORAS_DISCOVER_FAIL=1 -> exit 1
+#   manifest fetch: prints $STUB_ORAS_MANIFEST (default: a single image
+#             manifest); STUB_ORAS_MANIFEST_FAIL=1 -> exit 1
+#   attach:   fails the first $STUB_ORAS_ATTACH_FAILS calls (default 0), then
+#             prints $STUB_ORAS_ATTACH_OUT (default: $STUB_SBOM_DIGEST).
+#             Exits 3 if the file argument does not exist relative to cwd.
+set -euo pipefail
+printf 'oras %s\n' "$*" >> "${STUB_LOG:?}"
+case "$1" in
+  discover)
+    [ "${STUB_ORAS_DISCOVER_FAIL:-0}" = 1 ] && { echo "stub oras: discover failed" >&2; exit 1; }
+    none='{"referrers":[]}'; printf '%s\n' "${STUB_ORAS_DISCOVER_JSON:-$none}" ;;
+  manifest)
+    [ "${STUB_ORAS_MANIFEST_FAIL:-0}" = 1 ] && { echo "stub oras: manifest fetch failed" >&2; exit 1; }
+    single='{"mediaType":"application/vnd.oci.image.manifest.v1+json"}'
+    printf '%s\n' "${STUB_ORAS_MANIFEST:-$single}" ;;
+  attach)
+    printf 'oras-attach-cwd %s\n' "$PWD" >> "$STUB_LOG"
+    file="${!#}"; [ -f "${file%%:*}" ] || { echo "stub oras: no such file ${file%%:*}" >&2; exit 3; }
+    n=$(( $(cat "$STUB_LOG.attach" 2>/dev/null || echo 0) + 1 )); echo "$n" > "$STUB_LOG.attach"
+    [ "$n" -le "${STUB_ORAS_ATTACH_FAILS:-0}" ] && { echo "stub oras: attach failed ($n)" >&2; exit 1; }
+    printf '%s\n' "${STUB_ORAS_ATTACH_OUT:-${STUB_SBOM_DIGEST:?}}" ;;
+  *) echo "stub oras: unexpected subcommand $1" >&2; exit 64 ;;
+esac

@@ -1,0 +1,62 @@
+# .github/actions/publish-sbom/action.yml
+# INFIAAS-11804: publish a signed SPDX SBOM for ONE pushed per-arch image.
+# Shared by main.yaml (build job) and release.yaml (release job) so the tool
+# pins and wiring live in one place; the logic is scripts/publish-sbom.sh
+# (unit-tested in scripts/tests/publish_sbom.bats).
+#
+# Caller requirements:
+#   - job permissions `packages: write` (oras attach, cosign sign) and
+#     `id-token: write` (keyless cosign via GitHub OIDC)
+#   - a prior docker/login-action to ghcr.io (oras/cosign read ~/.docker/config.json)
+#   - actions/checkout (for the Makefile and the script)
+name: "Publish signed SBOM"
+description: "Syft SPDX SBOM for a pushed per-arch image, attached to its image digest (oras) and signed keyless (cosign)"
+inputs:
+  metadata-file:
+    description: "buildx --metadata-file of the push; its containerimage.digest (per-arch image or push index) is what gets an SBOM"
+    required: true
+  arch:
+    description: "amd64 or arm64"
+    required: true
+outputs:
+  sbom-dir:
+    description: "Directory holding sbom-<arch>.spdx.json and sbom-<arch>.txt"
+    value: ${{ steps.publish.outputs.dir }}
+runs:
+  using: "composite"
+  steps:
+    - uses: oras-project/setup-oras@1d808f7d7f6995cc68b7bf507bfe5c5446e1dc9d # v2.0.1
+      with:
+        version: 1.3.1
+
+    - uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
+      with:
+        cosign-release: v3.0.6
+
+    - name: Install Syft (pinned, checksum-verified per arch)
+      shell: bash
+      run: |
+        make install-syft SYFT_BIN_DIR="$HOME/.local/bin"
+        echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+    - name: Scan, attach and sign the SBOM
+      id: publish
+      shell: bash
+      env:
+        META: ${{ inputs.metadata-file }}
+        ARCH: ${{ inputs.arch }}
+      run: |
+        # An empty/missing digest is rejected by the script's validation (exit 2).
+        DIGEST="$(jq -r '."containerimage.digest" // empty' "$META")"
+        dir="$RUNNER_TEMP/sbom"
+        mkdir -p "$dir"
+        # lowercase: OCI repo names must be lowercase (owner may have uppercase)
+        scripts/publish-sbom.sh "ghcr.io/${GITHUB_REPOSITORY,,}" "$DIGEST" "$ARCH" "$dir"
+        echo "dir=${dir}" >> "$GITHUB_OUTPUT"
+
+    - name: Upload SBOM workflow artifact
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      with:
+        name: sbom-${{ inputs.arch }}
+        path: ${{ steps.publish.outputs.dir }}
+        if-no-files-found: error

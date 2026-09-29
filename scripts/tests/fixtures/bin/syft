@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# Test stub for syft (scripts/tests only). Records argv; writes the SPDX/table
+# outputs named by `-o spdx-json=PATH` / `-o syft-table=PATH`.
+#   STUB_SYFT_FAIL=1       exit 1 without writing anything
+#   STUB_SYFT_SPDX=<json>  SPDX content to write (default: two packages)
+set -euo pipefail
+printf 'syft %s\n' "$*" >> "${STUB_LOG:?}"
+[ "${STUB_SYFT_FAIL:-0}" = 1 ] && { echo "stub syft: forced failure" >&2; exit 1; }
+default='{"packages":[{"name":"a"},{"name":"b"}]}'
+spdx="${STUB_SYFT_SPDX:-$default}"
+for a in "$@"; do
+  case "$a" in
+    spdx-json=*)  printf '%s\n' "$spdx" > "${a#spdx-json=}" ;;
+    syft-table=*) printf 'NAME VERSION TYPE\n' > "${a#syft-table=}" ;;
+  esac
+done

@@ -2,6 +2,45 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- **GHCR publishing restored (INFIAAS-11804).** Every publish since 2026-09-17
+  (incl. the `v4.8.3` release, which was never published) failed with
+  `sbom.spdx.json exceeds 41943040 bytes`. Cause: CI did not pin BuildKit, and
+  `moby/buildkit:buildx-stable-1` moved from v0.31.2 to v0.32.2, which added an
+  undocumented 40 MiB attestation cap ([moby/buildkit#7044]). Our SBOM has been
+  ~66 MiB since at least 4.8.1; the image did not grow.
+
+### Changed
+
+- **BuildKit pinned** to `v0.33.0@sha256:6c2fa84a…` in `main.yaml` and
+  `release.yaml` (`setup-buildx-action` `driver-opts`). A new guardrail
+  (`make guardrails` → "buildkit pinned") fails if any buildx setup is unpinned
+  or tag-only; the "unpinned actions" check now also covers local composite
+  actions under `.github/actions/`.
+- **SBOM moved out of BuildKit** (`--sbom=false`). A full Syft SPDX SBOM per arch
+  is generated after push (`scripts/publish-sbom.sh`, via the
+  `.github/actions/publish-sbom` composite action), **attached to the image
+  digest in GHCR** (`oras attach`, `application/spdx+json`), **signed keyless**
+  with cosign, uploaded as the `sbom-<arch>` workflow artifact, and attached to
+  the GitHub Release when one exists. Fails closed: no SBOM, no release manifest.
+  Consumers reading `docker buildx imagetools inspect --format '{{json .SBOM}}'`
+  must switch to `oras discover` — see SECURITY.md → SBOM. Image size is
+  unaffected (the SBOM was never an image layer).
+- `make sbom` scans **once** (was twice), accepts `SBOM_IMAGE=registry:<ref>`
+  without a Docker daemon, and takes `SBOM_PLATFORM`. The checksum-verified Syft
+  installer is now `make install-syft`, with a pinned SHA256 per arch
+  (`SYFT_SHA256_AMD64` / `SYFT_SHA256_ARM64`, replacing `SYFT_SHA256`), so it
+  also works on the arm64 runner.
+
+### Added
+
+- `scripts/tests/` — hermetic bats suite for CI scripts (`publish_sbom.bats`,
+  `check_guardrails.bats`), run by `make test-scripts` / `make test-helpers` and
+  in `lint.yaml` ("CI-script unit suite").
+
+[moby/buildkit#7044]: https://github.com/moby/buildkit/issues/7044
+
 ## [4.8.3-pre] 2026-07-24 — Helper extraction, CI gates, installer decomposition — INFIAAS-11426
 
 ### Added
