@@ -22,6 +22,44 @@ load 'test_helper/common.bash'
   assert_failure
 }
 
+# --- Ruby toolchain removed (INFIAAS-11797) ----------------------------------
+# Ruby, rbenv, bundler, test-kitchen and cinc-auditor/InSpec were dropped in
+# 4.9.0. Checked in a login shell so /etc/profile.d PATH additions count too.
+
+@test "Ruby toolchain binaries are absent (ruby rbenv bundle bundler gem kitchen cinc-auditor inspec)" {
+  for exe in ruby rbenv bundle bundler gem kitchen cinc-auditor inspec; do
+    run bash -lc "command -v $exe"
+    assert_failure
+  done
+}
+
+@test "Ruby toolchain directories are absent (/opt/rbenv /opt/bundle /opt/terrarium-gems)" {
+  for d in /opt/rbenv /opt/bundle /opt/terrarium-gems; do
+    [ ! -e "$d" ] || { echo "Expected $d to be removed" >&2; return 1; }
+  done
+}
+
+@test "Ruby wrapper scripts are absent from /usr/local/bin" {
+  for f in /usr/local/bin/kitchen /usr/local/bin/cinc-auditor; do
+    [ ! -e "$f" ] || { echo "Expected $f to be removed" >&2; return 1; }
+  done
+}
+
+@test "No Ruby environment variables are set in a login shell" {
+  run bash -lc 'printf "%s|%s|%s|%s|%s\n" "${GEM_HOME:-}" "${RUBY_VERSION:-}" "${BUNDLER_VERSION:-}" "${RBENV_ROOT:-}" "${BUNDLE_SILENCE_ROOT_WARNING:-}"'
+  assert_success
+  assert_output "||||"
+}
+
+@test "PATH has no rbenv or bundle entries (login and interactive shells)" {
+  for mode in -lc -ic; do
+    run bash "$mode" 'echo "$PATH"'
+    assert_success
+    refute_output --partial "/opt/rbenv"
+    refute_output --partial "/opt/bundle"
+  done
+}
+
 # --- Docs/man pages removed --------------------------------------------------
 
 @test "/usr/share/doc is removed" {

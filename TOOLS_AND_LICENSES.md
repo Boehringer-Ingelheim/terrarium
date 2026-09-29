@@ -5,7 +5,7 @@ open-source licenses. Consumers of this image should review these licenses for
 compliance with their organization's policies.
 
 > **Last updated:** 2026-07-24 (reviewed under INFIAAS-11426; `latest` rows
-> reflect tools installed unpinned — pyenv/rbenv/ruby-build/uv and the
+> reflect tools installed unpinned — pyenv/uv and the
 > dnf-repo/installer CLIs — and remain accurate)
 > For a machine-readable SBOM, see the BuildKit SBOM attestation attached to
 > published images (`--sbom=true`), or generate one locally with
@@ -20,7 +20,6 @@ compliance with their organization's policies.
 | Tool | Version | License | Source |
 |------|---------|---------|--------|
 | Python | 3.13.12 (via pyenv) | [PSF-2.0](https://docs.python.org/3/license.html) | github.com/pyenv/pyenv → python.org |
-| Ruby | 3.4.9 (via rbenv) | [BSD-2-Clause](https://www.ruby-lang.org/en/about/license.txt) | github.com/rbenv/rbenv → ruby-lang.org |
 | Go | 1.26.1 | [BSD-3-Clause](https://go.dev/LICENSE) | go.dev |
 | Node.js | 24.14.0 | [MIT](https://github.com/nodejs/node/blob/main/LICENSE) | nodejs.org |
 
@@ -29,8 +28,6 @@ compliance with their organization's policies.
 | Tool | Version | License | Source |
 |------|---------|---------|--------|
 | pyenv | latest (git clone) | [MIT](https://github.com/pyenv/pyenv/blob/master/LICENSE) | github.com/pyenv/pyenv |
-| rbenv | latest (git clone) | [MIT](https://github.com/rbenv/rbenv/blob/master/LICENSE) | github.com/rbenv/rbenv |
-| ruby-build | latest (git clone) | [MIT](https://github.com/rbenv/ruby-build/blob/master/LICENSE) | github.com/rbenv/ruby-build |
 | tenv | 4.9.3 | [Apache-2.0](https://github.com/tofuutils/tenv/blob/main/LICENSE) | github.com/tofuutils/tenv |
 | uv | latest (install script) | [Apache-2.0](https://github.com/astral-sh/uv/blob/main/LICENSE-APACHE) | astral.sh/uv |
 
@@ -90,26 +87,6 @@ compliance with their organization's policies.
 | Tool | Version | License | Source |
 |------|---------|---------|--------|
 | bats-core | 1.13.0 | [MIT](https://github.com/bats-core/bats-core/blob/master/LICENSE.md) | github.com/bats-core/bats-core |
-| Test Kitchen | Gemfile | [Apache-2.0](https://github.com/test-kitchen/test-kitchen/blob/main/LICENSE) | rubygems.org |
-| kitchen-terraform | Gemfile (~> 7.0) | [Apache-2.0](https://github.com/newcontext-oss/kitchen-terraform/blob/master/LICENSE) | rubygems.org |
-| InSpec / cinc-auditor | Gemfile (>= 5.22.55) | [Apache-2.0](https://github.com/inspec/inspec/blob/main/LICENSE) | rubygems.cinc.sh |
-
-## Ruby Gems (via Bundler)
-
-The following gems are installed via `Gemfile` / `Gemfile.lock` into `/opt/bundle`:
-
-| Gem | License | Source |
-|-----|---------|--------|
-| activesupport | MIT | rubygems.org |
-| aws-sdk (~> 3) | Apache-2.0 | rubygems.org |
-| rspec-retry | MIT | rubygems.org |
-| chef-config | Apache-2.0 | rubygems.cinc.sh |
-| chef-utils | Apache-2.0 | rubygems.cinc.sh |
-| mixlib-install | Apache-2.0 | rubygems.cinc.sh |
-| mixlib-versioning | Apache-2.0 | rubygems.cinc.sh |
-
-> For the complete list of transitive Ruby dependencies and their licenses,
-> inspect `docker/Gemfile.lock` or run `bundle licenses` inside the container.
 
 ## Python Packages (via uv)
 
@@ -172,12 +149,11 @@ All binary-downloaded tools are cryptographically verified unless noted:
 
 | License | Count | Tools |
 |---------|-------|-------|
-| Apache-2.0 | 15+ | AWS CLI, AWS CDK, AWS SAM, Azure CLI (repo), GCP CLI, kubectl, Helm, oc, Trivy, tenv, uv, OpenStack, Test Kitchen, kitchen-terraform, InSpec |
-| MIT | 12+ | Node.js, pyenv, rbenv, ruby-build, terraform-docs, yq, zoxide, Task, bats-core, jq, Starship (ISC ≈ MIT), activesupport |
+| Apache-2.0 | 12+ | AWS CLI, AWS CDK, AWS SAM, Azure CLI (repo), GCP CLI, kubectl, Helm, oc, Trivy, tenv, uv, OpenStack |
+| MIT | 9+ | Node.js, pyenv, terraform-docs, yq, zoxide, Task, bats-core, jq, Starship (ISC ≈ MIT) |
 | MPL-2.0 | 4 | OpenTofu, tflint, sops, terraform-config-inspect |
 | BUSL-1.1 | 2 | Terraform, Packer |
 | BSD-3-Clause | 2 | Go, age |
-| BSD-2-Clause | 1 | Ruby |
 | PSF-2.0 | 1 | Python |
 | GPL-2.0+ / GPL-3.0+ | 2 | xorriso, GNU Parallel |
 | ISC | 1 | Starship |
@@ -202,7 +178,7 @@ assistant (e.g. Claude Code) to regenerate or verify the inventory:
 ```text
 Read docker/Dockerfile.terrarium and TOOLS_AND_LICENSES.md. For every tool
 installed in the Dockerfile (via ARG/ENV versions, dnf, binary download, pip,
-npm, gem/Bundler, or git clone):
+npm, or git clone):
 
 1. Check it appears in TOOLS_AND_LICENSES.md with the correct version.
 2. Verify the SPDX license identifier is accurate (check the tool's repo).
@@ -212,8 +188,7 @@ npm, gem/Bundler, or git clone):
 5. If a tool was removed from the Dockerfile, remove it from this file.
 6. If a tool was added to the Dockerfile, add it to the appropriate section.
 
-Also cross-reference docker/Gemfile and docker/pyproject.toml for Ruby gem
-and Python package changes respectively.
+Also cross-reference docker/pyproject.toml for Python package changes.
 
 Output a diff of any changes needed, or confirm the file is up to date.
 ```

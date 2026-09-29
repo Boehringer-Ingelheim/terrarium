@@ -22,9 +22,10 @@ load 'test_helper/common.bash'
   }
 }
 
-@test "/opt/bundle and /opt/rbenv/shims are group-owned by devtools and setgid" {
-  assert_devtools_setgid_dir "/opt/bundle"
-  assert_devtools_setgid_dir "/opt/rbenv/shims"
+@test "/opt/pyenv and /opt/tenv are group-owned by devtools and setgid" {
+  assert_devtools_setgid_dir "/opt/pyenv"
+  assert_devtools_setgid_dir "/opt/pyenv/shims"
+  assert_devtools_setgid_dir "/opt/tenv"
 }
 
 @test "/opt/pyenv and /opt/tenv are writable by devtools (runtime install support)" {
@@ -44,8 +45,8 @@ load 'test_helper/common.bash'
   done
 }
 
-@test "New files/dirs under /opt/bundle inherit devtools group; dirs inherit setgid" {
-  work="/opt/bundle/bats_perm_test_$$"
+@test "New files/dirs under /opt/pyenv inherit devtools group; dirs inherit setgid" {
+  work="/opt/pyenv/bats_perm_test_$$"
   run bash -lc 'mkdir -p '"$work"' && touch '"$work"'/f && stat -c "%G %A %n" '"$work"' '"$work"'/f'
   assert_success
 
@@ -64,23 +65,21 @@ load 'test_helper/common.bash'
 }
 
 
-@test "PATH/rbenv initialization works in a login shell" {
+@test "PATH initialization works in a login shell" {
   # -l forces login shell -> /etc/profile.d/* should apply
-  run bash -lc 'command -v ruby && command -v rbenv && command -v bundler && echo "$PATH"'
+  run bash -lc 'command -v python && command -v pyenv && command -v node && echo "$PATH"'
   assert_success
-  assert_output --partial "/opt/rbenv/shims"
-  assert_output --partial "/opt/rbenv/bin"
-  assert_output --partial "/opt/bundle/bin"
+  assert_output --partial "/opt/pyenv/shims"
+  assert_output --partial "/opt/pyenv/bin"
   assert_output --partial "/opt/node/bin"
 }
 
-@test "PATH/rbenv initialization works in an interactive non-login shell" {
+@test "PATH initialization works in an interactive non-login shell" {
   # -i (interactive) triggers /etc/bashrc -> /etc/bashrc.d/*
-  run bash -ic 'command -v ruby && command -v rbenv && command -v bundler && echo "$PATH"'
+  run bash -ic 'command -v python && command -v pyenv && command -v node && echo "$PATH"'
   assert_success
-  assert_output --partial "/opt/rbenv/shims"
-  assert_output --partial "/opt/rbenv/bin"
-  assert_output --partial "/opt/bundle/bin"
+  assert_output --partial "/opt/pyenv/shims"
+  assert_output --partial "/opt/pyenv/bin"
   assert_output --partial "/opt/node/bin"
 }
 

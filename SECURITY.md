@@ -1,6 +1,6 @@
 # Security Policy
 
-This project builds a **developer container** (Dev Container / Docker image) with a curated toolchain (e.g., Terraform, cloud CLIs, Packer, sops/age, Ruby, kubectl/helm). It is **not a production service**. Please report vulnerabilities privately and follow coordinated disclosure so users have time to update.
+This project builds a **developer container** (Dev Container / Docker image) with a curated toolchain (e.g., Terraform, cloud CLIs, Packer, sops/age, kubectl/helm). It is **not a production service**. Please report vulnerabilities privately and follow coordinated disclosure so users have time to update.
 
 ## Reporting a Vulnerability
 

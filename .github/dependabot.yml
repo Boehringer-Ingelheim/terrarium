@@ -13,6 +13,3 @@ updates:
     directory: "/docker"
     schedule: { interval: weekly }
     versioning-strategy: lockfile-only
-  - package-ecosystem: bundler
-    directory: "/docker"
-    schedule: { interval: weekly }
