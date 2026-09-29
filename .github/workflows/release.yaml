@@ -108,7 +108,7 @@ jobs:
       - uses: ./.github/actions/dump-context
         if: github.event.inputs.debug_context == 'true'
 
-      - uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4.3.0
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
         with:
           # INFIAAS-11804: pin BuildKit (see main.yaml for the full rationale;
           # enforced by scripts/check-guardrails.sh "buildkit pinned").
