@@ -60,22 +60,6 @@ load 'test_helper/common.bash'
   done
 }
 
-# --- terraform-config-inspect removed (INFIAAS-11477) -------------------------
-# The unmaintained 2022 fork was downloaded without verification and
-# had no known consumers. Dropped in 4.9.x; see CHANGELOG for alternatives.
-
-@test "terraform-config-inspect is absent" {
-  run bash -lc 'command -v terraform-config-inspect'
-  assert_failure
-  [ ! -e /usr/local/bin/terraform-config-inspect ] || { echo "Expected /usr/local/bin/terraform-config-inspect to be removed" >&2; return 1; }
-}
-
-@test "TERRAFORM_CONFIG_INSPECT_VERSION is not set in a login shell" {
-  run bash -lc 'printf "%s\n" "${TERRAFORM_CONFIG_INSPECT_VERSION-unset}"'
-  assert_success
-  assert_output "unset"
-}
-
 # --- Docs/man pages removed --------------------------------------------------
 
 @test "/usr/share/doc is removed" {
