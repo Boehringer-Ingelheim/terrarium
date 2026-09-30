@@ -27,6 +27,7 @@ load 'test_helper/common.bash'
 @test "yq matches YQ_VERSION"                 { assert_pinned_version YQ_VERSION yq --version; }
 @test "kubectl matches KUBECTL_VERSION"       { assert_pinned_version KUBECTL_VERSION kubectl version --client; }
 @test "node matches NODEJS_VERSION"           { assert_pinned_version NODEJS_VERSION node --version; }
+@test "npm matches NPM_VERSION"                 { assert_pinned_version NPM_VERSION npm --version; }
 @test "cdk matches AWS_CDK_VERSION"           { assert_pinned_version AWS_CDK_VERSION cdk --version; }
 @test "python matches PYTHON_VERSION"         { assert_pinned_version PYTHON_VERSION python --version; }
 @test "starship matches STARSHIP_VERSION"     { assert_pinned_version STARSHIP_VERSION starship --version; }

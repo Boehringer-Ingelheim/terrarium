@@ -16,6 +16,8 @@ ARG GO_VERSION=1.26.8
 ARG HELM_VERSION=3.22.0
 ARG KUBECTL_VERSION=1.35.9
 ARG NODEJS_VERSION=24.21.0
+# npm bundled with Node lags its own dependency fixes; pin it explicitly (INFIAAS-9587)
+ARG NPM_VERSION=11.20.0
 ARG OC_VERSION=4.19.48
 ARG OPENSTACK_RELEASE=2025.1
 ARG OPENSTACK_VENV=/opt/openstack
@@ -79,7 +81,7 @@ LABEL maintainer="Erhard Wais <erhard.wais@boehringer-ingelheim.com>, Josef Hart
 ARG TARGETPLATFORM TARGETOS TARGETARCH TARGETVARIANT BUILDPLATFORM BUILDOS BUILDARCH BUILDVARIANT
 # Pull in global args needed in this stage
 ARG AGE_VERSION AWS_CDK_VERSION BATS_CORE_VERSION
-ARG GO_VERSION HELM_VERSION KUBECTL_VERSION NODEJS_VERSION
+ARG GO_VERSION HELM_VERSION KUBECTL_VERSION NODEJS_VERSION NPM_VERSION
 ARG OC_VERSION OPENSTACK_RELEASE OPENSTACK_VENV
 ARG OPENTOFU_VERSION PACKER_VERSION PYTHON_VERSION
 ARG SOPS_VERSION STARSHIP_VERSION TASK_VERSION TENV_VERSION
@@ -94,6 +96,7 @@ ENV AGE_VERSION=${AGE_VERSION} \
     HELM_VERSION=${HELM_VERSION} \
     KUBECTL_VERSION=${KUBECTL_VERSION} \
     NODEJS_VERSION=${NODEJS_VERSION} \
+    NPM_VERSION=${NPM_VERSION} \
     OC_VERSION=${OC_VERSION} \
     OPENSTACK_RELEASE=${OPENSTACK_RELEASE} \
     OPENTOFU_VERSION=${OPENTOFU_VERSION} \
@@ -429,7 +432,7 @@ RUN if [ "x${TARGETARCH}" = "xamd64" ]; then \
     && sam --version
 
 
-# Node.js + signed SHASUMS verification + AWS CDK
+# Node.js + signed SHASUMS verification + npm (pinned, registry-integrity-checked) + AWS CDK
 RUN ARCH_NODE=$([[ "$TARGETARCH" == "amd64" ]] && echo "x64" || echo "arm64") \
     && VER="${NODEJS_VERSION}" \
     && BASE="https://nodejs.org/dist/v${VER}" \
@@ -440,6 +443,7 @@ RUN ARCH_NODE=$([[ "$TARGETARCH" == "amd64" ]] && echo "x64" || echo "arm64") \
     && xzcat "$FILE" | tar xpf - -C /opt/ \
     && mv "/opt/node-v${VER}-${TARGETOS}-${ARCH_NODE}" /opt/node \
     && rm -f "$FILE" \
+    && /opt/node/bin/npm install -g "npm@${NPM_VERSION}" \
     && /opt/node/bin/npm install -g aws-cdk@${AWS_CDK_VERSION} \
     && chown -R 1001:0 /opt/node && chmod +x /opt/node/bin/* \
     && node --version && cdk --version
