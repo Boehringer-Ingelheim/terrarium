@@ -443,8 +443,23 @@ RUN ARCH_NODE=$([[ "$TARGETARCH" == "amd64" ]] && echo "x64" || echo "arm64") \
 # so buildkit's cache-from treats version bumps as a cache-key change.
 # Without that, stale cached layers built with older versions can satisfy
 # cache-from hits even after the Dockerfile ARG defaults are bumped.
-RUN TENV_ARCH=$([[ "$TARGETARCH" == "amd64" ]] && echo "amd64" || echo "arm64") \
-    && dnf -y install "https://github.com/tofuutils/tenv/releases/download/v${TENV_VERSION}/tenv_v${TENV_VERSION}_${TENV_ARCH}.rpm" \
+#
+# tenv RPM integrity (INFIAAS-11804): the RPM is SHA-256-verified against the
+# release's checksums file before install (it was installed unverified).
+#
+# GitHub API rate limit (INFIAAS-11804): `tenv tofu install` resolves the
+# OpenTofu release through api.github.com, which allows 60 anonymous requests
+# per hour per IP, and CI runners share IPs. CI passes the job's GITHUB_TOKEN
+# (the build jobs hold no contents:write) as the BuildKit secret
+# `tenv_github_token`, handed to that one command only. It is never an ARG/ENV,
+# so it isn't in any layer, the cache key or the image. With no secret (forks,
+# local builds) tenv runs anonymously, as before.
+RUN --mount=type=secret,id=tenv_github_token,required=false \
+    TENV_ARCH=$([[ "$TARGETARCH" == "amd64" ]] && echo "amd64" || echo "arm64") \
+    && TENV_BASE="https://github.com/tofuutils/tenv/releases/download/v${TENV_VERSION}" && TENV_RPM="/tmp/tenv_v${TENV_VERSION}_${TENV_ARCH}.rpm" \
+    && fetch -o "$TENV_RPM" "${TENV_BASE}/$(basename "$TENV_RPM")" \
+    && verify_sha256_from_checksums "${TENV_BASE}/tenv_v${TENV_VERSION}_checksums.txt" "$TENV_RPM" \
+    && dnf -y install "$TENV_RPM" && rm -f "$TENV_RPM" \
     && export TFENV_HASHICORP_PGP_KEY=/opt/keys/hashicorp.asc \
     && export TOFUENV_OPENTOFU_PGP_KEY=/opt/keys/opentofu.asc \
     && echo "tenv version: $(tenv --version)" \
@@ -453,7 +468,9 @@ RUN TENV_ARCH=$([[ "$TARGETARCH" == "amd64" ]] && echo "amd64" || echo "arm64") 
     && tenv tf install ${TERRAFORM_VERSION} \
     && tenv tf use ${TERRAFORM_VERSION} \
     && terraform -version \
-    && tenv tofu install ${OPENTOFU_VERSION} \
+    && if [ -s /run/secrets/tenv_github_token ]; then \
+    TENV_GITHUB_TOKEN="$(cat /run/secrets/tenv_github_token)" tenv tofu install ${OPENTOFU_VERSION}; \
+    else tenv tofu install ${OPENTOFU_VERSION}; fi \
     && tenv tofu use ${OPENTOFU_VERSION} \
     && tofu -version \
     && chown -R 1001:0 "${TENV_ROOT}" && chmod -R 2775 "${TENV_ROOT}"

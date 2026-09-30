@@ -167,6 +167,13 @@ check-keys: ## CI check: fail if computed fingerprints differ from pins in $(ENV
 #
 # Compose common build options and conditionally add --no-cache
 DOCKER_BUILD_OPTS_BASE := --pull --progress=plain
+# INFIAAS-11804: optional read-only GitHub token for tenv's api.github.com calls
+# (60 anonymous requests/hour/IP). Passed as a BuildKit secret only when set, so
+# it never becomes a build-arg or image layer. Example:
+#   TENV_GITHUB_TOKEN="$(gh auth token)" make docker-build-test
+ifneq ($(strip $(TENV_GITHUB_TOKEN)),)
+  DOCKER_BUILD_OPTS_BASE += --secret id=tenv_github_token,env=TENV_GITHUB_TOKEN
+endif
 ifeq ($(NO_CACHE),1)
   DOCKER_BUILD_OPTS := $(DOCKER_BUILD_OPTS_BASE) --no-cache
 else

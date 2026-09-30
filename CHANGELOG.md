@@ -22,6 +22,25 @@
 
 ### Fixed
 
+- **Builds no longer fail on GitHub's anonymous API rate limit (INFIAAS-11804).**
+  `tenv tofu install` looks up OpenTofu releases through `api.github.com`,
+  which allows 60 anonymous requests per hour per IP. CI runners share IPs, so
+  the `v4.9.1-pre` release failed on all three build attempts
+  (`you are rate-limited by GitHub`). CI now passes the job's `GITHUB_TOKEN` as
+  the BuildKit secret `tenv_github_token`, handed to that one command only. It
+  is never a build-arg or `ENV`, so it is not in any layer, cache key or the
+  image. Without the secret (forks, local builds) tenv runs anonymously, as
+  before. Local builds can opt in with `TENV_GITHUB_TOKEN=… make docker-build-test`.
+
+- **Least privilege for the build jobs that run tenv (INFIAAS-11804).** Because
+  that token reaches third-party build tooling, no build job holds
+  `contents: write` any more. `release.yaml` gains a `tag` job (creates the
+  tag) and a `release-assets` job (attaches the SBOMs to a GitHub Release);
+  the `release` build job is `contents: read`. The tenv RPM, previously
+  installed straight from its URL, is now SHA-256-verified against the
+  release's `checksums.txt` first. The old tag step's empty-tag check could
+  never fire (it ran after the `v` prefix was added) and now does.
+
 - **GHCR publishing restored (INFIAAS-11804).** Every publish since 2026-09-17
   (incl. the `v4.8.3` release, which was never published) failed with
   `sbom.spdx.json exceeds 41943040 bytes`. Cause: CI did not pin BuildKit, and
