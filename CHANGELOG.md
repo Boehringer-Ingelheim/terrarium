@@ -45,6 +45,46 @@
     `vi`/`vim` or `gdbserver`, install them in a derived image
     (`dnf -y install vim-minimal gdb-gdbserver`) and accept the CVEs there.
 
+### Security (INFIAAS-9587)
+
+- **Critical+High findings down 78%.** Trivy 0.74.0, no `--ignore-unfixed`,
+  amd64, like-for-like against `v4.9.3-pre`: 1,271 → 282 rows. Critical went
+  46 → 3.
+  - **Go toolchain** 1.21.13 → **1.26.8**. `/usr/local/go` goes from 437 to 0
+    rows.
+  - **Pinned Go-built tools** bumped to releases built with a supported Go:
+    - tenv 4.11.1 → 4.15.1
+    - age 1.2.0 → 1.3.2
+    - oc 4.19.0 → 4.19.48
+    - trivy 0.69.3 → 0.74.0
+    - packer 1.11.2 → 1.16.1
+    - tflint 0.52.0 → 0.64.0
+    - terraform-docs v0.18.0 → v0.24.0
+    - sops 3.12.2 → 3.13.3
+    - helm 3.20.1 → 3.22.0
+    - go-task 3.38.0 → 3.53.1
+    - yq 4.52.4 → 4.54.1
+    - kubectl 1.35.3 → 1.35.9
+    - OpenTofu 1.11.5 → 1.11.14
+  - **Node.js** 24.14.0 → 24.21.0, with **npm pinned to 11.20.0**
+    (`NPM_VERSION`). **Python** 3.13.12 → 3.13.15.
+  - **Base images:** UBI 9.5 → **9.8**; the buildlang stage moves from Rocky
+    9.3 → **9.8**, pulled from `docker.io/rockylinux/rockylinux`, because the
+    `library/rockylinux` image is deprecated and stops at 9.3.
+  - **The uv cache is no longer shipped.** `uv sync --no-cache` runs, and the
+    build fails if `~/.cache/uv` exists.
+  - **Residuals** (no vendor fix, or the upstream tool has no fixed build yet)
+    are listed per package in the INFIAAS-9587 evidence. The largest are:
+    - the ODS-pinned Terraform 1.9.4 (built with Go 1.22.5; see below);
+    - tenv 4.15.1 (Go 1.25.12);
+    - oc 4.19.x (Go 1.23.10);
+    - terraform-docs (Go 1.25.8);
+    - 24 no-fix OS rpm rows.
+- **Tool defaults no longer follow the ODS terraform-2408 agent**, except
+  `TERRAFORM_VERSION` (still 1.9.4). The 4.8.x line had downgraded Go, age,
+  packer, task, terraform-docs and tflint to match the agent. Those versions
+  were EOL builds and carried most of the findings.
+
 ### Fixed
 
 - **Builds no longer fail on GitHub's anonymous API rate limit (INFIAAS-11804).**
@@ -115,6 +155,21 @@
 
 ### Added
 
+- **Pin-freshness guardrail (INFIAAS-9587, from INFIAAS-11478).**
+  `scripts/check-pin-freshness.sh` runs in `make guardrails` and in `lint.yaml`.
+  It fails when:
+  - `GO_VERSION` is not a supported Go major;
+  - `ROCKYLINUX_VERSION` is not the newest Rocky 9.x;
+  - a newer UBI 9 minor than `UBI9_VERSION` exists.
+
+  A deliberate lag gets a dated entry in `scripts/pin-freshness-allowlist.txt`
+  and warns until that date. The check needs network access; run
+  `make guardrails PIN_FRESHNESS=0` offline. It has 35 hermetic unit tests
+  (`scripts/tests/check_pin_freshness.bats`).
+- **Pinned-version bats asserts (INFIAAS-9587).** `docker/tests/02_pinned_versions.bats`
+  checks that every pinned tool reports exactly the version baked into its
+  `ENV`. `OC_VERSION` and `PYTHON_VERSION` are now in `ENV` too. The old Python
+  version test compared against an empty string and always passed.
 - `scripts/tests/` — hermetic bats suite for CI scripts (`publish_sbom.bats`,
   `check_guardrails.bats`, `is_prerelease.bats`, `release_scan_wiring.bats`), run by `make test-scripts` / `make test-helpers` and
   in `lint.yaml` ("CI-script unit suite").
