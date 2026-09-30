@@ -20,6 +20,20 @@
   - CI no longer computes or passes `GEMFILE_HASH`; dependabot no longer
     watches bundler; the guardrail ARG floor is 38 (was 42).
 
+- **terraform-config-inspect removed (INFIAAS-11477).** The binary came from
+  an unmaintained 2022 fork (`nichtraunzer/terraform-config-inspect` 0.2.0),
+  was downloaded without checksum or signature verification, and has no known
+  consumers. Its Go dependencies carried 73 fixable Critical/High Trivy
+  findings. `/usr/local/bin/terraform-config-inspect` and the
+  `TERRAFORM_CONFIG_INSPECT_VERSION` build-arg/environment variable are gone.
+  - **Alternatives:** `terraform-docs json .` for module inputs/outputs, or
+    `terraform show -json` / `tofu show -json` for a plan or state. If you
+    need the tool itself, install it in a derived image from HashiCorp's
+    source at a **pinned** pseudo-version, e.g.
+    `go install github.com/hashicorp/terraform-config-inspect@v0.0.0-<date>-<commit>`,
+    never `@latest`.
+  - The guardrail ARG floor is 37 (was 38).
+
 ### Fixed
 
 - **Builds no longer fail on GitHub's anonymous API rate limit (INFIAAS-11804).**

@@ -21,7 +21,6 @@ ARG SOPS_VERSION=3.12.2
 ARG STARSHIP_VERSION=1.24.2
 ARG TASK_VERSION=3.38.0
 ARG TENV_VERSION=4.11.1
-ARG TERRAFORM_CONFIG_INSPECT_VERSION=0.2.0
 ARG TERRAFORM_DOCS_VERSION=v0.18.0
 ARG TERRAFORM_VERSION=1.9.4
 ARG TFLINT_VERSION=0.52.0
@@ -77,7 +76,7 @@ ARG GO_VERSION HELM_VERSION KUBECTL_VERSION NODEJS_VERSION
 ARG OC_VERSION OPENSTACK_RELEASE OPENSTACK_VENV
 ARG OPENTOFU_VERSION PACKER_VERSION PYTHON_VERSION
 ARG SOPS_VERSION STARSHIP_VERSION TASK_VERSION TENV_VERSION
-ARG TERRAFORM_CONFIG_INSPECT_VERSION TERRAFORM_DOCS_VERSION TERRAFORM_VERSION
+ARG TERRAFORM_DOCS_VERSION TERRAFORM_VERSION
 ARG TFLINT_VERSION TRIVY_VERSION YQ_VERSION ZOXIDE_VERSION
 ARG DEVTOOLS_GID=2001
 
@@ -97,7 +96,6 @@ ENV AGE_VERSION=${AGE_VERSION} \
     TENV_AUTO_INSTALL=true \
     TENV_ROOT=/opt/tenv \
     TENV_VERSION=${TENV_VERSION} \
-    TERRAFORM_CONFIG_INSPECT_VERSION=${TERRAFORM_CONFIG_INSPECT_VERSION} \
     TERRAFORM_DOCS_VERSION=${TERRAFORM_DOCS_VERSION} \
     TERRAFORM_VERSION=${TERRAFORM_VERSION} \
     TFLINT_VERSION=${TFLINT_VERSION} \
@@ -500,8 +498,6 @@ RUN ARCH=$([[ "$TARGETARCH" == "amd64" ]] && echo "amd64" || echo "arm64") \
     && rm -f "$FILE" \
     && packer --version
 
-# terraform-config-inspect
-
 # starship — download binary directly and verify checksum
 RUN set -eux; \
     ARCH=$([[ "$TARGETARCH" = "amd64" ]] && echo "x86_64" || echo "aarch64"); \
@@ -568,24 +564,6 @@ RUN ARCH_RPM=$([[ "$TARGETARCH" = "amd64" ]] && echo "x86_64" || echo "aarch64")
 # age — download, verify, install (helper: docker/files/bin/install_age)
 RUN install_age
 
-
-# terraform-config-inspect (support "latest" tag; use fetch wrapper for retries)
-RUN set -eux; \
-    ARCH=$([[ "$TARGETARCH" == "amd64" ]] && echo "amd64" || echo "arm64"); \
-    if [ "${TERRAFORM_CONFIG_INSPECT_VERSION}" = "latest" ]; then \
-    TCI_TAG="$(fetch https://api.github.com/repos/nichtraunzer/terraform-config-inspect/releases/latest | jq -r .tag_name)"; \
-    TCI_VER="${TCI_TAG#v}"; \
-    else \
-    TCI_TAG="v${TERRAFORM_CONFIG_INSPECT_VERSION}"; \
-    TCI_VER="${TERRAFORM_CONFIG_INSPECT_VERSION#v}"; \
-    fi; \
-    FNAME="terraform-config-inspect_${TCI_VER}_${TARGETOS}_${ARCH}.tar.gz"; \
-    BASE="https://github.com/nichtraunzer/terraform-config-inspect/releases/download/${TCI_TAG}"; \
-    fetch -o "/tmp/${FNAME}" "${BASE}/${FNAME}" \
-    && tar zxpf "/tmp/${FNAME}" -C /usr/local/bin/ terraform-config-inspect \
-    && rm -f "/tmp/${FNAME}" \
-    && chmod 755 /usr/local/bin/terraform-config-inspect \
-    && /usr/local/bin/terraform-config-inspect
 
 # yq
 RUN TARGETARCH_SYNONYM_SHORT2=$([[ "$TARGETARCH" == "amd64" ]] && echo "amd64" || echo "arm64") \

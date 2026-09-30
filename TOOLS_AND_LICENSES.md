@@ -39,7 +39,6 @@ compliance with their organization's policies.
 | OpenTofu | 1.11.5 (via tenv) | [MPL-2.0](https://github.com/opentofu/opentofu/blob/main/LICENSE) | opentofu.org |
 | Packer | 1.15.0 | [BUSL-1.1](https://github.com/hashicorp/packer/blob/main/LICENSE) | releases.hashicorp.com |
 | terraform-docs | v0.21.0 | [MIT](https://github.com/terraform-docs/terraform-docs/blob/master/LICENSE) | github.com/terraform-docs/terraform-docs |
-| terraform-config-inspect | 0.2.0 | [MPL-2.0](https://github.com/hashicorp/terraform-config-inspect/blob/main/LICENSE) | github.com/nichtraunzer/terraform-config-inspect |
 | tflint | 0.61.0 | [MPL-2.0](https://github.com/terraform-linters/tflint/blob/master/LICENSE) | github.com/terraform-linters/tflint |
 
 ## Cloud CLIs
@@ -140,7 +139,6 @@ All binary-downloaded tools are cryptographically verified unless noted:
 | zoxide | **Not verified** | Upstream publishes no checksums |
 | yq | **Not verified** | Direct binary download |
 | terraform-docs | **Not verified** | Direct binary download |
-| terraform-config-inspect | **Not verified** | Direct binary download |
 | Task (go-task) | **Not verified** | Install script |
 
 ---
@@ -151,7 +149,7 @@ All binary-downloaded tools are cryptographically verified unless noted:
 |---------|-------|-------|
 | Apache-2.0 | 12+ | AWS CLI, AWS CDK, AWS SAM, Azure CLI (repo), GCP CLI, kubectl, Helm, oc, Trivy, tenv, uv, OpenStack |
 | MIT | 9+ | Node.js, pyenv, terraform-docs, yq, zoxide, Task, bats-core, jq, Starship (ISC ≈ MIT) |
-| MPL-2.0 | 4 | OpenTofu, tflint, sops, terraform-config-inspect |
+| MPL-2.0 | 3 | OpenTofu, tflint, sops |
 | BUSL-1.1 | 2 | Terraform, Packer |
 | BSD-3-Clause | 2 | Go, age |
 | PSF-2.0 | 1 | Python |
