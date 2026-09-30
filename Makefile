@@ -59,7 +59,7 @@ define assert_file
 	test -f "$(1)" || { printf "$(RED)Error: missing file: $(1)$(RESET)\n" >&2; exit 1; }
 endef
 
-.PHONY: help verify-keys print-keys write-keys check-keys docker-build docker-build-test docker-test docker-test-exec test sbom install-syft guardrails lint shellcheck hadolint test-helpers test-scripts docker-test-helpers check-keys-drift
+.PHONY: help verify-keys print-keys write-keys check-keys docker-build docker-build-test docker-test docker-test-exec test sbom install-syft guardrails pin-freshness lint shellcheck hadolint test-helpers test-scripts docker-test-helpers check-keys-drift
 
 # Files shellcheck lints (kept in sync with .github/workflows/lint.yaml)
 SHELLCHECK_TARGETS ?= scripts/*.sh scripts/tests/fixtures/bin/* docker/vendor-keys/*.sh docker/files/bin/*
@@ -68,8 +68,17 @@ SHELLCHECK_IMAGE ?= koalaman/shellcheck:stable
 HADOLINT_IMAGE   ?= hadolint/hadolint:latest
 
 # ================== Quality gates ==================
-guardrails: ## Mechanical do-not-regress + ratchet assertions on the Dockerfile
+# Pin freshness needs the network (go.dev, dl.rockylinux.org, registry.access.redhat.com).
+# Offline: make guardrails PIN_FRESHNESS=0
+PIN_FRESHNESS ?= 1
+
+guardrails: ## Mechanical do-not-regress + ratchet assertions, then pin freshness (PIN_FRESHNESS=0 skips it offline)
 	@bash scripts/check-guardrails.sh "$(DOCKERFILE)"
+	@if [ "$(PIN_FRESHNESS)" = 1 ]; then $(MAKE) --no-print-directory pin-freshness; \
+	 else printf "$(YELLOW)pin-freshness skipped (PIN_FRESHNESS=$(PIN_FRESHNESS))$(RESET)\n"; fi
+
+pin-freshness: ## Fail if GO_VERSION / ROCKYLINUX_VERSION / UBI9_VERSION are stale (network; allowlist: scripts/pin-freshness-allowlist.txt)
+	@bash scripts/check-pin-freshness.sh "$(DOCKERFILE)"
 
 check-keys-drift: ## Fail if vendor-key pins in $(ENV_FILE) drift from the Dockerfile ENV block (fingerprints only)
 	@bash scripts/check-vendor-key-drift.sh "$(DOCKERFILE)" "$(ENV_FILE)"
