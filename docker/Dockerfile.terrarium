@@ -362,7 +362,12 @@ RUN pip config set global.cert /etc/ssl/certs/ca-bundle.crt \
 # ─── Python user‑level libraries via uv ─────────────────────────────────────
 COPY pyproject.toml /tmp/pyproject.toml
 COPY uv.lock       /tmp/uv.lock
-RUN uv sync --directory /tmp --no-managed-python --frozen
+# --no-cache (INFIAAS-9587): the uv cache in $HOME/.cache/uv is never used
+# after this step but shipped wheel copies (uv itself, cryptography, PyJWT, …)
+# that scanners report on top of the installed venv. Fail the build if a cache
+# directory is still left behind.
+RUN uv sync --directory /tmp --no-managed-python --frozen --no-cache \
+    && test ! -e "${HOME}/.cache/uv"
 ENV PATH=/tmp/.venv/bin:$PATH
 
 # ─── Azure CLI (signed repo) ────────────────────────────────────────────────
