@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# Test stub for curl (scripts/tests only). Records the URL, then answers from
+# fixtures instead of the network:
+#   *go.dev*              prints $STUB_CURL_GO_JSON (file)
+#   *rockylinux*          prints $STUB_CURL_ROCKY_HTML (file)
+#   */manifests/<tag>     `-w %{http_code}` probe: 200 if <tag> is listed in
+#                         $STUB_CURL_UBI_TAGS (space-separated), else 404;
+#                         $STUB_CURL_PROBE_CODE overrides the code (e.g. 503)
+#                         for every tag; $STUB_CURL_PROBE_CODES ("9.8=000 …")
+#                         overrides it per tag
+#   STUB_CURL_FAIL=1      every call fails like a network error (exit 7, and a
+#                         probe prints 000 as real curl does)
+set -euo pipefail
+url="${!#}"
+printf 'curl %s\n' "$url" >> "${STUB_LOG:?}"
+probe=0
+for a in "$@"; do [ "$a" = '%{http_code}' ] && probe=1; done
+if [ "${STUB_CURL_FAIL:-0}" = 1 ]; then
+  [ "$probe" = 1 ] && printf '000'
+  echo "stub curl: (7) Failed to connect" >&2
+  exit 7
+fi
+case "$url" in
+  */manifests/*)
+    [ "$probe" = 1 ] || { echo "stub curl: manifest fetch without a probe" >&2; exit 64; }
+    tag="${url##*/}"
+    for kv in ${STUB_CURL_PROBE_CODES:-}; do
+      [ "${kv%%=*}" = "$tag" ] && { printf '%s' "${kv#*=}"; exit 0; }
+    done
+    if [ -n "${STUB_CURL_PROBE_CODE:-}" ]; then printf '%s' "$STUB_CURL_PROBE_CODE"; exit 0; fi
+    case " ${STUB_CURL_UBI_TAGS:-} " in *" $tag "*) printf '200' ;; *) printf '404' ;; esac ;;
+  *go.dev*)      cat "${STUB_CURL_GO_JSON:?}" ;;
+  *rockylinux*)  cat "${STUB_CURL_ROCKY_HTML:?}" ;;
+  *) echo "stub curl: unexpected URL $url" >&2; exit 64 ;;
+esac

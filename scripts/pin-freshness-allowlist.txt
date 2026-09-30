@@ -1,0 +1,12 @@
+# Deliberate version-pin lags for scripts/check-pin-freshness.sh (INFIAAS-9587).
+#
+# One entry per line:   <ARG_NAME> <expires YYYY-MM-DD> <reason>
+#   e.g.  ROCKYLINUX_VERSION 2026-12-31 9.9 breaks the pyenv build, see INFIAAS-NNNN
+#
+# While an entry is live the stale pin only WARNs; on the day after it expires
+# the guardrail fails again, so every exception must be re-justified. Only the
+# checked pins are accepted (GO_VERSION ROCKYLINUX_VERSION UBI9_VERSION); an
+# unknown name is an error, so a typo cannot silently cover nothing.
+#
+# TERRAFORM_VERSION is intentionally pinned to the ODS Jenkins agent and is not
+# freshness-checked, so it needs no entry here.

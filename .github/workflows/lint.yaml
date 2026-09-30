@@ -1,7 +1,9 @@
 ---
 # Lint & mechanical guardrails.
 # Runs the same targets as `make lint` so local and CI enforcement never drift:
-#   - guardrails : do-not-regress security counts + ratchet metrics (blocking)
+#   - guardrails : do-not-regress security counts + ratchet metrics, then pin
+#                  freshness (GO/ROCKYLINUX/UBI9 pins current; network, blocking;
+#                  dated exceptions in scripts/pin-freshness-allowlist.txt)
 #   - shellcheck : severity=warning over shell sources (blocking)
 #   - hadolint   : Dockerfile lint (INFORMATIONAL until INFIAAS-11426 heredoc
 #                  extraction lets hadolint parse the file; then made blocking)
@@ -29,7 +31,7 @@ jobs:
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - name: Mechanical guardrails
+      - name: Mechanical guardrails + pin freshness
         run: make guardrails
 
       - name: Shellcheck (severity=warning)

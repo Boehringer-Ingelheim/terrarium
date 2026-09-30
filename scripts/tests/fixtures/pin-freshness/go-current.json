@@ -1,0 +1,12 @@
+[
+  {
+    "version": "go1.27.1",
+    "stable": true,
+    "files": []
+  },
+  {
+    "version": "go1.26.8",
+    "stable": true,
+    "files": []
+  }
+]
