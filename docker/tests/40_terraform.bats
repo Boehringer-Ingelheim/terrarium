@@ -12,11 +12,6 @@ load 'test_helper/common.bash'
 
 @test "terraform-docs Installed" { check_binary terraform-docs; }
 
-@test "terraform-config-inspect Installed" {
-  run terraform-config-inspect --json
-  assert_success
-}
-
 @test "OpenTofu via tenv works" {
   run tenv tofu list
   assert_success

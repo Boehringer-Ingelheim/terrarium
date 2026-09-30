@@ -59,8 +59,10 @@ for f in "$BIN_DIR"/*; do [ -f "$f" ] && VSRC+=("$f"); done
 chk "sha256 refs"        "$(grep -h sha256 "${VSRC[@]}" 2>/dev/null | grep -c sha256 || true)"        -ge 23
 chk "gpg/pgp refs"       "$(grep -hiE 'gpg|pgp' "${VSRC[@]}" 2>/dev/null | grep -ciE 'gpg|pgp' || true)" -ge 66
 # Floor lowered 42 -> 38 by INFIAAS-11797 (Ruby removal dropped BUNDLER_VERSION,
-# GEM_HOME, RUBY_VERSION and GEMFILE_HASH). Lower it only for a deliberate removal.
-chk "ARG pins"           "$(grep -cE '^ARG ' "$DF")"                   -ge 38
+# GEM_HOME, RUBY_VERSION and GEMFILE_HASH), then 38 -> 37 by INFIAAS-11477
+# (terraform-config-inspect removal dropped TERRAFORM_CONFIG_INSPECT_VERSION).
+# Lower it only for a deliberate removal.
+chk "ARG pins"           "$(grep -cE '^ARG ' "$DF")"                   -ge 37
 chk "node fingerprints"  "$(sed -n '/NODE_RELEASE_FPRS/,/^$/p' "$DF" | grep -cE '^[[:space:]]*[0-9A-F]{40}')" -eq 63
 chk "curl-pipe-to-shell" "$(grep -cE 'curl[^|]*\|[[:space:]]*(ba)?sh' "$DF" || true)" -eq 0
 chk "unpinned actions"   "$(grep -rhoE 'uses: [^@]+@[^ ]+' "${PIN_DIRS[@]}" | grep -cvE '@[0-9a-f]{40}' || true)" -eq 0
