@@ -34,6 +34,17 @@
     never `@latest`.
   - The guardrail ARG floor is 37 (was 38).
 
+- **vim-minimal and gdb-gdbserver removed (INFIAAS-9587).** Both come from
+  the UBI base, nothing in the image requires them, and they carried 87 High
+  CVEs (76 + 11) that Red Hat has not fixed. `vi`, `vim` and `gdbserver` are
+  no longer present. Enhanced `vim` shares the same CVEs, so it is not shipped
+  as a replacement.
+  - **Migration:** `nano` is installed and `EDITOR`/`VISUAL` default to it, so
+    `git commit`, `visudo` and `crontab -e` keep working. Set `EDITOR` (or
+    `GIT_EDITOR`, e.g. `code --wait` in VS Code) to override. If you need
+    `vi`/`vim` or `gdbserver`, install them in a derived image
+    (`dnf -y install vim-minimal gdb-gdbserver`) and accept the CVEs there.
+
 ### Fixed
 
 - **Builds no longer fail on GitHub's anonymous API rate limit (INFIAAS-11804).**
