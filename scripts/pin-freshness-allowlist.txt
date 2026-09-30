@@ -8,5 +8,5 @@
 # checked pins are accepted (GO_VERSION ROCKYLINUX_VERSION UBI9_VERSION); an
 # unknown name is an error, so a typo cannot silently cover nothing.
 #
-# TERRAFORM_VERSION is intentionally pinned to the ODS Jenkins agent and is not
-# freshness-checked, so it needs no entry here.
+# TERRAFORM_VERSION is not freshness-checked (it is only tenv's default; projects
+# pin their own version), so it needs no entry here.

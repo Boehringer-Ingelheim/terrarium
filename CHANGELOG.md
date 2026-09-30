@@ -45,6 +45,10 @@
     `vi`/`vim` or `gdbserver`, install them in a derived image
     (`dnf -y install vim-minimal gdb-gdbserver`) and accept the CVEs there.
 
+- **Default Terraform is 1.16.4 (was 1.9.4) (INFIAAS-9587).** Pin 1.9.4 (or
+  any version) per project with a `.terraform-version` file; tenv installs it on
+  first use. Details under **Changed**.
+
 ### Security (INFIAAS-9587)
 
 - **Critical+High findings down 78%.** Trivy 0.74.0, no `--ignore-unfixed`,
@@ -75,15 +79,14 @@
     build fails if `~/.cache/uv` exists.
   - **Residuals** (no vendor fix, or the upstream tool has no fixed build yet)
     are listed per package in the INFIAAS-9587 evidence. The largest are:
-    - the ODS-pinned Terraform 1.9.4 (built with Go 1.22.5; see below);
     - tenv 4.15.1 (Go 1.25.12);
     - oc 4.19.x (Go 1.23.10);
     - terraform-docs (Go 1.25.8);
     - 24 no-fix OS rpm rows.
-- **Tool defaults no longer follow the ODS terraform-2408 agent**, except
-  `TERRAFORM_VERSION` (still 1.9.4). The 4.8.x line had downgraded Go, age,
-  packer, task, terraform-docs and tflint to match the agent. Those versions
-  were EOL builds and carried most of the findings.
+- **Tool defaults no longer follow the ODS terraform-2408 agent.** The 4.8.x
+  line had downgraded Go, age, packer, task, terraform-docs, tflint and
+  Terraform to match the agent. Those versions were EOL builds and carried most
+  of the findings.
 
 ### Fixed
 
@@ -133,6 +136,21 @@
 
 ### Changed
 
+- **Default Terraform 1.9.4 → 1.16.4 (INFIAAS-9587).** 1.9.4 was built with
+  Go 1.22.5 and carried 56 Critical+High findings; 1.16.4 is built with Go
+  1.26.8 and x/crypto 0.56.0. The image's `terraform` is still the tenv proxy
+  (`TENV_AUTO_INSTALL=true`), so **older versions stay one step away** (each is
+  downloaded and PGP-verified by tenv on first use, which needs access to
+  releases.hashicorp.com):
+  - a `.terraform-version` file in the project (e.g. `1.9.4`, the ODS
+    terraform-2408 agent version) is picked up automatically;
+  - `TFENV_TERRAFORM_VERSION=1.9.4` in the environment;
+  - `tenv tf install 1.9.4 && tenv tf use 1.9.4` to change the default.
+
+  A `required_version` constraint in the `.tf` files alone does **not** switch
+  the version while a default is set; use `.terraform-version`.
+  **Migration:** projects that relied on the 1.9.4 default, or that share state
+  with ODS Jenkins agents on 1.9.x, should commit a `.terraform-version`.
 - **BuildKit pinned** to `v0.33.0@sha256:6c2fa84a…` in `main.yaml` and
   `release.yaml` (`setup-buildx-action` `driver-opts`). A new guardrail
   (`make guardrails` → "buildkit pinned") fails if any buildx setup is unpinned
