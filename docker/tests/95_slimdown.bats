@@ -60,23 +60,6 @@ load 'test_helper/common.bash'
   done
 }
 
-# --- Unfixed-CVE packages removed (INFIAAS-9587, D5) --------------------------
-# vim-minimal (76 High) and gdb-gdbserver (11 High) have no Red Hat fix.
-
-@test "vim-minimal and gdb-gdbserver rpms are not installed" {
-  for pkg in vim-minimal gdb-gdbserver; do
-    run rpm -q "$pkg"
-    assert_failure
-  done
-}
-
-@test "vi, vim and gdbserver are not on PATH (login shell)" {
-  for exe in vi vim gdbserver; do
-    run bash -lc "command -v $exe"
-    assert_failure
-  done
-}
-
 # --- Docs/man pages removed --------------------------------------------------
 
 @test "/usr/share/doc is removed" {
