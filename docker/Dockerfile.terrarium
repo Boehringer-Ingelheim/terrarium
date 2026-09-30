@@ -1,9 +1,14 @@
 # --------- Global args — single source of truth for all versions ---------
 # Sorted alphabetically. Referenced by ARG in each stage that needs them.
-# Base images pinned for build determinism
-# Default Versions need to match the Jenkins Build containers as defined at https://github.com/opendevstack/ods-quickstarters/blob/master/common/jenkins-agents/terraform-2408/docker/Dockerfile.ubi9#L26
-ARG ROCKYLINUX_VERSION=9.3
-ARG UBI9_VERSION=9.5
+# Base images pinned for build determinism. Keep both on the newest EL9 minor:
+# Rocky point releases go EOL when the next one ships, and
+# scripts/check-pin-freshness.sh (make guardrails) fails on a stale pin.
+# TERRAFORM_VERSION defaults to the ODS Jenkins agent version, see
+# https://github.com/opendevstack/ods-quickstarters/blob/master/common/jenkins-agents/terraform-2408/docker/Dockerfile.ubi9#L26
+# (allowlisted in scripts/pin-freshness-allowlist.txt). The other tools track
+# their latest release built with a supported Go (INFIAAS-9587).
+ARG ROCKYLINUX_VERSION=9.8
+ARG UBI9_VERSION=9.8
 ARG AGE_VERSION=1.3.2
 ARG AWS_CDK_VERSION=2.1024.0
 ARG BATS_CORE_VERSION=1.13.0
@@ -31,13 +36,15 @@ ARG ZOXIDE_VERSION=0.9.9
 
 
 # ================= Stage 0 — buildlang (compile on Rocky 9) =================
-FROM rockylinux:${ROCKYLINUX_VERSION} AS buildlang
+# docker.io/library/rockylinux is deprecated and stops at 9.3; the Rocky
+# Enterprise Software Foundation publishes current point releases here.
+FROM docker.io/rockylinux/rockylinux:${ROCKYLINUX_VERSION} AS buildlang
 ARG PYTHON_VERSION
 
 ENV PYENV_ROOT=/opt/pyenv
 ENV PATH=${PYENV_ROOT}/shims:${PYENV_ROOT}/bin:$PATH
 
-RUN dnf -y update \
+RUN dnf -y upgrade \
     && dnf -y install dnf-plugins-core \
     && dnf config-manager --set-enabled crb \
     && dnf -y groupinstall "Development Tools" \
