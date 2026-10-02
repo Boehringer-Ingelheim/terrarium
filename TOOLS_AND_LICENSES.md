@@ -66,7 +66,7 @@ compliance with their organization's policies.
 
 | Tool | Version | License | Source |
 |------|---------|---------|--------|
-| Trivy | 0.74.0 | [Apache-2.0](https://github.com/aquasecurity/trivy/blob/main/LICENSE) | github.com/aquasecurity/trivy |
+| Trivy | 0.75.0 | [Apache-2.0](https://github.com/aquasecurity/trivy/blob/main/LICENSE) | github.com/aquasecurity/trivy |
 | sops | 3.13.3 | [MPL-2.0](https://github.com/getsops/sops/blob/main/LICENSE) | github.com/getsops/sops |
 | age | 1.3.2 | [BSD-3-Clause](https://github.com/FiloSottile/age/blob/main/LICENSE) | github.com/FiloSottile/age |
 
