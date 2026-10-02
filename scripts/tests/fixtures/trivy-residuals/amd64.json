@@ -1,0 +1,21 @@
+{
+  "Results": [
+    {"Target": "usr/local/bin/oc", "Class": "lang-pkgs", "Type": "gobinary",
+     "Vulnerabilities": [
+       {"VulnerabilityID": "CVE-2025-0001", "PkgName": "golang.org/x/crypto", "InstalledVersion": "v0.41.0"},
+       {"VulnerabilityID": "CVE-2025-0002", "PkgName": "golang.org/x/crypto", "InstalledVersion": "v0.41.0"}]},
+    {"Target": "usr/bin/tenv", "Class": "lang-pkgs", "Type": "gobinary",
+     "Vulnerabilities": [{"VulnerabilityID": "CVE-2025-1000", "PkgName": "stdlib", "InstalledVersion": "v1.25.12"}]},
+    {"Target": "usr/bin/tofu", "Class": "lang-pkgs", "Type": "gobinary",
+     "Vulnerabilities": [{"VulnerabilityID": "CVE-2025-1000", "PkgName": "stdlib", "InstalledVersion": "v1.25.12"}]},
+    {"Target": "Python", "Class": "lang-pkgs", "Type": "python-pkg",
+     "Vulnerabilities": [
+       {"VulnerabilityID": "CVE-2025-2000", "PkgName": "PyJWT", "InstalledVersion": "2.13.0",
+        "PkgPath": "usr/lib64/az/lib/python3.12/site-packages/pyjwt-2.13.0.dist-info/METADATA"},
+       {"VulnerabilityID": "CVE-2025-3000", "PkgName": "setuptools", "InstalledVersion": "70.3.0"}]},
+    {"Target": "usr/local/aws-sam-cli/1.166.2/dist/_internal/samcli/local/rapid/aws-lambda-rie-x86_64",
+     "Class": "lang-pkgs", "Type": "gobinary",
+     "Vulnerabilities": [{"VulnerabilityID": "CVE-2025-4000", "PkgName": "github.com/go-chi/chi/v5", "InstalledVersion": "v5.2.2"}]},
+    {"Target": "rockylinux 9.8", "Class": "os-pkgs", "Type": "redhat"}
+  ]
+}
