@@ -22,7 +22,10 @@ ARG NPM_VERSION=11.20.0
 # itself (INFIAAS-9587, docker/files/bin/npm_patch_bundled). Same major only.
 ARG NPM_BUNDLED_PATCHES="undici@6.28.1 ip-address@10.7.1 brace-expansion@5.0.12"
 ARG OC_VERSION=4.19.48
-ARG OPENSTACK_RELEASE=2025.1
+ARG OPENSTACK_RELEASE=2026.2
+# Security-only upgrades applied over the OpenStack upper-constraints, which
+# still pin these at vulnerable versions (INFIAAS-9587). `pip check` must pass.
+ARG OPENSTACK_OVERRIDES="urllib3==2.8.0 cryptography==50.0.2"
 ARG OPENSTACK_VENV=/opt/openstack
 ARG OPENTOFU_VERSION=1.13.1
 ARG PACKER_VERSION=1.16.1
@@ -86,7 +89,7 @@ ARG TARGETPLATFORM TARGETOS TARGETARCH TARGETVARIANT BUILDPLATFORM BUILDOS BUILD
 ARG AGE_VERSION AWS_CDK_VERSION BATS_CORE_VERSION
 ARG GO_VERSION HELM_VERSION KUBECTL_VERSION NODEJS_VERSION NPM_VERSION
 ARG NPM_BUNDLED_PATCHES
-ARG OC_VERSION OPENSTACK_RELEASE OPENSTACK_VENV
+ARG OC_VERSION OPENSTACK_OVERRIDES OPENSTACK_RELEASE OPENSTACK_VENV
 ARG OPENTOFU_VERSION PACKER_VERSION PYTHON_VERSION
 ARG SOPS_VERSION STARSHIP_VERSION TASK_VERSION TENV_VERSION
 ARG TERRAFORM_DOCS_VERSION TERRAFORM_VERSION
@@ -103,6 +106,7 @@ ENV AGE_VERSION=${AGE_VERSION} \
     NPM_VERSION=${NPM_VERSION} \
     NPM_BUNDLED_PATCHES="${NPM_BUNDLED_PATCHES}" \
     OC_VERSION=${OC_VERSION} \
+    OPENSTACK_OVERRIDES="${OPENSTACK_OVERRIDES}" \
     OPENSTACK_RELEASE=${OPENSTACK_RELEASE} \
     OPENTOFU_VERSION=${OPENTOFU_VERSION} \
     PACKER_VERSION=${PACKER_VERSION} \
@@ -666,12 +670,14 @@ RUN arch="${TARGETARCH:-$(echo "${TARGETPLATFORM:-linux/amd64}" | cut -d/ -f2)}"
     && oc version --client
 
 # --- OpenStack CLI -----------------------------------------------------------
-# Versions should match upper constraints https://opendev.org/openstack/requirements/src/branch/stable/${OPENSTACK_RELEASE}/upper-constraints.txt
+# Versions match the upper constraints (minus OPENSTACK_OVERRIDES) https://opendev.org/openstack/requirements/src/branch/stable/${OPENSTACK_RELEASE}/upper-constraints.txt
 RUN python -m venv ${OPENSTACK_VENV} \
     && ${OPENSTACK_VENV}/bin/pip install --no-cache-dir \
     python-openstackclient \
     python-barbicanclient \
     --constraint https://opendev.org/openstack/requirements/raw/branch/stable/${OPENSTACK_RELEASE}/upper-constraints.txt \
+    && ${OPENSTACK_VENV}/bin/pip install --no-cache-dir ${OPENSTACK_OVERRIDES} \
+    && ${OPENSTACK_VENV}/bin/pip check \
     && ln -s ${OPENSTACK_VENV}/bin/openstack /usr/local/bin/openstack \
     && openstack --version
 

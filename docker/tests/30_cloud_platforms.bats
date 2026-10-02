@@ -50,3 +50,15 @@ load 'test_helper/common.bash'
     assert_success
     assert_output --partial "secret"
 }
+
+# @openstack
+@test "openstack venv has OPENSTACK_OVERRIDES applied and is consistent (INFIAAS-9587)" {
+    [ -n "${OPENSTACK_OVERRIDES:-}" ] || skip "OPENSTACK_OVERRIDES is empty"
+    for spec in ${OPENSTACK_OVERRIDES}; do
+        run /opt/openstack/bin/pip show "${spec%%==*}"
+        assert_success
+        assert_line "Version: ${spec#*==}"
+    done
+    run /opt/openstack/bin/pip check
+    assert_success
+}
