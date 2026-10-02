@@ -19,27 +19,28 @@ compliance with their organization's policies.
 
 | Tool | Version | License | Source |
 |------|---------|---------|--------|
-| Python | 3.13.12 (via pyenv) | [PSF-2.0](https://docs.python.org/3/license.html) | github.com/pyenv/pyenv → python.org |
-| Go | 1.26.1 | [BSD-3-Clause](https://go.dev/LICENSE) | go.dev |
-| Node.js | 24.14.0 | [MIT](https://github.com/nodejs/node/blob/main/LICENSE) | nodejs.org |
+| Python | 3.13.15 (via pyenv) | [PSF-2.0](https://docs.python.org/3/license.html) | github.com/pyenv/pyenv → python.org |
+| Go | 1.26.8 | [BSD-3-Clause](https://go.dev/LICENSE) | go.dev |
+| Node.js | 24.21.0 | [MIT](https://github.com/nodejs/node/blob/main/LICENSE) | nodejs.org |
+| npm | 11.20.0 (pinned over the Node-bundled npm) | [Artistic-2.0](https://github.com/npm/cli/blob/latest/LICENSE) | registry.npmjs.org |
 
 ## Version Managers
 
 | Tool | Version | License | Source |
 |------|---------|---------|--------|
 | pyenv | latest (git clone) | [MIT](https://github.com/pyenv/pyenv/blob/master/LICENSE) | github.com/pyenv/pyenv |
-| tenv | 4.9.3 | [Apache-2.0](https://github.com/tofuutils/tenv/blob/main/LICENSE) | github.com/tofuutils/tenv |
+| tenv | 4.15.1 | [Apache-2.0](https://github.com/tofuutils/tenv/blob/main/LICENSE) | github.com/tofuutils/tenv |
 | uv | latest (install script) | [Apache-2.0](https://github.com/astral-sh/uv/blob/main/LICENSE-APACHE) | astral.sh/uv |
 
 ## Infrastructure as Code
 
 | Tool | Version | License | Source |
 |------|---------|---------|--------|
-| Terraform | 1.14.7 (via tenv) | [BUSL-1.1](https://github.com/hashicorp/terraform/blob/main/LICENSE) | releases.hashicorp.com |
-| OpenTofu | 1.11.5 (via tenv) | [MPL-2.0](https://github.com/opentofu/opentofu/blob/main/LICENSE) | opentofu.org |
-| Packer | 1.15.0 | [BUSL-1.1](https://github.com/hashicorp/packer/blob/main/LICENSE) | releases.hashicorp.com |
-| terraform-docs | v0.21.0 | [MIT](https://github.com/terraform-docs/terraform-docs/blob/master/LICENSE) | github.com/terraform-docs/terraform-docs |
-| tflint | 0.61.0 | [MPL-2.0](https://github.com/terraform-linters/tflint/blob/master/LICENSE) | github.com/terraform-linters/tflint |
+| Terraform | 1.16.4 (via tenv; the default — tenv installs any other version on demand) | [BUSL-1.1](https://github.com/hashicorp/terraform/blob/main/LICENSE) | releases.hashicorp.com |
+| OpenTofu | 1.11.14 (via tenv) | [MPL-2.0](https://github.com/opentofu/opentofu/blob/main/LICENSE) | opentofu.org |
+| Packer | 1.16.1 | [BUSL-1.1](https://github.com/hashicorp/packer/blob/main/LICENSE) | releases.hashicorp.com |
+| terraform-docs | v0.24.0 | [MIT](https://github.com/terraform-docs/terraform-docs/blob/master/LICENSE) | github.com/terraform-docs/terraform-docs |
+| tflint | 0.64.0 | [MPL-2.0](https://github.com/terraform-linters/tflint/blob/master/LICENSE) | github.com/terraform-linters/tflint |
 
 ## Cloud CLIs
 
@@ -57,17 +58,17 @@ compliance with their organization's policies.
 
 | Tool | Version | License | Source |
 |------|---------|---------|--------|
-| kubectl | 1.35.3 | [Apache-2.0](https://github.com/kubernetes/kubectl/blob/master/LICENSE) | dl.k8s.io |
-| Helm | 3.20.1 | [Apache-2.0](https://github.com/helm/helm/blob/main/LICENSE) | get.helm.sh |
-| OpenShift CLI (oc) | 4.19.0 | [Apache-2.0](https://github.com/openshift/oc/blob/master/LICENSE) | mirror.openshift.com |
+| kubectl | 1.35.9 | [Apache-2.0](https://github.com/kubernetes/kubectl/blob/master/LICENSE) | dl.k8s.io |
+| Helm | 3.22.0 | [Apache-2.0](https://github.com/helm/helm/blob/main/LICENSE) | get.helm.sh |
+| OpenShift CLI (oc) | 4.19.48 | [Apache-2.0](https://github.com/openshift/oc/blob/master/LICENSE) | mirror.openshift.com |
 
 ## Security & Secrets
 
 | Tool | Version | License | Source |
 |------|---------|---------|--------|
-| Trivy | 0.69.3 | [Apache-2.0](https://github.com/aquasecurity/trivy/blob/main/LICENSE) | github.com/aquasecurity/trivy |
-| sops | 3.12.2 | [MPL-2.0](https://github.com/getsops/sops/blob/main/LICENSE) | github.com/getsops/sops |
-| age | 1.3.1 | [BSD-3-Clause](https://github.com/FiloSottile/age/blob/main/LICENSE) | github.com/FiloSottile/age |
+| Trivy | 0.74.0 | [Apache-2.0](https://github.com/aquasecurity/trivy/blob/main/LICENSE) | github.com/aquasecurity/trivy |
+| sops | 3.13.3 | [MPL-2.0](https://github.com/getsops/sops/blob/main/LICENSE) | github.com/getsops/sops |
+| age | 1.3.2 | [BSD-3-Clause](https://github.com/FiloSottile/age/blob/main/LICENSE) | github.com/FiloSottile/age |
 
 ## Shell & Utilities
 
@@ -75,10 +76,11 @@ compliance with their organization's policies.
 |------|---------|---------|--------|
 | Starship | 1.24.2 | [ISC](https://github.com/starship/starship/blob/master/LICENSE) | starship.rs |
 | zoxide | 0.9.9 | [MIT](https://github.com/ajeetdsouza/zoxide/blob/main/LICENSE) | github.com/ajeetdsouza/zoxide |
-| yq | 4.52.4 | [MIT](https://github.com/mikefarah/yq/blob/master/LICENSE) | github.com/mikefarah/yq |
-| Task (go-task) | 3.49.1 | [MIT](https://github.com/go-task/task/blob/main/LICENSE) | taskfile.dev |
+| yq | 4.54.1 | [MIT](https://github.com/mikefarah/yq/blob/master/LICENSE) | github.com/mikefarah/yq |
+| Task (go-task) | 3.53.1 | [MIT](https://github.com/go-task/task/blob/main/LICENSE) | taskfile.dev |
 | jq | dnf | [MIT](https://github.com/jqlang/jq/blob/master/COPYING) | dnf (EPEL) |
 | GNU Parallel | dnf | [GPL-3.0-or-later](https://www.gnu.org/software/parallel/) | dnf (EPEL) |
+| nano | dnf (default `EDITOR`; replaces vi/vim-minimal) | [GPL-3.0-or-later](https://www.nano-editor.org/) | dnf (UBI 9) |
 | xorriso | buildlang stage | [GPL-2.0-or-later](https://www.gnu.org/software/xorriso/) | dnf (Rocky Linux CRB) |
 
 ## Testing Frameworks
@@ -109,8 +111,8 @@ The following packages are installed via `pyproject.toml` / `uv.lock`:
 
 | Component | Details |
 |-----------|---------|
-| Base image | `registry.access.redhat.com/ubi9/ubi:9.5` (Red Hat Universal Base Image 9) |
-| Build stage | `rockylinux:9.3` (Rocky Linux 9 — RHEL-compatible, BSD-licensed) |
+| Base image | `registry.access.redhat.com/ubi9/ubi:9.8` (Red Hat Universal Base Image 9) |
+| Build stage | `docker.io/rockylinux/rockylinux:9.8` (Rocky Linux 9 — RHEL-compatible, BSD-licensed) |
 | OS packages | Installed via `dnf` — RPM packages follow their individual upstream licenses (primarily GPL-2.0, LGPL, MIT, BSD) |
 | EPEL | Fedora Extra Packages for Enterprise Linux 9 |
 
@@ -135,11 +137,12 @@ All binary-downloaded tools are cryptographically verified unless noted:
 | Azure CLI | RPM GPG key | Microsoft repo signing key |
 | GCP CLI | RPM GPG key | Google Cloud repo signing key |
 | sops | RPM package | GitHub releases |
-| tenv | RPM package | GitHub releases |
+| tenv | SHA256 checksums.txt | GitHub releases (RPM) |
 | zoxide | **Not verified** | Upstream publishes no checksums |
 | yq | **Not verified** | Direct binary download |
 | terraform-docs | **Not verified** | Direct binary download |
 | Task (go-task) | **Not verified** | Install script |
+| OpenShift CLI (oc) | **Not verified** | mirror.openshift.com tarball (the mirror publishes `sha256sum.txt`; follow-up) |
 
 ---
 
@@ -153,7 +156,7 @@ All binary-downloaded tools are cryptographically verified unless noted:
 | BUSL-1.1 | 2 | Terraform, Packer |
 | BSD-3-Clause | 2 | Go, age |
 | PSF-2.0 | 1 | Python |
-| GPL-2.0+ / GPL-3.0+ | 2 | xorriso, GNU Parallel |
+| GPL-2.0+ / GPL-3.0+ | 3 | xorriso, GNU Parallel, nano |
 | ISC | 1 | Starship |
 
 > **Note on BUSL-1.1 (Business Source License):** Terraform and Packer use the

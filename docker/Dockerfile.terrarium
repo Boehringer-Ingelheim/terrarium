@@ -1,43 +1,52 @@
 # --------- Global args — single source of truth for all versions ---------
 # Sorted alphabetically. Referenced by ARG in each stage that needs them.
-# Base images pinned for build determinism
-# Default Versions need to match the Jenkins Build containers as defined at https://github.com/opendevstack/ods-quickstarters/blob/master/common/jenkins-agents/terraform-2408/docker/Dockerfile.ubi9#L26
-ARG ROCKYLINUX_VERSION=9.3
-ARG UBI9_VERSION=9.5
-ARG AGE_VERSION=1.2.0
+# Base images pinned for build determinism. Keep both on the newest EL9 minor:
+# Rocky point releases go EOL when the next one ships, and
+# scripts/check-pin-freshness.sh (make guardrails) fails on a stale pin.
+# Tools track their latest release built with a supported Go (INFIAAS-9587);
+# GO_VERSION is freshness-checked too. TERRAFORM_VERSION is only the *default*:
+# tenv (TENV_AUTO_INSTALL=true) installs whatever a project pins in
+# .terraform-version or TFENV_TERRAFORM_VERSION, e.g. the ODS agent's 1.9.4.
+ARG ROCKYLINUX_VERSION=9.8
+ARG UBI9_VERSION=9.8
+ARG AGE_VERSION=1.3.2
 ARG AWS_CDK_VERSION=2.1024.0
 ARG BATS_CORE_VERSION=1.13.0
-ARG GO_VERSION=1.21.13
-ARG HELM_VERSION=3.20.1
-ARG KUBECTL_VERSION=1.35.3
-ARG NODEJS_VERSION=24.14.0
-ARG OC_VERSION=4.19.0
+ARG GO_VERSION=1.26.8
+ARG HELM_VERSION=3.22.0
+ARG KUBECTL_VERSION=1.35.9
+ARG NODEJS_VERSION=24.21.0
+# npm bundled with Node lags its own dependency fixes; pin it explicitly (INFIAAS-9587)
+ARG NPM_VERSION=11.20.0
+ARG OC_VERSION=4.19.48
 ARG OPENSTACK_RELEASE=2025.1
 ARG OPENSTACK_VENV=/opt/openstack
-ARG OPENTOFU_VERSION=1.11.5
-ARG PACKER_VERSION=1.11.2
-ARG PYTHON_VERSION=3.13.12
-ARG SOPS_VERSION=3.12.2
+ARG OPENTOFU_VERSION=1.11.14
+ARG PACKER_VERSION=1.16.1
+ARG PYTHON_VERSION=3.13.15
+ARG SOPS_VERSION=3.13.3
 ARG STARSHIP_VERSION=1.24.2
-ARG TASK_VERSION=3.38.0
-ARG TENV_VERSION=4.11.1
-ARG TERRAFORM_DOCS_VERSION=v0.18.0
-ARG TERRAFORM_VERSION=1.9.4
-ARG TFLINT_VERSION=0.52.0
-ARG TRIVY_VERSION=0.69.3
+ARG TASK_VERSION=3.53.1
+ARG TENV_VERSION=4.15.1
+ARG TERRAFORM_DOCS_VERSION=v0.24.0
+ARG TERRAFORM_VERSION=1.16.4
+ARG TFLINT_VERSION=0.64.0
+ARG TRIVY_VERSION=0.74.0
 # ARG UV_VERSION=0.11.6 Defined in docker/pyproject.toml
-ARG YQ_VERSION=4.52.4
+ARG YQ_VERSION=4.54.1
 ARG ZOXIDE_VERSION=0.9.9
 
 
 # ================= Stage 0 — buildlang (compile on Rocky 9) =================
-FROM rockylinux:${ROCKYLINUX_VERSION} AS buildlang
+# docker.io/library/rockylinux is deprecated and stops at 9.3; the Rocky
+# Enterprise Software Foundation publishes current point releases here.
+FROM docker.io/rockylinux/rockylinux:${ROCKYLINUX_VERSION} AS buildlang
 ARG PYTHON_VERSION
 
 ENV PYENV_ROOT=/opt/pyenv
 ENV PATH=${PYENV_ROOT}/shims:${PYENV_ROOT}/bin:$PATH
 
-RUN dnf -y update \
+RUN dnf -y upgrade \
     && dnf -y install dnf-plugins-core \
     && dnf config-manager --set-enabled crb \
     && dnf -y groupinstall "Development Tools" \
@@ -72,7 +81,7 @@ LABEL maintainer="Erhard Wais <erhard.wais@boehringer-ingelheim.com>, Josef Hart
 ARG TARGETPLATFORM TARGETOS TARGETARCH TARGETVARIANT BUILDPLATFORM BUILDOS BUILDARCH BUILDVARIANT
 # Pull in global args needed in this stage
 ARG AGE_VERSION AWS_CDK_VERSION BATS_CORE_VERSION
-ARG GO_VERSION HELM_VERSION KUBECTL_VERSION NODEJS_VERSION
+ARG GO_VERSION HELM_VERSION KUBECTL_VERSION NODEJS_VERSION NPM_VERSION
 ARG OC_VERSION OPENSTACK_RELEASE OPENSTACK_VENV
 ARG OPENTOFU_VERSION PACKER_VERSION PYTHON_VERSION
 ARG SOPS_VERSION STARSHIP_VERSION TASK_VERSION TENV_VERSION
@@ -87,9 +96,12 @@ ENV AGE_VERSION=${AGE_VERSION} \
     HELM_VERSION=${HELM_VERSION} \
     KUBECTL_VERSION=${KUBECTL_VERSION} \
     NODEJS_VERSION=${NODEJS_VERSION} \
+    NPM_VERSION=${NPM_VERSION} \
+    OC_VERSION=${OC_VERSION} \
     OPENSTACK_RELEASE=${OPENSTACK_RELEASE} \
     OPENTOFU_VERSION=${OPENTOFU_VERSION} \
     PACKER_VERSION=${PACKER_VERSION} \
+    PYTHON_VERSION=${PYTHON_VERSION} \
     SOPS_VERSION=${SOPS_VERSION} \
     STARSHIP_VERSION=${STARSHIP_VERSION} \
     TASK_VERSION=${TASK_VERSION} \
@@ -257,14 +269,20 @@ RUN printf '\nmax_parallel_downloads=10\nretries=10\ntsflags=nodocs\n' >> /etc/d
 #   ca-certificates — keep trust anchors up to date for curl / openssl fetches
 #   libyaml-devel   — header package kept alongside `libyaml` so downstream images
 #                     can rebuild native extensions (Python PyYAML)
+#   nano            — the terminal editor; replaces vi/vim-minimal, which the
+#                     slimdown step removes (INFIAAS-9587, see EDITOR below)
 RUN dnf -y install dnf-plugins-core \
     && dnf config-manager --set-enabled ubi-9-codeready-builder-rpms \
     && dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm \
-    && dnf -y install jq parallel ripgrep util-linux-user ca-certificates libyaml-devel \
+    && dnf -y install jq parallel ripgrep util-linux-user ca-certificates libyaml-devel nano \
     && jq --version \
     && rg --version \
     && chsh --version \
+    && nano --version \
     && dnf clean all
+# git, visudo, crontab and friends fall back to `vi`, which is not in the image.
+ENV EDITOR=nano \
+    VISUAL=nano
 
 ENV RUNTIME_PKGS="gcc gcc-c++ make git coreutils zlib zlib-devel unzip wget \
     bzip2 bzip2-devel xz xz-devel sqlite sqlite-devel libffi libffi-devel \
@@ -360,7 +378,12 @@ RUN pip config set global.cert /etc/ssl/certs/ca-bundle.crt \
 # ─── Python user‑level libraries via uv ─────────────────────────────────────
 COPY pyproject.toml /tmp/pyproject.toml
 COPY uv.lock       /tmp/uv.lock
-RUN uv sync --directory /tmp --no-managed-python --frozen
+# --no-cache (INFIAAS-9587): the uv cache in $HOME/.cache/uv is never used
+# after this step but shipped wheel copies (uv itself, cryptography, PyJWT, …)
+# that scanners report on top of the installed venv. Fail the build if a cache
+# directory is still left behind.
+RUN uv sync --directory /tmp --no-managed-python --frozen --no-cache \
+    && test ! -e "${HOME}/.cache/uv"
 ENV PATH=/tmp/.venv/bin:$PATH
 
 # ─── Azure CLI (signed repo) ────────────────────────────────────────────────
@@ -409,7 +432,7 @@ RUN if [ "x${TARGETARCH}" = "xamd64" ]; then \
     && sam --version
 
 
-# Node.js + signed SHASUMS verification + AWS CDK
+# Node.js + signed SHASUMS verification + npm (pinned, registry-integrity-checked) + AWS CDK
 RUN ARCH_NODE=$([[ "$TARGETARCH" == "amd64" ]] && echo "x64" || echo "arm64") \
     && VER="${NODEJS_VERSION}" \
     && BASE="https://nodejs.org/dist/v${VER}" \
@@ -420,6 +443,7 @@ RUN ARCH_NODE=$([[ "$TARGETARCH" == "amd64" ]] && echo "x64" || echo "arm64") \
     && xzcat "$FILE" | tar xpf - -C /opt/ \
     && mv "/opt/node-v${VER}-${TARGETOS}-${ARCH_NODE}" /opt/node \
     && rm -f "$FILE" \
+    && /opt/node/bin/npm install -g "npm@${NPM_VERSION}" \
     && /opt/node/bin/npm install -g aws-cdk@${AWS_CDK_VERSION} \
     && chown -R 1001:0 /opt/node && chmod +x /opt/node/bin/* \
     && node --version && cdk --version
@@ -710,12 +734,19 @@ ENV GNUPGHOME=/home/terrarium/.gnupg
 # image is built. They are not needed at runtime — consumers use the pre-built
 # Python interpreter from the buildlang stage.
 # Savings: ~210 MB (build deps) + ~138 MB (docs/man/locale) ≈ 350 MB.
+# vim-minimal and gdb-gdbserver come from the UBI base, nothing requires them,
+# and they carry 76 + 11 High CVEs that Red Hat has not fixed (INFIAAS-9587,
+# decision D5). Enhanced vim shares the same CVEs, so it is no substitute;
+# nano is the editor. The rpm -q guards fail the build if either returns
+# (one per package: `rpm -q a b` is non-zero if EITHER is missing).
 RUN set -eux \
     && dnf -y remove gcc gcc-c++ cpp binutils autoconf automake libtool \
     kernel-headers glibc-devel libstdc++-devel \
     openssl-devel bzip2-devel libffi-devel sqlite-devel \
     xz-devel zlib-devel libxcrypt-devel \
+    vim-minimal gdb-gdbserver \
     && dnf -y autoremove \
+    && ! rpm -q vim-minimal && ! rpm -q gdb-gdbserver \
     && dnf clean all \
     && rm -rf /var/cache/dnf \
     && rm -rf /usr/share/doc /usr/share/man /usr/share/info \

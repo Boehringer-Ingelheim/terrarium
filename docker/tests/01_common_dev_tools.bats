@@ -53,3 +53,16 @@ load 'test_helper/common.bash'
   run test -s /etc/pki/tls/certs/ca-bundle.crt
   assert_success
 }
+
+# nano replaces vi/vim-minimal (INFIAAS-9587).
+@test "nano is installed" { check_binary nano; }
+
+# With vi gone, `git commit` / `visudo` need EDITOR to name a real command. The
+# image defaults it to nano; a consumer override (e.g. `code --wait`) is fine as
+# long as its command exists, so the suite stays valid in live devcontainers.
+@test "EDITOR and VISUAL resolve to an installed command" {
+  for var in EDITOR VISUAL; do
+    run bash -lc 'cmd="${'"$var"'%% *}"; [ -n "$cmd" ] && command -v "$cmd"'
+    assert_success
+  done
+}

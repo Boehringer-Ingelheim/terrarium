@@ -55,3 +55,22 @@ check_version() {
   run "$exe" "$@"
   assert_success
 }
+
+# Assert that a tool reports exactly the version pinned in the image ENV.
+# Usage: assert_pinned_version GO_VERSION go version
+#   - fails if the pin variable is unset/empty (a missing ENV would otherwise
+#     make any --partial match pass vacuously);
+#   - tolerates a leading "v" on either side (TERRAFORM_DOCS_VERSION=v0.18.0,
+#     `helm version` prints v3.x);
+#   - anchors the match so 1.26.8 does not match 1.26.80 or 11.26.8;
+#   - returns explicitly after each assertion, so it also fails correctly when
+#     called without errexit (e.g. wrapped in `run`).
+assert_pinned_version() {
+  local var="$1"; shift
+  local want="${!var:-}"
+  want="${want#v}"
+  [ -n "$want" ] || { echo "$var is not set in the image environment" >&2; return 1; }
+  run "$@"
+  assert_success || return 1
+  assert_output --regexp "(^|[^0-9.])v?${want//./\\.}([^0-9]|$)" || return 1
+}
