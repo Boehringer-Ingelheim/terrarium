@@ -77,7 +77,7 @@ compliance with their organization's policies.
 | Starship | 1.24.2 | [ISC](https://github.com/starship/starship/blob/master/LICENSE) | starship.rs |
 | zoxide | 0.9.9 | [MIT](https://github.com/ajeetdsouza/zoxide/blob/main/LICENSE) | github.com/ajeetdsouza/zoxide |
 | yq | 4.54.1 | [MIT](https://github.com/mikefarah/yq/blob/master/LICENSE) | github.com/mikefarah/yq |
-| Task (go-task) | 3.53.1 | [MIT](https://github.com/go-task/task/blob/main/LICENSE) | taskfile.dev |
+| Task (go-task) | 3.54.0 | [MIT](https://github.com/go-task/task/blob/main/LICENSE) | taskfile.dev |
 | jq | dnf | [MIT](https://github.com/jqlang/jq/blob/master/COPYING) | dnf (EPEL) |
 | GNU Parallel | dnf | [GPL-3.0-or-later](https://www.gnu.org/software/parallel/) | dnf (EPEL) |
 | nano | dnf (default `EDITOR`; replaces vi/vim-minimal) | [GPL-3.0-or-later](https://www.nano-editor.org/) | dnf (UBI 9) |
