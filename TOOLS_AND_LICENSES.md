@@ -37,7 +37,7 @@ compliance with their organization's policies.
 | Tool | Version | License | Source |
 |------|---------|---------|--------|
 | Terraform | 1.16.4 (via tenv; the default — tenv installs any other version on demand) | [BUSL-1.1](https://github.com/hashicorp/terraform/blob/main/LICENSE) | releases.hashicorp.com |
-| OpenTofu | 1.11.14 (via tenv) | [MPL-2.0](https://github.com/opentofu/opentofu/blob/main/LICENSE) | opentofu.org |
+| OpenTofu | 1.13.1 (via tenv) | [MPL-2.0](https://github.com/opentofu/opentofu/blob/main/LICENSE) | opentofu.org |
 | Packer | 1.16.1 | [BUSL-1.1](https://github.com/hashicorp/packer/blob/main/LICENSE) | releases.hashicorp.com |
 | terraform-docs | v0.24.0 | [MIT](https://github.com/terraform-docs/terraform-docs/blob/master/LICENSE) | github.com/terraform-docs/terraform-docs |
 | tflint | 0.64.0 | [MPL-2.0](https://github.com/terraform-linters/tflint/blob/master/LICENSE) | github.com/terraform-linters/tflint |
@@ -66,7 +66,7 @@ compliance with their organization's policies.
 
 | Tool | Version | License | Source |
 |------|---------|---------|--------|
-| Trivy | 0.74.0 | [Apache-2.0](https://github.com/aquasecurity/trivy/blob/main/LICENSE) | github.com/aquasecurity/trivy |
+| Trivy | 0.75.0 | [Apache-2.0](https://github.com/aquasecurity/trivy/blob/main/LICENSE) | github.com/aquasecurity/trivy |
 | sops | 3.13.3 | [MPL-2.0](https://github.com/getsops/sops/blob/main/LICENSE) | github.com/getsops/sops |
 | age | 1.3.2 | [BSD-3-Clause](https://github.com/FiloSottile/age/blob/main/LICENSE) | github.com/FiloSottile/age |
 
@@ -77,7 +77,7 @@ compliance with their organization's policies.
 | Starship | 1.24.2 | [ISC](https://github.com/starship/starship/blob/master/LICENSE) | starship.rs |
 | zoxide | 0.9.9 | [MIT](https://github.com/ajeetdsouza/zoxide/blob/main/LICENSE) | github.com/ajeetdsouza/zoxide |
 | yq | 4.54.1 | [MIT](https://github.com/mikefarah/yq/blob/master/LICENSE) | github.com/mikefarah/yq |
-| Task (go-task) | 3.53.1 | [MIT](https://github.com/go-task/task/blob/main/LICENSE) | taskfile.dev |
+| Task (go-task) | 3.54.0 | [MIT](https://github.com/go-task/task/blob/main/LICENSE) | taskfile.dev |
 | jq | dnf | [MIT](https://github.com/jqlang/jq/blob/master/COPYING) | dnf (EPEL) |
 | GNU Parallel | dnf | [GPL-3.0-or-later](https://www.gnu.org/software/parallel/) | dnf (EPEL) |
 | nano | dnf (default `EDITOR`; replaces vi/vim-minimal) | [GPL-3.0-or-later](https://www.nano-editor.org/) | dnf (UBI 9) |

@@ -67,3 +67,16 @@ BIN
     assert_success
     assert_output ""
 }
+
+@test "npm's bundled packages are at least NPM_BUNDLED_PATCHES (INFIAAS-9587)" {
+    [ -n "${NPM_BUNDLED_PATCHES:-}" ] || skip "NPM_BUNDLED_PATCHES is empty"
+    root=/opt/node/lib/node_modules/npm/node_modules
+    for spec in ${NPM_BUNDLED_PATCHES}; do
+        name="${spec%@*}" want="${spec#*@}"
+        run node -p "require('${root}/${name}/package.json').version"
+        assert_success
+        # sort -V: the bundled copy must not be older than the patch target
+        [ "$(printf '%s\n%s\n' "$output" "$want" | sort -V | head -n1)" = "$want" ] \
+            || fail "bundled ${name} is ${output}, expected >= ${want}"
+    done
+}

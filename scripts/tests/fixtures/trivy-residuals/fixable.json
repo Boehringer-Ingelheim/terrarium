@@ -1,0 +1,9 @@
+{
+  "Results": [
+    {"Target": "Node.js", "Class": "lang-pkgs", "Type": "node-pkg",
+     "Vulnerabilities": [{"VulnerabilityID": "CVE-2026-19534", "PkgName": "undici", "InstalledVersion": "6.28.0",
+       "PkgPath": "opt/node/lib/node_modules/npm/node_modules/undici/package.json"}]},
+    {"Target": "usr/bin/task", "Class": "lang-pkgs", "Type": "gobinary",
+     "Vulnerabilities": [{"VulnerabilityID": "CVE-2025-5000", "PkgName": "stdlib", "InstalledVersion": "v1.26.5"}]}
+  ]
+}

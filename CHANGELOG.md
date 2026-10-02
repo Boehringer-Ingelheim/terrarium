@@ -1,5 +1,59 @@
 # Changelog
 
+## [4.9.5] 2026-10-02 — Release scan gate green
+
+The `v4.9.4` release published its images, but the release Trivy gate
+(`scan.yaml`, fixable Critical/High/Medium) failed on both arches with 331
+amd64 findings. This release fixes everything that can be fixed in this
+repository. The rest is vendor-only, and each of those findings is accepted
+explicitly and expires.
+
+### Security (INFIAAS-9587)
+
+- **npm's bundled dependencies patched.** Even the newest npm (11.21.0,
+  12.2.0) bundles `undici` 6.28.0 (CVE-2026-19534 High, CVE-2026-85024
+  Medium), `ip-address` 10.5.0 and `brace-expansion` 5.0.9. The new
+  `NPM_BUNDLED_PATCHES` build-arg swaps in `undici` 6.28.1, `ip-address` 10.7.1
+  and `brace-expansion` 5.0.12, via `docker/files/bin/npm_patch_bundled`. Each
+  target is the same major, within npm's declared range, and checked against
+  the registry's integrity hash.
+- **Tools bumped to releases that fix their findings:**
+  - go-task 3.53.1 → 3.54.0: 13 → 0.
+  - trivy 0.74.0 → 0.75.0: 7 → 0.
+  - OpenTofu 1.11.14 → **1.13.1**: 29 → 3. This is the default `tofu`; pin
+    another version per project with `.opentofu-version`.
+  - uv 0.11.15 → 0.11.33 (quinn-proto).
+- **Python:**
+  - `/tmp/.venv`: PyJWT 2.15.0, urllib3 2.8.0 and virtualenv 21.7.13 (the
+    dependabot PRs #55–#57). cryptography 46.0.7 → 48.0.1, the highest
+    Azure CLI allows: azure-cli-core 2.90.0 pins `msal==1.36.0`, which requires
+    `cryptography<49`.
+  - `/opt/openstack`: upper-constraints `2025.1` → `2026.2`
+    (python-openstackclient 10.3.0). The new `OPENSTACK_OVERRIDES` build-arg
+    upgrades the two packages that the constraints still pin at vulnerable
+    versions: urllib3 2.8.0 and cryptography 50.0.2. `pip check` gates the
+    build.
+- **Accepted residuals: `.trivyignore.yaml`.** These are findings only a
+  vendor can fix, because the image already ships the vendor's newest release:
+  - oc 4.19.48 (a Red Hat build);
+  - tenv 4.15.1 and its proxy binaries (Go 1.25.12);
+  - sops, terraform-docs, tflint, packer, age, helm;
+  - the AWS SAM Lambda emulator;
+  - the Python bundled by the Azure CLI and Google Cloud CLI;
+  - pip 26.2.1's own `vendor.txt`.
+
+  Each entry is one CVE at its exact path (or purl), carries the reason, and
+  expires on **2026-12-31**. A new CVE, or the same CVE anywhere else, still
+  fails the gate. `scripts/trivy-residuals.sh` regenerates the file from the
+  Trivy JSON of both arches, and refuses any finding that matches no
+  documented vendor rule.
+
+### Changed
+
+- The release scan's SARIF and the job-log table both apply
+  `.trivyignore.yaml`. Accepted residuals therefore no longer appear in the
+  Security tab; the file is the record.
+
 ## [4.9.4] 2026-07-24 — Remove Ruby Toolchain and Security Remediation
 
 ### ⚠ BREAKING / Removed
