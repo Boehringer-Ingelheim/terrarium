@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [4.9.4] 2026-07-24 — Remove Ruby Toolchain and Security Remediation
 
 ### ⚠ BREAKING / Removed
 
