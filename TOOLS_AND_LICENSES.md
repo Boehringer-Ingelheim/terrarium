@@ -37,7 +37,7 @@ compliance with their organization's policies.
 | Tool | Version | License | Source |
 |------|---------|---------|--------|
 | Terraform | 1.16.4 (via tenv; the default — tenv installs any other version on demand) | [BUSL-1.1](https://github.com/hashicorp/terraform/blob/main/LICENSE) | releases.hashicorp.com |
-| OpenTofu | 1.11.14 (via tenv) | [MPL-2.0](https://github.com/opentofu/opentofu/blob/main/LICENSE) | opentofu.org |
+| OpenTofu | 1.13.1 (via tenv) | [MPL-2.0](https://github.com/opentofu/opentofu/blob/main/LICENSE) | opentofu.org |
 | Packer | 1.16.1 | [BUSL-1.1](https://github.com/hashicorp/packer/blob/main/LICENSE) | releases.hashicorp.com |
 | terraform-docs | v0.24.0 | [MIT](https://github.com/terraform-docs/terraform-docs/blob/master/LICENSE) | github.com/terraform-docs/terraform-docs |
 | tflint | 0.64.0 | [MPL-2.0](https://github.com/terraform-linters/tflint/blob/master/LICENSE) | github.com/terraform-linters/tflint |
