@@ -333,7 +333,7 @@ jobs:
             type=raw,value=latest,enable=${{ steps.resolve.outputs.is_prerelease == 'false' }}
 
       - name: Create and push manifest
-        uses: int128/docker-manifest-create-action@6edb43463bd4878b8cee224ca274378a3635d78f # v2.28.0
+        uses: int128/docker-manifest-create-action@a118e9fe12455375d4810aa318c20e6dba77288e # v2.29.0
         with:
           tags: ${{ steps.meta.outputs.tags }}
           sources: |
