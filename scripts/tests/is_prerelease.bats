@@ -73,9 +73,13 @@ classify() { run "$SCRIPT" "$1"; }
 
 # ---- wiring: both workflows use the script and fail closed ----------------------
 
-@test "wiring: main.yaml and release.yaml classify via scripts/is-prerelease.sh" {
-  grep -q 'scripts/is-prerelease.sh' "$WF/main.yaml"
-  grep -q 'scripts/is-prerelease.sh' "$WF/release.yaml"
+@test "wiring: the workflows classify via scripts/is-prerelease.sh (release.yaml directly, both via is-highest-release.sh)" {
+  # INFIAAS-11916 (S1.6): the `latest` decision moved to is-highest-release.sh,
+  # which reuses this classifier instead of duplicating it.
+  grep -qF '"$(scripts/is-prerelease.sh "' "$WF/release.yaml"
+  grep -qF 'is-prerelease.sh' "$BATS_TEST_DIRNAME/../is-highest-release.sh"
+  grep -qF '"$(scripts/is-highest-release.sh "' "$WF/main.yaml"
+  grep -qF '"$(scripts/is-highest-release.sh "' "$WF/release.yaml"
 }
 
 @test "wiring: the old unanchored -(pre|alpha|beta|rc) regex is gone" {
@@ -83,9 +87,11 @@ classify() { run "$SCRIPT" "$1"; }
   [ "$status" -eq 1 ]
 }
 
-@test "wiring: tag-driven latest is enabled only on an explicit 'false' (empty/unknown never moves latest)" {
+@test "wiring: tag-driven latest is enabled only on an explicit 'true' (empty/unknown never moves latest)" {
+  # Was `is_prerelease == 'false'`; INFIAAS-11916 gates on the highest-release
+  # output instead. Still fail closed: a skipped or failed step yields ''.
   run grep -hE 'type=raw,value=latest,enable=\$\{\{' "$WF/main.yaml" "$WF/release.yaml"
   [ "$status" -eq 0 ]
-  [ "${#lines[@]}" -eq 2 ]
-  for l in "${lines[@]}"; do [[ "$l" == *"is_prerelease == 'false'"* ]]; done
+  [ "${#lines[@]}" -eq 3 ]   # main: per-arch + manifest; release: manifest
+  for l in "${lines[@]}"; do [[ "$l" == *"move_latest == 'true'"* ]]; done
 }

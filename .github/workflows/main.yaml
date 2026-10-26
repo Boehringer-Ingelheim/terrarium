@@ -72,20 +72,34 @@ jobs:
           # Enforced by scripts/check-guardrails.sh ("buildkit pinned").
           driver-opts: image=moby/buildkit:v0.33.0@sha256:6c2fa84a6b61ccd72899dde4239f8d5717f05f9a8ca6f3cad185fb1a95a94de3
 
+      # INFIAAS-11916 (S1.6): the per-arch `latest-<arch>` and `<major>-<arch>`
+      # tags move only for the highest release, so a maintenance release
+      # (v4.8.4 after v4.9.6) cannot move them back. `latest=auto` used to add
+      # `latest` for ANY release tag. It is now off, and an explicit rule uses
+      # the guard. Exit 2 (unrecognised tag, git failure) fails the job.
+      - name: Classify tag (latest guard)
+        id: rel
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          move_latest="$(scripts/is-highest-release.sh "$GITHUB_REF_NAME")"
+          echo "move_latest=${move_latest}" >> "$GITHUB_OUTPUT"
+          echo "::notice::Tag=${GITHUB_REF_NAME}, highest release (moves latest/major)=${move_latest}"
+
       - name: Docker metadata
         id: meta
         uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
         with:
           images: ghcr.io/${{ github.repository }}
-          flavor: latest=auto,suffix=${{ matrix.suffix }}
+          flavor: latest=false,suffix=${{ matrix.suffix }}
           tags: |
             type=ref,event=branch
             type=ref,event=pr
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
-            type=semver,pattern={{major}}
+            type=semver,pattern={{major}},enable=${{ steps.rel.outputs.move_latest == 'true' }}
             type=sha
             type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=latest,enable=${{ steps.rel.outputs.move_latest == 'true' }}
 
       - name: Login to GHCR
         if: github.event_name != 'pull_request'
@@ -223,15 +237,17 @@ jobs:
           # lowercase image ref for the manifest sources below (a with: block can't use bash ${,,})
           echo "image=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
 
-      # INFIAAS-11804 (B4): a pushed pre-release tag (vX.Y.Z-<suffix>) must never
-      # move `latest`. Same classifier as release.yaml; an unrecognised tag
-      # fails this step (exit 2), so it can never move `latest` either.
-      - name: Classify pre-release
-        id: pre
+      # INFIAAS-11804 (B4) and INFIAAS-11916 (S1.6): `latest` moves only for
+      # the highest release. scripts/is-highest-release.sh reuses
+      # scripts/is-prerelease.sh, so a pre-release tag never moves it, and
+      # neither does an older line published later (v4.8.4 after v4.9.6). An
+      # unrecognised tag or a git failure fails this step (exit 2).
+      - name: Classify tag (latest guard)
+        id: rel
         run: |
-          is_pre="$(scripts/is-prerelease.sh "$GITHUB_REF_NAME")"
-          echo "is_prerelease=${is_pre}" >> "$GITHUB_OUTPUT"
-          echo "::notice::Tag=${GITHUB_REF_NAME}, Pre-release=${is_pre}"
+          move_latest="$(scripts/is-highest-release.sh "$GITHUB_REF_NAME")"
+          echo "move_latest=${move_latest}" >> "$GITHUB_OUTPUT"
+          echo "::notice::Tag=${GITHUB_REF_NAME}, highest release (moves latest)=${move_latest}"
 
       - name: Generate manifest tags
         id: meta
@@ -240,7 +256,7 @@ jobs:
           images: ghcr.io/${{ github.repository }}
           tags: |
             type=semver,pattern={{version}}
-            type=raw,value=latest,enable=${{ steps.pre.outputs.is_prerelease == 'false' }}
+            type=raw,value=latest,enable=${{ steps.rel.outputs.move_latest == 'true' }}
 
       - name: Create and push manifest
         uses: int128/docker-manifest-create-action@6edb43463bd4878b8cee224ca274378a3635d78f # v2.28.0
