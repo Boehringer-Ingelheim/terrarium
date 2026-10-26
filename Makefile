@@ -62,10 +62,12 @@ endef
 .PHONY: help verify-keys print-keys write-keys check-keys docker-build docker-build-test docker-test docker-test-exec test sbom install-syft guardrails pin-freshness lint shellcheck hadolint test-helpers test-scripts docker-test-helpers check-keys-drift
 
 # Files shellcheck lints (kept in sync with .github/workflows/lint.yaml)
-SHELLCHECK_TARGETS ?= scripts/*.sh scripts/tests/fixtures/bin/* docker/vendor-keys/*.sh docker/files/bin/*
+SHELLCHECK_TARGETS ?= scripts/*.sh scripts/tests/fixtures/bin/* docker/vendor-keys/*.sh docker/files/bin/* docker/files/profile.d/*
 # Docker images for linters (no host install required; matches CI)
 SHELLCHECK_IMAGE ?= koalaman/shellcheck:stable
-HADOLINT_IMAGE   ?= hadolint/hadolint:latest
+# Pinned by tag and digest (INFIAAS-11916 A-09): a floating :latest could add an
+# error-level rule and flip the now-blocking gate with no change in this repo.
+HADOLINT_IMAGE   ?= hadolint/hadolint:v2.15.1@sha256:32dac94127fd60b7b7e3fbfc65e1383b9b5e25c9bfd7b8536de7a539fe68a12d
 
 # ================== Quality gates ==================
 # Pin freshness needs the network (go.dev, dl.rockylinux.org, registry.access.redhat.com).

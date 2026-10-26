@@ -50,3 +50,23 @@ load 'test_helper/common.bash'
     assert_success
     assert_output --partial "secret"
 }
+
+# @openstack
+@test "openstack venv has OPENSTACK_OVERRIDES applied and is consistent (INFIAAS-9587)" {
+    [ -n "${OPENSTACK_OVERRIDES:-}" ] || skip "OPENSTACK_OVERRIDES is empty"
+    for spec in ${OPENSTACK_OVERRIDES}; do
+        run /opt/openstack/bin/pip show "${spec%%==*}"
+        assert_success
+        assert_line "Version: ${spec#*==}"
+    done
+    run /opt/openstack/bin/pip check
+    assert_success
+}
+
+@test "gcloud repo is the static file and dnf's \$basearch resolved to this image's arch (INFIAAS-11916)" {
+  run grep -F 'baseurl=https://packages.cloud.google.com/yum/repos/cloud-sdk-el9-$basearch' /etc/yum.repos.d/google-cloud-sdk.repo
+  assert_success
+  run rpm -q --qf '%{ARCH}' google-cloud-cli
+  assert_success
+  assert_output "$(uname -m)"
+}

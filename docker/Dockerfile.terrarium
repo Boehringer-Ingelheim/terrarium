@@ -469,16 +469,9 @@ RUN rpm --import https://packages.microsoft.com/keys/microsoft.asc \
     && dnf clean all
 
 # ─── GCP CLI (Google Cloud SDK signed repo) ────────────────────────────────
-RUN ARCH_GCP=$([[ "$TARGETARCH" == "amd64" ]] && echo "x86_64" || echo "aarch64") \
-    && cat > /etc/yum.repos.d/google-cloud-sdk.repo <<EOF
-[google-cloud-cli]
-name=Google Cloud CLI
-baseurl=https://packages.cloud.google.com/yum/repos/cloud-sdk-el9-${ARCH_GCP}
-enabled=1
-gpgcheck=1
-repo_gpgcheck=0
-gpgkey=https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
-EOF
+# Static repo file (was a heredoc that hadolint cannot parse); dnf's $basearch
+# selects cloud-sdk-el9-x86_64 / -aarch64 per TARGETARCH.
+COPY files/yum.repos.d/google-cloud-sdk.repo /etc/yum.repos.d/google-cloud-sdk.repo
 RUN dnf -y install google-cloud-cli \
     && gcloud version \
     && dnf clean all
@@ -578,20 +571,8 @@ RUN --mount=type=secret,id=tenv_github_token,required=false \
     && tofu -version \
     && chown -R 1001:0 "${TENV_ROOT}" && chmod -R 2775 "${TENV_ROOT}"
 
-# Safe tenv profile
-RUN cat > /etc/profile.d/tenv.sh <<'EOF'
-if command -v tenv >/dev/null 2>&1; then
-  if tenv --help 2>&1 | grep -q 'update-path'; then
-    TENV_NEW_PATH="$((/usr/bin/tenv update-path) 2>/dev/null || true)"
-    if [ -n "$TENV_NEW_PATH" ]; then
-      case ":$PATH:" in *":$TENV_NEW_PATH:"*) : ;; *) PATH="$TENV_NEW_PATH:$PATH" ;; esac
-    fi
-  elif tenv --help 2>&1 | grep -q 'init'; then
-    eval "$(/usr/bin/tenv init - bash 2>/dev/null)" || true
-  fi
-fi
-export PATH
-EOF
+# Safe tenv profile (static file; was a heredoc that hadolint cannot parse)
+COPY files/profile.d/tenv.sh /etc/profile.d/tenv.sh
 
 # HashiCorp tools — verify signed checksums
 RUN ARCH=$([[ "$TARGETARCH" == "amd64" ]] && echo "amd64" || echo "arm64") \
