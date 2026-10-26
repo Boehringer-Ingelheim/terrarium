@@ -337,6 +337,10 @@ jobs:
         uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
         with:
           images: ghcr.io/${{ github.repository }}
+          # INFIAAS-11916 (A-01): defence in depth; type=raw never auto-adds
+          # latest, but every metadata step must say latest=false explicitly
+          # (check-guardrails.sh), so a later type=semver rule cannot bypass the guard.
+          flavor: latest=false
           tags: |
             type=raw,value=${{ steps.resolve.outputs.image_tag }}
             type=raw,value=latest,enable=${{ steps.resolve.outputs.move_latest == 'true' }}

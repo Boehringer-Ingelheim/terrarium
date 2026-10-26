@@ -213,6 +213,15 @@ highest() { run --separate-stderr "$SCRIPT" "$1"; }
   for l in "${lines[@]}"; do [[ "$l" == *"outputs.move_latest == 'true' }}"* ]]; done
 }
 
+@test "wiring (A-01): every docker/metadata-action step declares flavor latest=false" {
+  for f in "$WF/main.yaml" "$WF/release.yaml"; do
+    steps="$(grep -c 'docker/metadata-action@' "$f")"
+    flavors="$(grep -cE '^[[:space:]]*flavor:.*latest=false' "$f")"
+    [ "$steps" -ge 1 ]
+    [ "$steps" -eq "$flavors" ]
+  done
+}
+
 @test "wiring: no metadata flavour adds latest on its own (latest=auto|true)" {
   run grep -nE 'flavor:.*latest=(auto|true)' "$WF/main.yaml" "$WF/release.yaml"
   [ "$status" -eq 1 ]

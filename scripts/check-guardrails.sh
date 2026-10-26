@@ -93,6 +93,18 @@ chk "latest not via highest-release guard" \
 chk "major not via highest-release guard" \
   "$(wf_all | grep -E 'pattern=\{\{major\}\}([^.]|$)' | grep -vE "$guard_expr" | grep -c . || true)" -eq 0
 chk "flavor latest=auto|true" "$(wf_all | grep -cE 'flavor:.*latest=(auto|true)' || true)" -eq 0
+# INFIAAS-11916 (A-01): a metadata-action step WITHOUT a flavor still gets the
+# action's default latest=auto, which adds `latest` for any release tag via
+# type=semver, whatever the move_latest guard says. So every
+# docker/metadata-action step must declare `flavor:` with latest=false. Each
+# step's block runs from its `uses:` line to the next `- ` step item.
+meta_unflavored="$(find "$WF_DIR" -type f \( -name '*.yml' -o -name '*.yaml' \) -exec awk '
+  FNR == 1 { if (inmeta && !ok) bad++; inmeta = 0 }
+  /uses: docker\/metadata-action@/ { if (inmeta && !ok) bad++; inmeta = 1; ok = 0; next }
+  inmeta && /^[[:space:]]*- [a-z_-]+:/ { if (!ok) bad++; inmeta = 0 }
+  inmeta && /^[[:space:]]*flavor:.*latest=false/ { ok = 1 }
+  END { if (inmeta && !ok) bad++; print bad + 0 }' {} + | awk '{s += $1} END {print s + 0}')"
+chk "metadata-action without latest=false" "$meta_unflavored" -eq 0
 unwired=0
 while IFS= read -r f; do
   grep -q 'scripts/is-highest-release.sh' "$f" || { echo "  move_latest used without scripts/is-highest-release.sh: $f"; unwired=$((unwired + 1)); }

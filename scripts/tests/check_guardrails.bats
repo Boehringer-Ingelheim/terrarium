@@ -120,8 +120,53 @@ PINNED="driver-opts: image=moby/buildkit:v0.33.0@sha256:$(printf 'b%.0s' $(seq 1
 latest_rules() {
   local f="$1"; shift
   printf '      - id: rel\n        run: move_latest="$(scripts/is-highest-release.sh "$GITHUB_REF_NAME")"\n' >> "$WF_DIR/$f"
-  printf '      - uses: docker/metadata-action@%s # v6\n        with:\n          tags: |\n' "$SHA40" >> "$WF_DIR/$f"
+  printf '      - uses: docker/metadata-action@%s # v6\n        with:\n          flavor: latest=false\n          tags: |\n' "$SHA40" >> "$WF_DIR/$f"
   local r; for r in "$@"; do printf '            %s\n' "$r" >> "$WF_DIR/$f"; done
+}
+
+# meta_step <file> <flavor line or empty> — a metadata step (semver + guarded
+# latest) followed by another step, so the step boundary is exercised.
+meta_step() {
+  printf '      - id: rel\n        run: move_latest="$(scripts/is-highest-release.sh "$GITHUB_REF_NAME")"\n' >> "$WF_DIR/$1"
+  printf '      - name: Generate manifest tags\n        id: meta\n        uses: docker/metadata-action@%s # v6\n        with:\n          images: ghcr.io/x/y\n' "$SHA40" >> "$WF_DIR/$1"
+  [ -z "$2" ] || printf '          %s\n' "$2" >> "$WF_DIR/$1"
+  printf '          tags: |\n            type=semver,pattern={{version}}\n            type=raw,value=latest,enable=${{ steps.rel.outputs.move_latest == %s }}\n' "'true'" >> "$WF_DIR/$1"
+  printf '      - name: Create and push manifest\n        uses: int128/docker-manifest-create-action@%s # v2\n        with:\n          flavor: latest=false\n' "$SHA40" >> "$WF_DIR/$1"
+}
+
+@test "A-01: a metadata-action step with no flavor fails (default latest=auto would add latest via type=semver)" {
+  wf main.yaml "$PINNED"
+  meta_step main.yaml ""
+  run "$GUARD" "$DF"
+  [ "$status" -eq 1 ]
+  [[ "$output" == *"GUARDRAIL FAIL: metadata-action without latest=false = 1"* ]]
+}
+
+@test "A-01: a metadata-action step with flavor latest=auto fails" {
+  wf main.yaml "$PINNED"
+  meta_step main.yaml "flavor: latest=auto"
+  run "$GUARD" "$DF"
+  [ "$status" -eq 1 ]
+  [[ "$output" == *"GUARDRAIL FAIL: metadata-action without latest=false = 1"* ]]
+}
+
+@test "A-01: a metadata-action step with flavor latest=false (with or without suffix) passes" {
+  for fl in "flavor: latest=false" "flavor: latest=false,suffix=-linux-amd64"; do
+    wf main.yaml "$PINNED"
+    meta_step main.yaml "$fl"
+    run "$GUARD" "$DF"
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"ok: metadata-action without latest=false = 0"* ]]
+  done
+}
+
+@test "A-01: a flavor latest=false in a LATER step does not cover an unflavored metadata step" {
+  wf main.yaml "$PINNED"
+  meta_step main.yaml ""   # the following step carries flavor: latest=false
+  wf release.yaml "$PINNED"; meta_step release.yaml "flavor: latest=false"
+  run "$GUARD" "$DF"
+  [ "$status" -eq 1 ]
+  [[ "$output" == *"GUARDRAIL FAIL: metadata-action without latest=false = 1"* ]]
 }
 
 @test "latest: the old pre-release-only gate (is_prerelease == 'false') now fails" {
