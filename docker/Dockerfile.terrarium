@@ -20,7 +20,7 @@ ARG NODEJS_VERSION=24.22.1
 ARG NPM_VERSION=11.20.0
 # Fixed releases swapped in for packages npm bundles, until npm ships them
 # itself (INFIAAS-9587, docker/files/bin/npm_patch_bundled). Same major only.
-ARG NPM_BUNDLED_PATCHES="undici@6.29.1 ip-address@10.7.5 brace-expansion@5.0.12"
+ARG NPM_BUNDLED_PATCHES="undici@6.29.1 ip-address@10.7.5 brace-expansion@5.0.12 postcss-selector-parser@7.1.7"
 ARG OC_VERSION=4.19.48
 ARG OPENSTACK_RELEASE=2026.2
 # Security-only upgrades applied over the OpenStack upper-constraints, which
@@ -42,9 +42,9 @@ ARG STARSHIP_VERSION=1.24.2
 ARG TASK_VERSION=3.54.0
 ARG TENV_VERSION=4.15.1
 ARG TERRAFORM_DOCS_VERSION=v0.24.0
-ARG TERRAFORM_VERSION=1.16.4
+ARG TERRAFORM_VERSION=1.16.7
 ARG TFLINT_VERSION=0.64.0
-ARG TRIVY_VERSION=0.75.0
+ARG TRIVY_VERSION=0.76.1
 # ARG UV_VERSION=0.11.6 Defined in docker/pyproject.toml
 ARG YQ_VERSION=4.54.1
 ARG ZOXIDE_VERSION=0.9.9
