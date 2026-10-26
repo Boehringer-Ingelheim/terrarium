@@ -36,6 +36,10 @@ for f in "$@"; do [ -f "$f" ] || { echo "ERROR: no such report: $f" >&2; exit 2;
 rule_for() { # <path> <pkg> → prints the rule key, or nothing
   case "$1" in
     usr/local/bin/oc) echo oc ;;
+    opt/tenv/Terraform/*/terraform) echo terraform-default ;;
+    usr/local/bin/terraform-config-inspect) echo terraform-config-inspect ;;
+    opt/rbenv/versions/*/lib/ruby/gems/*/specifications/*) echo ruby-default-gems ;;
+    opt/bundle/ruby/*/specifications/*) echo gem-lock ;;
     usr/bin/tenv|usr/bin/atmos|usr/bin/terraform|usr/bin/terragrunt|usr/bin/terramate|usr/bin/tf|usr/bin/tofu) echo tenv ;;
     opt/tenv/OpenTofu/*/tofu) echo opentofu ;;
     usr/local/bin/sops|usr/bin/sops) echo sops ;;
@@ -44,30 +48,41 @@ rule_for() { # <path> <pkg> → prints the rule key, or nothing
     usr/local/bin/packer) echo packer ;;
     usr/local/bin/age|usr/local/bin/age-keygen) echo age ;;
     usr/local/bin/helm) echo helm ;;
+    usr/bin/task) echo task ;;
+    usr/local/bin/kubectl) echo kubectl ;;
+    usr/local/bin/yq) echo yq ;;
     */samcli/local/rapid/aws-lambda-rie-*) echo aws-sam-rie ;;
     usr/lib64/az/*) echo azure-cli-rpm ;;
     usr/lib64/google-cloud-sdk/*) echo gcloud ;;
-    tmp/.venv/lib/python*/site-packages/cryptography-*) echo venv-cryptography ;;
-    "") case "$2" in msgpack|setuptools|urllib3) echo pip-vendor ;; esac ;;
+    tmp/.venv/lib/python*/site-packages/cryptography-*|tmp/.venv/lib/python*/site-packages/[Pp]y[Nn]a[Cc]l-*) echo venv-azure-pins ;;
+    "") case "$2" in msgpack|setuptools|urllib3) echo pip-vendor ;; certifi) echo az-pip-certifi ;; esac ;;
   esac
 }
 
 reason_for() {
   case "$1" in
-    oc) echo "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor." ;;
+    oc) echo "oc 4.19.51 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules). oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor." ;;
     tenv) echo "tenv 4.15.1 is the newest release and is built with go1.25.12; /usr/bin/{atmos,terraform,terragrunt,terramate,tf,tofu} are tenv's own proxy binaries. Lifted by the next tenv release." ;;
-    opentofu) echo "OpenTofu 1.13.1 is the newest release (go1.27.1); the remaining modules (x/mod, grpc) are fixed only in releases newer than its build. Lifted by the next OpenTofu patch." ;;
+    opentofu) echo "OpenTofu 1.11.14 is the newest 1.11.z (built with an older Go). The 4.8 line keeps the 1.11 minor (security fixes only, no tool moves); terrarium 4.9 ships OpenTofu 1.13. Lifted by the next 1.11 patch or by moving to terrarium 4.9." ;;
     sops) echo "sops 3.13.3 is the newest release (go1.26.5). Lifted by the next sops release." ;;
-    terraform-docs) echo "terraform-docs v0.24.0 is the newest release (go1.25.8). Lifted by the next terraform-docs release." ;;
-    tflint) echo "tflint 0.64.0 is the newest release (go1.26.3). Lifted by the next tflint release." ;;
-    packer) echo "packer 1.16.1 is the newest release. Lifted by the next packer release." ;;
-    age) echo "age 1.3.2 is the newest release (x/crypto v0.55.0). Lifted by the next age release." ;;
+    terraform-docs) echo "terraform-docs v0.18.0 follows the ODS terraform-2408 agent: on the 4.8 line the default tool versions match the agent (security fixes only, no tool moves). It is not the newest release (terrarium 4.9 ships v0.24.0). Lifted by moving to terrarium 4.9, or when the agent moves." ;;
+    tflint) echo "tflint 0.52.0 follows the ODS terraform-2408 agent: on the 4.8 line the default tool versions match the agent (security fixes only, no tool moves). It is not the newest release (terrarium 4.9 ships 0.64.0). Lifted by moving to terrarium 4.9, or when the agent moves." ;;
+    packer) echo "packer 1.11.2 follows the ODS terraform-2408 agent: on the 4.8 line the default tool versions match the agent (security fixes only, no tool moves). It is not the newest release (terrarium 4.9 ships 1.16.1). Lifted by moving to terrarium 4.9, or when the agent moves." ;;
+    age) echo "age 1.2.0 follows the ODS terraform-2408 agent: on the 4.8 line the default tool versions match the agent (security fixes only, no tool moves). It is not the newest release (terrarium 4.9 ships 1.3.2). Lifted by moving to terrarium 4.9, or when the agent moves." ;;
+    task) echo "go-task 3.38.0 follows the ODS terraform-2408 agent: on the 4.8 line the default tool versions match the agent (security fixes only, no tool moves). It is not the newest release (terrarium 4.9 ships 3.54.0). Lifted by moving to terrarium 4.9, or when the agent moves." ;;
+    kubectl) echo "kubectl 1.35.9 is the newest 1.35.z (go1.26.8, x/net v0.56.0); kubectl stays within one minor of the clusters. Lifted by the next 1.35 patch release." ;;
+    yq) echo "yq 4.54.1 is the newest release (go1.27.1, x/net v0.59.0). Lifted by the next yq release." ;;
+    az-pip-certifi) echo "The Azure CLI 2.91.0 RPM (newest) ships pip 26.2.1 under /usr/lib64/az, which vendors certifi 2026.6.17 (eMudhra, INFIAAS-11916); Trivy reports pip-vendored packages without a path. The fix is merged upstream but unreleased (Azure/azure-cli#34250). Lifted by the next Azure CLI release." ;;
     helm) echo "helm 3.22.0 is the newest v3 release (x/crypto v0.55.0); helm 4.3.0 has the same x/crypto. Lifted by the next helm release." ;;
-    aws-sam-rie) echo "AWS SAM CLI 1.166.2 is the newest release; it bundles the Lambda Runtime Interface Emulator (chi v5.2.2), which only runs locally under 'sam local'. Lifted by the next SAM CLI release." ;;
-    azure-cli-rpm) echo "Azure CLI 2.90.0 is the newest Microsoft RPM; it bundles its own Python packages under /usr/lib64/az. Lifted by the next Azure CLI release." ;;
+    aws-sam-rie) echo "AWS SAM CLI 1.170.0 is the newest release (2026-10-22); it bundles the Lambda Runtime Interface Emulator (Go, chi), which only runs locally under 'sam local'. Lifted by the next SAM CLI release." ;;
+    azure-cli-rpm) echo "Azure CLI 2.91.0 is the newest Microsoft RPM (2026-10-05); it bundles its own Python packages under /usr/lib64/az. Lifted by the next Azure CLI release." ;;
     gcloud) echo "Google Cloud CLI is installed unpinned from Google's repo (newest release); it bundles its own Python under /usr/lib64/google-cloud-sdk. Lifted by the next Cloud SDK release." ;;
-    venv-cryptography) echo "azure-cli-core 2.90.0 (newest) pins msal==1.36.0, which requires cryptography<49, so /tmp/.venv stays on cryptography 48.0.1. Lifted when Azure CLI moves to a newer msal." ;;
-    pip-vendor) echo "pip 26.2.1 (newest; pip main too) vendors these, listed in pip/_vendor/vendor.txt of every pip in the image; Trivy reports them without a path. pip vendors only pkg_resources from setuptools. Lifted by the next pip release." ;;
+    venv-azure-pins) echo "/tmp/.venv keeps azure-cli 2.75.0, which pins PyNaCl~=1.5.0 and msal 1.33.0b1 (cryptography<48), so it stays on PyNaCl 1.5.0 and cryptography 47.0.0. Newer azure-cli needs a pre-release Azure SDK set; the RPM az 2.91.0 resolves first on PATH. Lifted by moving to terrarium 4.9." ;;
+    terraform-default) echo "Terraform 1.9.4 is tenv's default on the 4.8 line because it follows the ODS terraform-2408 agent (security fixes only, no tool moves); tenv installs whatever a project pins. Not the newest release (terrarium 4.9 ships 1.16.7). Lifted by moving to terrarium 4.9, or when the agent moves." ;;
+    terraform-config-inspect) echo "terraform-config-inspect v0.2.0 (2022, go1.13) is the newest release of nichtraunzer/terraform-config-inspect and also the ODS terraform-2408 agent pin. Lifted by a new release of the fork, or by moving to terrarium 4.9, which does not ship it." ;;
+    ruby-default-gems) echo "Ruby 3.3.4 follows the ODS terraform-2408 agent and the projects that pin .ruby-version 3.3.4 (4.8 is the line for Ruby users; a patch bump would break those pins, see INFIAAS-11725). These are its default and bundled gems. Lifted by moving to terrarium 4.9, which has no Ruby." ;;
+    gem-lock) echo "The kitchen-terraform / InSpec gem set (docker/Gemfile.lock) is frozen on the 4.8 line; the fixes need a major (excon 1.x, rubyzip 3.x) or a minor inside the InSpec stack (mongo 2.26). Lifted by moving to terrarium 4.9, which has no Ruby." ;;
+    pip-vendor) echo "pip 26.2.2 (newest, INFIAAS-11916; the Azure CLI RPM still ships 26.2.1) vendors these, listed in pip/_vendor/vendor.txt of every pip in the image; Trivy reports them without a path. pip vendors only pkg_resources from setuptools. Lifted by the next pip release." ;;
   esac
 }
 
