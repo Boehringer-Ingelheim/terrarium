@@ -555,90 +555,120 @@ vulnerabilities:
   # ── aws-sam-rie
   - id: CVE-2025-69725
     paths:
+      - "opt/pyenv/versions/3.13.17/lib/python3.13/site-packages/samcli/local/rapid/aws-lambda-rie-arm64"
+      - "opt/pyenv/versions/3.13.17/lib/python3.13/site-packages/samcli/local/rapid/aws-lambda-rie-x86_64"
       - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-arm64"
       - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-x86_64"
     statement: "AWS SAM CLI 1.170.0 is the newest release (2026-10-22); it bundles the Lambda Runtime Interface Emulator (Go, chi), which only runs locally under 'sam local'. Lifted by the next SAM CLI release."
     expired_at: 2026-12-31
   - id: CVE-2026-111943
     paths:
+      - "opt/pyenv/versions/3.13.17/lib/python3.13/site-packages/samcli/local/rapid/aws-lambda-rie-arm64"
+      - "opt/pyenv/versions/3.13.17/lib/python3.13/site-packages/samcli/local/rapid/aws-lambda-rie-x86_64"
       - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-arm64"
       - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-x86_64"
     statement: "AWS SAM CLI 1.170.0 is the newest release (2026-10-22); it bundles the Lambda Runtime Interface Emulator (Go, chi), which only runs locally under 'sam local'. Lifted by the next SAM CLI release."
     expired_at: 2026-12-31
   - id: CVE-2026-114437
     paths:
+      - "opt/pyenv/versions/3.13.17/lib/python3.13/site-packages/samcli/local/rapid/aws-lambda-rie-arm64"
+      - "opt/pyenv/versions/3.13.17/lib/python3.13/site-packages/samcli/local/rapid/aws-lambda-rie-x86_64"
       - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-arm64"
       - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-x86_64"
     statement: "AWS SAM CLI 1.170.0 is the newest release (2026-10-22); it bundles the Lambda Runtime Interface Emulator (Go, chi), which only runs locally under 'sam local'. Lifted by the next SAM CLI release."
     expired_at: 2026-12-31
   - id: CVE-2026-56866
     paths:
+      - "opt/pyenv/versions/3.13.17/lib/python3.13/site-packages/samcli/local/rapid/aws-lambda-rie-arm64"
+      - "opt/pyenv/versions/3.13.17/lib/python3.13/site-packages/samcli/local/rapid/aws-lambda-rie-x86_64"
       - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-arm64"
       - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-x86_64"
     statement: "AWS SAM CLI 1.170.0 is the newest release (2026-10-22); it bundles the Lambda Runtime Interface Emulator (Go, chi), which only runs locally under 'sam local'. Lifted by the next SAM CLI release."
     expired_at: 2026-12-31
   - id: CVE-2026-78659
     paths:
+      - "opt/pyenv/versions/3.13.17/lib/python3.13/site-packages/samcli/local/rapid/aws-lambda-rie-arm64"
+      - "opt/pyenv/versions/3.13.17/lib/python3.13/site-packages/samcli/local/rapid/aws-lambda-rie-x86_64"
       - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-arm64"
       - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-x86_64"
     statement: "AWS SAM CLI 1.170.0 is the newest release (2026-10-22); it bundles the Lambda Runtime Interface Emulator (Go, chi), which only runs locally under 'sam local'. Lifted by the next SAM CLI release."
     expired_at: 2026-12-31
   - id: CVE-2026-78660
     paths:
+      - "opt/pyenv/versions/3.13.17/lib/python3.13/site-packages/samcli/local/rapid/aws-lambda-rie-arm64"
+      - "opt/pyenv/versions/3.13.17/lib/python3.13/site-packages/samcli/local/rapid/aws-lambda-rie-x86_64"
       - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-arm64"
       - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-x86_64"
     statement: "AWS SAM CLI 1.170.0 is the newest release (2026-10-22); it bundles the Lambda Runtime Interface Emulator (Go, chi), which only runs locally under 'sam local'. Lifted by the next SAM CLI release."
     expired_at: 2026-12-31
   - id: CVE-2026-78663
     paths:
+      - "opt/pyenv/versions/3.13.17/lib/python3.13/site-packages/samcli/local/rapid/aws-lambda-rie-arm64"
+      - "opt/pyenv/versions/3.13.17/lib/python3.13/site-packages/samcli/local/rapid/aws-lambda-rie-x86_64"
       - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-arm64"
       - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-x86_64"
     statement: "AWS SAM CLI 1.170.0 is the newest release (2026-10-22); it bundles the Lambda Runtime Interface Emulator (Go, chi), which only runs locally under 'sam local'. Lifted by the next SAM CLI release."
     expired_at: 2026-12-31
   - id: CVE-2026-78667
     paths:
+      - "opt/pyenv/versions/3.13.17/lib/python3.13/site-packages/samcli/local/rapid/aws-lambda-rie-arm64"
+      - "opt/pyenv/versions/3.13.17/lib/python3.13/site-packages/samcli/local/rapid/aws-lambda-rie-x86_64"
       - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-arm64"
       - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-x86_64"
     statement: "AWS SAM CLI 1.170.0 is the newest release (2026-10-22); it bundles the Lambda Runtime Interface Emulator (Go, chi), which only runs locally under 'sam local'. Lifted by the next SAM CLI release."
     expired_at: 2026-12-31
   - id: CVE-2026-78669
     paths:
+      - "opt/pyenv/versions/3.13.17/lib/python3.13/site-packages/samcli/local/rapid/aws-lambda-rie-arm64"
+      - "opt/pyenv/versions/3.13.17/lib/python3.13/site-packages/samcli/local/rapid/aws-lambda-rie-x86_64"
       - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-arm64"
       - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-x86_64"
     statement: "AWS SAM CLI 1.170.0 is the newest release (2026-10-22); it bundles the Lambda Runtime Interface Emulator (Go, chi), which only runs locally under 'sam local'. Lifted by the next SAM CLI release."
     expired_at: 2026-12-31
   - id: CVE-2026-94439
     paths:
+      - "opt/pyenv/versions/3.13.17/lib/python3.13/site-packages/samcli/local/rapid/aws-lambda-rie-arm64"
+      - "opt/pyenv/versions/3.13.17/lib/python3.13/site-packages/samcli/local/rapid/aws-lambda-rie-x86_64"
       - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-arm64"
       - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-x86_64"
     statement: "AWS SAM CLI 1.170.0 is the newest release (2026-10-22); it bundles the Lambda Runtime Interface Emulator (Go, chi), which only runs locally under 'sam local'. Lifted by the next SAM CLI release."
     expired_at: 2026-12-31
   - id: CVE-2026-94440
     paths:
+      - "opt/pyenv/versions/3.13.17/lib/python3.13/site-packages/samcli/local/rapid/aws-lambda-rie-arm64"
+      - "opt/pyenv/versions/3.13.17/lib/python3.13/site-packages/samcli/local/rapid/aws-lambda-rie-x86_64"
       - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-arm64"
       - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-x86_64"
     statement: "AWS SAM CLI 1.170.0 is the newest release (2026-10-22); it bundles the Lambda Runtime Interface Emulator (Go, chi), which only runs locally under 'sam local'. Lifted by the next SAM CLI release."
     expired_at: 2026-12-31
   - id: CVE-2026-94448
     paths:
+      - "opt/pyenv/versions/3.13.17/lib/python3.13/site-packages/samcli/local/rapid/aws-lambda-rie-arm64"
+      - "opt/pyenv/versions/3.13.17/lib/python3.13/site-packages/samcli/local/rapid/aws-lambda-rie-x86_64"
       - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-arm64"
       - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-x86_64"
     statement: "AWS SAM CLI 1.170.0 is the newest release (2026-10-22); it bundles the Lambda Runtime Interface Emulator (Go, chi), which only runs locally under 'sam local'. Lifted by the next SAM CLI release."
     expired_at: 2026-12-31
   - id: CVE-2026-97030
     paths:
+      - "opt/pyenv/versions/3.13.17/lib/python3.13/site-packages/samcli/local/rapid/aws-lambda-rie-arm64"
+      - "opt/pyenv/versions/3.13.17/lib/python3.13/site-packages/samcli/local/rapid/aws-lambda-rie-x86_64"
       - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-arm64"
       - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-x86_64"
     statement: "AWS SAM CLI 1.170.0 is the newest release (2026-10-22); it bundles the Lambda Runtime Interface Emulator (Go, chi), which only runs locally under 'sam local'. Lifted by the next SAM CLI release."
     expired_at: 2026-12-31
   - id: CVE-2026-97031
     paths:
+      - "opt/pyenv/versions/3.13.17/lib/python3.13/site-packages/samcli/local/rapid/aws-lambda-rie-arm64"
+      - "opt/pyenv/versions/3.13.17/lib/python3.13/site-packages/samcli/local/rapid/aws-lambda-rie-x86_64"
       - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-arm64"
       - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-x86_64"
     statement: "AWS SAM CLI 1.170.0 is the newest release (2026-10-22); it bundles the Lambda Runtime Interface Emulator (Go, chi), which only runs locally under 'sam local'. Lifted by the next SAM CLI release."
     expired_at: 2026-12-31
   - id: CVE-2026-97032
     paths:
+      - "opt/pyenv/versions/3.13.17/lib/python3.13/site-packages/samcli/local/rapid/aws-lambda-rie-arm64"
+      - "opt/pyenv/versions/3.13.17/lib/python3.13/site-packages/samcli/local/rapid/aws-lambda-rie-x86_64"
       - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-arm64"
       - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-x86_64"
     statement: "AWS SAM CLI 1.170.0 is the newest release (2026-10-22); it bundles the Lambda Runtime Interface Emulator (Go, chi), which only runs locally under 'sam local'. Lifted by the next SAM CLI release."
