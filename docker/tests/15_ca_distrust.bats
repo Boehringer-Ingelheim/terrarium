@@ -60,6 +60,19 @@ FIXTURES="$BATS_TEST_DIRNAME/fixtures/emudhra-compromised"
 # Format: "<shell glob>|<why / vendor tracking link>". Every run reports them
 # on fd 3, and reports any that the vendor has fixed so the entry can go.
 CA_RESIDUALS=(
+    # Azure CLI RPM 2.91.0 (newest, 2026-10-05) bundles certifi and pip with the
+    # old roots. Fixed on dev, not yet released: Azure/azure-cli#34250 (certifi),
+    # Azure/azure-cli#34275 (embedded Python 3.14.9).
+    "/usr/lib64/az/lib/python3*/site-packages/certifi/cacert.pem|Azure CLI RPM: fix unreleased, https://github.com/Azure/azure-cli/pull/34250"
+    "/usr/lib64/az/lib/python3*/site-packages/pip/_vendor/certifi/cacert.pem|Azure CLI RPM: fix unreleased, https://github.com/Azure/azure-cli/pull/34275"
+    # AWS SAM CLI 1.170.0 (newest, 2026-10-22) bundles certifi 2026.7.22 and
+    # botocore's AAA-carrying bundle. Tracked: aws/aws-sam-cli#9359.
+    "/usr/local/aws-sam-cli/*/dist/_internal/certifi/cacert.pem|AWS SAM CLI: no fixed release, https://github.com/aws/aws-sam-cli/pull/9359"
+    "/usr/local/aws-sam-cli/*/dist/_internal/botocore/cacert.pem|AWS SAM CLI: no fixed release, https://github.com/aws/aws-sam-cli/pull/9359"
+    # botocore 1.39.x's own bundle (still has AAA) is only a fallback: botocore
+    # uses certifi whenever it is importable, and /tmp/.venv has certifi
+    # >= 2026.10.23. boto3/botocore are held at ~=1.39 (botocore 1.43.x drops AAA).
+    "/tmp/.venv/lib/python3*/site-packages/botocore/cacert.pem|unused fallback: botocore loads certifi (fixed) first; lifted by the boto3/botocore 1.43 bump"
 )
 
 setup_file() {
