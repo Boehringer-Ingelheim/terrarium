@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+# link_system_ca_bundle — replace CA bundles vendored inside installed packages
+# with a symlink to the system trust store (INFIAAS-11916).
+#
+# Some Ruby gems ship their own copy of a Mozilla CA bundle (aws-sdk-core,
+# excon, httpclient, ms_rest). Those copies are frozen at the gem's release
+# date, so an OS ca-certificates update never reaches them: after the
+# eMudhra/emSign intermediate compromise they still trusted the compromised
+# intermediates (15_ca_distrust.bats). Even the newest httpclient and ms_rest
+# releases carry stale bundles, so a gem bump cannot fix it. Pointing each
+# copy at the system bundle makes every gem trust exactly what the OS trusts.
+#
+# Usage: link_system_ca_bundle <system-bundle> <vendored-bundle> [...]
+#
+# Rules (each fails, exit 1, unless noted):
+#   - <system-bundle> must exist and contain at least one PEM certificate;
+#   - every <vendored-bundle> must exist. An unmatched shell glob stays
+#     literal and fails here, so a gem that moves or drops its bundle forces
+#     the list to be updated instead of silently covering nothing;
+#   - a <vendored-bundle> must be a regular file holding a PEM certificate
+#     (refuses to replace anything else);
+#   - one that is already a symlink to <system-bundle> is left alone (NOTE,
+#     not an error), so the step is idempotent.
+# Exit 2 on a usage error.
+set -euo pipefail
+
+[ "$#" -ge 2 ] || { echo "usage: link_system_ca_bundle <system-bundle> <vendored-bundle> ..." >&2; exit 2; }
+sys="$1"; shift
+pem_marker='-----BEGIN CERTIFICATE-----'
+
+[ -e "$sys" ] || { echo "ERROR: system bundle ${sys} does not exist" >&2; exit 1; }
+grep -qF -- "$pem_marker" "$sys" || { echo "ERROR: system bundle ${sys} holds no PEM certificate" >&2; exit 1; }
+
+for f in "$@"; do
+  if [ -L "$f" ]; then
+    if [ "$(readlink -- "$f")" = "$sys" ]; then
+      echo "NOTE: ${f} already links to ${sys}"
+      continue
+    fi
+    echo "ERROR: ${f} is a symlink to $(readlink -- "$f"), not ${sys}; refusing" >&2; exit 1
+  fi
+  [ -e "$f" ] || { echo "ERROR: no such vendored bundle: ${f} (did the package move or drop it?)" >&2; exit 1; }
+  [ -f "$f" ] || { echo "ERROR: ${f} is not a regular file; refusing" >&2; exit 1; }
+  grep -qF -- "$pem_marker" "$f" || { echo "ERROR: ${f} holds no PEM certificate; refusing" >&2; exit 1; }
+  ln -sfn -- "$sys" "$f"
+  echo "linked ${f} -> ${sys}"
+done

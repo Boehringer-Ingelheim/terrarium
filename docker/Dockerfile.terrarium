@@ -425,6 +425,17 @@ RUN set -eux; \
     bundle clean --force; \
     BUNDLE_FROZEN=true bundle check
 
+# Gems that ship their own (frozen) Mozilla CA bundle trust exactly what the OS
+# trusts instead (INFIAAS-11916): their copies still trusted the compromised
+# eMudhra/emSign intermediates, and httpclient/ms_rest have no newer release.
+# The list is explicit; an entry that no longer matches fails the build.
+RUN link_system_ca_bundle /etc/pki/tls/certs/ca-bundle.crt \
+    ${GEM_HOME}/ruby/*/gems/aws-sdk-core-*/ca-bundle.crt \
+    ${GEM_HOME}/ruby/*/gems/excon-*/data/cacert.pem \
+    ${GEM_HOME}/ruby/*/gems/httpclient-*/lib/httpclient/cacert.pem \
+    ${GEM_HOME}/ruby/*/gems/httpclient-*/lib/httpclient/cacert1024.pem \
+    ${GEM_HOME}/ruby/*/gems/ms_rest-*/ca-cert.pem
+
 # xorriso (from buildlang)
 COPY --from=buildlang /usr/bin/xorriso /usr/bin/xorriso
 COPY --from=buildlang /usr/lib64/libisoburn.so.* /usr/lib64/
