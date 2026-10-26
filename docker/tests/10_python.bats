@@ -27,14 +27,24 @@ load 'test_helper/common.bash'
   assert_output "${PYTHON_VERSION}"
 }
 
-@test "pip in the pyenv interpreter and in /opt/openstack is at least PIP_MIN_VERSION" {
-  [ -n "${PIP_MIN_VERSION:-}" ] || fail "PIP_MIN_VERSION is not set in the image ENV"
-  for py in "/opt/pyenv/versions/${PYTHON_VERSION}/bin/python" /opt/openstack/bin/python; do
-    run "$py" -c 'import pip; print(pip.__version__)'
-    assert_success
-    [ "$(printf '%s\n%s\n' "$output" "$PIP_MIN_VERSION" | sort -V | head -n1)" = "$PIP_MIN_VERSION" ] \
-      || fail "$py: pip $output < PIP_MIN_VERSION $PIP_MIN_VERSION"
-  done
+# The pip pin is a build ARG only (PIP_VERSION, INFIAAS-11916 A-02/A-07): an
+# ENV in the PIP_* namespace would be read by pip as configuration. The exact
+# floor is asserted independently in 15_ca_distrust.bats (PIP_FLOOR).
+@test "pip is the same pinned version in the pyenv interpreter and in /opt/openstack" {
+  [ -n "${PYTHON_VERSION:-}" ] || fail "PYTHON_VERSION is not set in the image ENV"
+  run "/opt/pyenv/versions/${PYTHON_VERSION}/bin/python" -c 'import pip; print(pip.__version__)'
+  assert_success
+  pyenv_pip="$output"
+  [[ "$pyenv_pip" =~ ^[0-9]+\.[0-9]+(\.[0-9]+)?$ ]] || fail "unexpected pip version '${pyenv_pip}'"
+  run /opt/openstack/bin/python -c 'import pip; print(pip.__version__)'
+  assert_success
+  assert_output "$pyenv_pip"
+}
+
+@test "no pip configuration leaks in from the image ENV (A-07)" {
+  run pip config list
+  assert_success
+  refute_output --partial ":env:"
 }
 
 @test "uv CLI is installed" {
