@@ -192,7 +192,7 @@ jobs:
           trivyignores: .trivyignore.yaml
 
       - name: Upload Trivy results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@6f2ac81f5cd81fe351a197ba0b00d91d03cd2aee # v4.39.0
+        uses: github/codeql-action/upload-sarif@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
         # hashFiles: no SARIF when a release pull failed (no scan ran) — the
         # explicit failure step above is the signal, not a missing-file error.
         if: always() && hashFiles('trivy-results.sarif') != ''
