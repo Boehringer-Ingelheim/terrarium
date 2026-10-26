@@ -19,10 +19,10 @@ compliance with their organization's policies.
 
 | Tool | Version | License | Source |
 |------|---------|---------|--------|
-| Python | 3.13.12 (via pyenv) | [PSF-2.0](https://docs.python.org/3/license.html) | github.com/pyenv/pyenv → python.org |
-| Ruby | 3.4.9 (via rbenv) | [BSD-2-Clause](https://www.ruby-lang.org/en/about/license.txt) | github.com/rbenv/rbenv → ruby-lang.org |
-| Go | 1.26.1 | [BSD-3-Clause](https://go.dev/LICENSE) | go.dev |
-| Node.js | 24.14.0 | [MIT](https://github.com/nodejs/node/blob/main/LICENSE) | nodejs.org |
+| Python | 3.13.17 (via pyenv) | [PSF-2.0](https://docs.python.org/3/license.html) | github.com/pyenv/pyenv → python.org |
+| Ruby | 3.3.4 (via rbenv) | [BSD-2-Clause](https://www.ruby-lang.org/en/about/license.txt) | github.com/rbenv/rbenv → ruby-lang.org |
+| Go | 1.26.10 | [BSD-3-Clause](https://go.dev/LICENSE) | go.dev |
+| Node.js | 24.22.1 | [MIT](https://github.com/nodejs/node/blob/main/LICENSE) | nodejs.org |
 
 ## Version Managers
 
@@ -31,19 +31,19 @@ compliance with their organization's policies.
 | pyenv | latest (git clone) | [MIT](https://github.com/pyenv/pyenv/blob/master/LICENSE) | github.com/pyenv/pyenv |
 | rbenv | latest (git clone) | [MIT](https://github.com/rbenv/rbenv/blob/master/LICENSE) | github.com/rbenv/rbenv |
 | ruby-build | latest (git clone) | [MIT](https://github.com/rbenv/ruby-build/blob/master/LICENSE) | github.com/rbenv/ruby-build |
-| tenv | 4.9.3 | [Apache-2.0](https://github.com/tofuutils/tenv/blob/main/LICENSE) | github.com/tofuutils/tenv |
+| tenv | 4.15.1 | [Apache-2.0](https://github.com/tofuutils/tenv/blob/main/LICENSE) | github.com/tofuutils/tenv |
 | uv | latest (install script) | [Apache-2.0](https://github.com/astral-sh/uv/blob/main/LICENSE-APACHE) | astral.sh/uv |
 
 ## Infrastructure as Code
 
 | Tool | Version | License | Source |
 |------|---------|---------|--------|
-| Terraform | 1.14.7 (via tenv) | [BUSL-1.1](https://github.com/hashicorp/terraform/blob/main/LICENSE) | releases.hashicorp.com |
-| OpenTofu | 1.11.5 (via tenv) | [MPL-2.0](https://github.com/opentofu/opentofu/blob/main/LICENSE) | opentofu.org |
-| Packer | 1.15.0 | [BUSL-1.1](https://github.com/hashicorp/packer/blob/main/LICENSE) | releases.hashicorp.com |
-| terraform-docs | v0.21.0 | [MIT](https://github.com/terraform-docs/terraform-docs/blob/master/LICENSE) | github.com/terraform-docs/terraform-docs |
+| Terraform | 1.9.4 (via tenv, default) | [BUSL-1.1](https://github.com/hashicorp/terraform/blob/main/LICENSE) | releases.hashicorp.com |
+| OpenTofu | 1.11.14 (via tenv) | [MPL-2.0](https://github.com/opentofu/opentofu/blob/main/LICENSE) | opentofu.org |
+| Packer | 1.11.2 | [BUSL-1.1](https://github.com/hashicorp/packer/blob/main/LICENSE) | releases.hashicorp.com |
+| terraform-docs | v0.18.0 | [MIT](https://github.com/terraform-docs/terraform-docs/blob/master/LICENSE) | github.com/terraform-docs/terraform-docs |
 | terraform-config-inspect | 0.2.0 | [MPL-2.0](https://github.com/hashicorp/terraform-config-inspect/blob/main/LICENSE) | github.com/nichtraunzer/terraform-config-inspect |
-| tflint | 0.61.0 | [MPL-2.0](https://github.com/terraform-linters/tflint/blob/master/LICENSE) | github.com/terraform-linters/tflint |
+| tflint | 0.52.0 | [MPL-2.0](https://github.com/terraform-linters/tflint/blob/master/LICENSE) | github.com/terraform-linters/tflint |
 
 ## Cloud CLIs
 
@@ -54,24 +54,24 @@ compliance with their organization's policies.
 | AWS CDK | 2.1024.0 (npm) | [Apache-2.0](https://github.com/aws/aws-cdk/blob/main/LICENSE) | npm (aws-cdk) |
 | Azure CLI | latest (dnf repo) | [MIT](https://github.com/Azure/azure-cli/blob/dev/LICENSE) | packages.microsoft.com |
 | GCP CLI (gcloud) | latest (dnf repo) | [Apache-2.0](https://cloud.google.com/sdk/docs/install) | packages.cloud.google.com |
-| OpenStack CLI | 7.1.5 (pip venv) | [Apache-2.0](https://github.com/openstack/python-openstackclient/blob/master/LICENSE) | pypi.org |
-| OpenStack Barbican client | 7.3.0 (pip venv) | [Apache-2.0](https://github.com/openstack/python-barbicanclient/blob/master/LICENSE) | pypi.org |
+| OpenStack CLI | 7.5.1 (pip venv) | [Apache-2.0](https://github.com/openstack/python-openstackclient/blob/master/LICENSE) | pypi.org |
+| OpenStack Barbican client | 7.1.0 (pip venv) | [Apache-2.0](https://github.com/openstack/python-barbicanclient/blob/master/LICENSE) | pypi.org |
 
 ## Kubernetes & Container Tools
 
 | Tool | Version | License | Source |
 |------|---------|---------|--------|
-| kubectl | 1.35.3 | [Apache-2.0](https://github.com/kubernetes/kubectl/blob/master/LICENSE) | dl.k8s.io |
-| Helm | 3.20.1 | [Apache-2.0](https://github.com/helm/helm/blob/main/LICENSE) | get.helm.sh |
-| OpenShift CLI (oc) | 4.19.0 | [Apache-2.0](https://github.com/openshift/oc/blob/master/LICENSE) | mirror.openshift.com |
+| kubectl | 1.35.9 | [Apache-2.0](https://github.com/kubernetes/kubectl/blob/master/LICENSE) | dl.k8s.io |
+| Helm | 3.22.0 | [Apache-2.0](https://github.com/helm/helm/blob/main/LICENSE) | get.helm.sh |
+| OpenShift CLI (oc) | 4.19.51 | [Apache-2.0](https://github.com/openshift/oc/blob/master/LICENSE) | mirror.openshift.com |
 
 ## Security & Secrets
 
 | Tool | Version | License | Source |
 |------|---------|---------|--------|
-| Trivy | 0.69.3 | [Apache-2.0](https://github.com/aquasecurity/trivy/blob/main/LICENSE) | github.com/aquasecurity/trivy |
-| sops | 3.12.2 | [MPL-2.0](https://github.com/getsops/sops/blob/main/LICENSE) | github.com/getsops/sops |
-| age | 1.3.1 | [BSD-3-Clause](https://github.com/FiloSottile/age/blob/main/LICENSE) | github.com/FiloSottile/age |
+| Trivy | 0.76.1 | [Apache-2.0](https://github.com/aquasecurity/trivy/blob/main/LICENSE) | github.com/aquasecurity/trivy |
+| sops | 3.13.3 | [MPL-2.0](https://github.com/getsops/sops/blob/main/LICENSE) | github.com/getsops/sops |
+| age | 1.2.0 | [BSD-3-Clause](https://github.com/FiloSottile/age/blob/main/LICENSE) | github.com/FiloSottile/age |
 
 ## Shell & Utilities
 
@@ -79,8 +79,8 @@ compliance with their organization's policies.
 |------|---------|---------|--------|
 | Starship | 1.24.2 | [ISC](https://github.com/starship/starship/blob/master/LICENSE) | starship.rs |
 | zoxide | 0.9.9 | [MIT](https://github.com/ajeetdsouza/zoxide/blob/main/LICENSE) | github.com/ajeetdsouza/zoxide |
-| yq | 4.52.4 | [MIT](https://github.com/mikefarah/yq/blob/master/LICENSE) | github.com/mikefarah/yq |
-| Task (go-task) | 3.49.1 | [MIT](https://github.com/go-task/task/blob/main/LICENSE) | taskfile.dev |
+| yq | 4.54.1 | [MIT](https://github.com/mikefarah/yq/blob/master/LICENSE) | github.com/mikefarah/yq |
+| Task (go-task) | 3.38.0 | [MIT](https://github.com/go-task/task/blob/main/LICENSE) | taskfile.dev |
 | jq | dnf | [MIT](https://github.com/jqlang/jq/blob/master/COPYING) | dnf (EPEL) |
 | GNU Parallel | dnf | [GPL-3.0-or-later](https://www.gnu.org/software/parallel/) | dnf (EPEL) |
 | xorriso | buildlang stage | [GPL-2.0-or-later](https://www.gnu.org/software/xorriso/) | dnf (Rocky Linux CRB) |
@@ -119,12 +119,14 @@ The following packages are installed via `pyproject.toml` / `uv.lock`:
 |---------|---------|--------|
 | boto3 / botocore (~> 1.39) | Apache-2.0 | pypi.org |
 | pre-commit (~> 4.2) | MIT | pypi.org |
-| requests (~> 2.32) | Apache-2.0 | pypi.org |
+| requests (~> 2.33) | Apache-2.0 | pypi.org |
 | python-hcl2 (~> 2.0) | MIT | pypi.org |
-| pipenv (~> 2024.0) | MIT | pypi.org |
+| pipenv (~> 2026.10) | MIT | pypi.org |
 | pycodestyle (~> 2.14) | MIT | pypi.org |
 | simplejson (~> 3.19) | MIT / Academic Free License | pypi.org |
-| virtualenv (~> 20.32) | MIT | pypi.org |
+| virtualenv (~> 21.14.13) | MIT | pypi.org |
+| certifi (>= 2026.10.23) | MPL-2.0 | pypi.org |
+| uv (~> 0.13.5) | Apache-2.0 / MIT | pypi.org |
 
 > For the complete list of transitive Python dependencies and their licenses,
 > inspect `docker/uv.lock` or run `uv pip list --format columns` inside the container.
