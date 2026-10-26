@@ -101,91 +101,91 @@ vulnerabilities:
     paths:
       - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-arm64"
       - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-x86_64"
-    statement: "AWS SAM CLI 1.166.2 is the newest release; it bundles the Lambda Runtime Interface Emulator (chi v5.2.2), which only runs locally under 'sam local'. Lifted by the next SAM CLI release."
+    statement: "AWS SAM CLI 1.170.0 is the newest release (2026-10-22); it bundles the Lambda Runtime Interface Emulator (Go, chi), which only runs locally under 'sam local'. Lifted by the next SAM CLI release."
     expired_at: 2026-12-31
   - id: CVE-2026-111943
     paths:
       - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-arm64"
       - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-x86_64"
-    statement: "AWS SAM CLI 1.166.2 is the newest release; it bundles the Lambda Runtime Interface Emulator (chi v5.2.2), which only runs locally under 'sam local'. Lifted by the next SAM CLI release."
+    statement: "AWS SAM CLI 1.170.0 is the newest release (2026-10-22); it bundles the Lambda Runtime Interface Emulator (Go, chi), which only runs locally under 'sam local'. Lifted by the next SAM CLI release."
     expired_at: 2026-12-31
   - id: CVE-2026-114437
     paths:
       - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-arm64"
       - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-x86_64"
-    statement: "AWS SAM CLI 1.166.2 is the newest release; it bundles the Lambda Runtime Interface Emulator (chi v5.2.2), which only runs locally under 'sam local'. Lifted by the next SAM CLI release."
+    statement: "AWS SAM CLI 1.170.0 is the newest release (2026-10-22); it bundles the Lambda Runtime Interface Emulator (Go, chi), which only runs locally under 'sam local'. Lifted by the next SAM CLI release."
     expired_at: 2026-12-31
   - id: CVE-2026-56866
     paths:
       - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-arm64"
       - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-x86_64"
-    statement: "AWS SAM CLI 1.166.2 is the newest release; it bundles the Lambda Runtime Interface Emulator (chi v5.2.2), which only runs locally under 'sam local'. Lifted by the next SAM CLI release."
+    statement: "AWS SAM CLI 1.170.0 is the newest release (2026-10-22); it bundles the Lambda Runtime Interface Emulator (Go, chi), which only runs locally under 'sam local'. Lifted by the next SAM CLI release."
     expired_at: 2026-12-31
   - id: CVE-2026-78659
     paths:
       - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-arm64"
       - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-x86_64"
-    statement: "AWS SAM CLI 1.166.2 is the newest release; it bundles the Lambda Runtime Interface Emulator (chi v5.2.2), which only runs locally under 'sam local'. Lifted by the next SAM CLI release."
+    statement: "AWS SAM CLI 1.170.0 is the newest release (2026-10-22); it bundles the Lambda Runtime Interface Emulator (Go, chi), which only runs locally under 'sam local'. Lifted by the next SAM CLI release."
     expired_at: 2026-12-31
   - id: CVE-2026-78660
     paths:
       - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-arm64"
       - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-x86_64"
-    statement: "AWS SAM CLI 1.166.2 is the newest release; it bundles the Lambda Runtime Interface Emulator (chi v5.2.2), which only runs locally under 'sam local'. Lifted by the next SAM CLI release."
+    statement: "AWS SAM CLI 1.170.0 is the newest release (2026-10-22); it bundles the Lambda Runtime Interface Emulator (Go, chi), which only runs locally under 'sam local'. Lifted by the next SAM CLI release."
     expired_at: 2026-12-31
   - id: CVE-2026-78663
     paths:
       - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-arm64"
       - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-x86_64"
-    statement: "AWS SAM CLI 1.166.2 is the newest release; it bundles the Lambda Runtime Interface Emulator (chi v5.2.2), which only runs locally under 'sam local'. Lifted by the next SAM CLI release."
+    statement: "AWS SAM CLI 1.170.0 is the newest release (2026-10-22); it bundles the Lambda Runtime Interface Emulator (Go, chi), which only runs locally under 'sam local'. Lifted by the next SAM CLI release."
     expired_at: 2026-12-31
   - id: CVE-2026-78667
     paths:
       - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-arm64"
       - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-x86_64"
-    statement: "AWS SAM CLI 1.166.2 is the newest release; it bundles the Lambda Runtime Interface Emulator (chi v5.2.2), which only runs locally under 'sam local'. Lifted by the next SAM CLI release."
+    statement: "AWS SAM CLI 1.170.0 is the newest release (2026-10-22); it bundles the Lambda Runtime Interface Emulator (Go, chi), which only runs locally under 'sam local'. Lifted by the next SAM CLI release."
     expired_at: 2026-12-31
   - id: CVE-2026-78669
     paths:
       - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-arm64"
       - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-x86_64"
-    statement: "AWS SAM CLI 1.166.2 is the newest release; it bundles the Lambda Runtime Interface Emulator (chi v5.2.2), which only runs locally under 'sam local'. Lifted by the next SAM CLI release."
+    statement: "AWS SAM CLI 1.170.0 is the newest release (2026-10-22); it bundles the Lambda Runtime Interface Emulator (Go, chi), which only runs locally under 'sam local'. Lifted by the next SAM CLI release."
     expired_at: 2026-12-31
   - id: CVE-2026-94439
     paths:
       - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-arm64"
       - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-x86_64"
-    statement: "AWS SAM CLI 1.166.2 is the newest release; it bundles the Lambda Runtime Interface Emulator (chi v5.2.2), which only runs locally under 'sam local'. Lifted by the next SAM CLI release."
+    statement: "AWS SAM CLI 1.170.0 is the newest release (2026-10-22); it bundles the Lambda Runtime Interface Emulator (Go, chi), which only runs locally under 'sam local'. Lifted by the next SAM CLI release."
     expired_at: 2026-12-31
   - id: CVE-2026-94440
     paths:
       - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-arm64"
       - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-x86_64"
-    statement: "AWS SAM CLI 1.166.2 is the newest release; it bundles the Lambda Runtime Interface Emulator (chi v5.2.2), which only runs locally under 'sam local'. Lifted by the next SAM CLI release."
+    statement: "AWS SAM CLI 1.170.0 is the newest release (2026-10-22); it bundles the Lambda Runtime Interface Emulator (Go, chi), which only runs locally under 'sam local'. Lifted by the next SAM CLI release."
     expired_at: 2026-12-31
   - id: CVE-2026-94448
     paths:
       - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-arm64"
       - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-x86_64"
-    statement: "AWS SAM CLI 1.166.2 is the newest release; it bundles the Lambda Runtime Interface Emulator (chi v5.2.2), which only runs locally under 'sam local'. Lifted by the next SAM CLI release."
+    statement: "AWS SAM CLI 1.170.0 is the newest release (2026-10-22); it bundles the Lambda Runtime Interface Emulator (Go, chi), which only runs locally under 'sam local'. Lifted by the next SAM CLI release."
     expired_at: 2026-12-31
   - id: CVE-2026-97030
     paths:
       - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-arm64"
       - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-x86_64"
-    statement: "AWS SAM CLI 1.166.2 is the newest release; it bundles the Lambda Runtime Interface Emulator (chi v5.2.2), which only runs locally under 'sam local'. Lifted by the next SAM CLI release."
+    statement: "AWS SAM CLI 1.170.0 is the newest release (2026-10-22); it bundles the Lambda Runtime Interface Emulator (Go, chi), which only runs locally under 'sam local'. Lifted by the next SAM CLI release."
     expired_at: 2026-12-31
   - id: CVE-2026-97031
     paths:
       - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-arm64"
       - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-x86_64"
-    statement: "AWS SAM CLI 1.166.2 is the newest release; it bundles the Lambda Runtime Interface Emulator (chi v5.2.2), which only runs locally under 'sam local'. Lifted by the next SAM CLI release."
+    statement: "AWS SAM CLI 1.170.0 is the newest release (2026-10-22); it bundles the Lambda Runtime Interface Emulator (Go, chi), which only runs locally under 'sam local'. Lifted by the next SAM CLI release."
     expired_at: 2026-12-31
   - id: CVE-2026-97032
     paths:
       - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-arm64"
       - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-x86_64"
-    statement: "AWS SAM CLI 1.166.2 is the newest release; it bundles the Lambda Runtime Interface Emulator (chi v5.2.2), which only runs locally under 'sam local'. Lifted by the next SAM CLI release."
+    statement: "AWS SAM CLI 1.170.0 is the newest release (2026-10-22); it bundles the Lambda Runtime Interface Emulator (Go, chi), which only runs locally under 'sam local'. Lifted by the next SAM CLI release."
     expired_at: 2026-12-31
   # ── az-pip-certifi
   - id: GHSA-6q48-6c7w-9gw2
@@ -197,117 +197,117 @@ vulnerabilities:
   - id: CVE-2026-101917
     paths:
       - "usr/lib64/az/lib/python3.12/site-packages/pyjwt-2.13.0.dist-info/METADATA"
-    statement: "Azure CLI 2.90.0 is the newest Microsoft RPM; it bundles its own Python packages under /usr/lib64/az. Lifted by the next Azure CLI release."
+    statement: "Azure CLI 2.91.0 is the newest Microsoft RPM (2026-10-05); it bundles its own Python packages under /usr/lib64/az. Lifted by the next Azure CLI release."
     expired_at: 2026-12-31
   - id: CVE-2026-101918
     paths:
       - "usr/lib64/az/lib/python3.12/site-packages/pyjwt-2.13.0.dist-info/METADATA"
-    statement: "Azure CLI 2.90.0 is the newest Microsoft RPM; it bundles its own Python packages under /usr/lib64/az. Lifted by the next Azure CLI release."
+    statement: "Azure CLI 2.91.0 is the newest Microsoft RPM (2026-10-05); it bundles its own Python packages under /usr/lib64/az. Lifted by the next Azure CLI release."
     expired_at: 2026-12-31
   - id: CVE-2026-102265
     paths:
       - "usr/lib64/az/lib/python3.12/site-packages/pyjwt-2.13.0.dist-info/METADATA"
-    statement: "Azure CLI 2.90.0 is the newest Microsoft RPM; it bundles its own Python packages under /usr/lib64/az. Lifted by the next Azure CLI release."
+    statement: "Azure CLI 2.91.0 is the newest Microsoft RPM (2026-10-05); it bundles its own Python packages under /usr/lib64/az. Lifted by the next Azure CLI release."
     expired_at: 2026-12-31
   - id: CVE-2026-102266
     paths:
       - "usr/lib64/az/lib/python3.12/site-packages/pyjwt-2.13.0.dist-info/METADATA"
-    statement: "Azure CLI 2.90.0 is the newest Microsoft RPM; it bundles its own Python packages under /usr/lib64/az. Lifted by the next Azure CLI release."
+    statement: "Azure CLI 2.91.0 is the newest Microsoft RPM (2026-10-05); it bundles its own Python packages under /usr/lib64/az. Lifted by the next Azure CLI release."
     expired_at: 2026-12-31
   - id: CVE-2026-102267
     paths:
       - "usr/lib64/az/lib/python3.12/site-packages/pyjwt-2.13.0.dist-info/METADATA"
-    statement: "Azure CLI 2.90.0 is the newest Microsoft RPM; it bundles its own Python packages under /usr/lib64/az. Lifted by the next Azure CLI release."
+    statement: "Azure CLI 2.91.0 is the newest Microsoft RPM (2026-10-05); it bundles its own Python packages under /usr/lib64/az. Lifted by the next Azure CLI release."
     expired_at: 2026-12-31
   - id: CVE-2026-102268
     paths:
       - "usr/lib64/az/lib/python3.12/site-packages/pyjwt-2.13.0.dist-info/METADATA"
-    statement: "Azure CLI 2.90.0 is the newest Microsoft RPM; it bundles its own Python packages under /usr/lib64/az. Lifted by the next Azure CLI release."
+    statement: "Azure CLI 2.91.0 is the newest Microsoft RPM (2026-10-05); it bundles its own Python packages under /usr/lib64/az. Lifted by the next Azure CLI release."
     expired_at: 2026-12-31
   - id: CVE-2026-102269
     paths:
       - "usr/lib64/az/lib/python3.12/site-packages/pyjwt-2.13.0.dist-info/METADATA"
-    statement: "Azure CLI 2.90.0 is the newest Microsoft RPM; it bundles its own Python packages under /usr/lib64/az. Lifted by the next Azure CLI release."
+    statement: "Azure CLI 2.91.0 is the newest Microsoft RPM (2026-10-05); it bundles its own Python packages under /usr/lib64/az. Lifted by the next Azure CLI release."
     expired_at: 2026-12-31
   - id: CVE-2026-102270
     paths:
       - "usr/lib64/az/lib/python3.12/site-packages/pyjwt-2.13.0.dist-info/METADATA"
-    statement: "Azure CLI 2.90.0 is the newest Microsoft RPM; it bundles its own Python packages under /usr/lib64/az. Lifted by the next Azure CLI release."
+    statement: "Azure CLI 2.91.0 is the newest Microsoft RPM (2026-10-05); it bundles its own Python packages under /usr/lib64/az. Lifted by the next Azure CLI release."
     expired_at: 2026-12-31
   - id: CVE-2026-102271
     paths:
       - "usr/lib64/az/lib/python3.12/site-packages/pyjwt-2.13.0.dist-info/METADATA"
-    statement: "Azure CLI 2.90.0 is the newest Microsoft RPM; it bundles its own Python packages under /usr/lib64/az. Lifted by the next Azure CLI release."
+    statement: "Azure CLI 2.91.0 is the newest Microsoft RPM (2026-10-05); it bundles its own Python packages under /usr/lib64/az. Lifted by the next Azure CLI release."
     expired_at: 2026-12-31
   - id: CVE-2026-102272
     paths:
       - "usr/lib64/az/lib/python3.12/site-packages/pyjwt-2.13.0.dist-info/METADATA"
-    statement: "Azure CLI 2.90.0 is the newest Microsoft RPM; it bundles its own Python packages under /usr/lib64/az. Lifted by the next Azure CLI release."
+    statement: "Azure CLI 2.91.0 is the newest Microsoft RPM (2026-10-05); it bundles its own Python packages under /usr/lib64/az. Lifted by the next Azure CLI release."
     expired_at: 2026-12-31
   - id: CVE-2026-102273
     paths:
       - "usr/lib64/az/lib/python3.12/site-packages/pyjwt-2.13.0.dist-info/METADATA"
-    statement: "Azure CLI 2.90.0 is the newest Microsoft RPM; it bundles its own Python packages under /usr/lib64/az. Lifted by the next Azure CLI release."
+    statement: "Azure CLI 2.91.0 is the newest Microsoft RPM (2026-10-05); it bundles its own Python packages under /usr/lib64/az. Lifted by the next Azure CLI release."
     expired_at: 2026-12-31
   - id: CVE-2026-102274
     paths:
       - "usr/lib64/az/lib/python3.12/site-packages/pyjwt-2.13.0.dist-info/METADATA"
-    statement: "Azure CLI 2.90.0 is the newest Microsoft RPM; it bundles its own Python packages under /usr/lib64/az. Lifted by the next Azure CLI release."
+    statement: "Azure CLI 2.91.0 is the newest Microsoft RPM (2026-10-05); it bundles its own Python packages under /usr/lib64/az. Lifted by the next Azure CLI release."
     expired_at: 2026-12-31
   - id: CVE-2026-102275
     paths:
       - "usr/lib64/az/lib/python3.12/site-packages/pyjwt-2.13.0.dist-info/METADATA"
-    statement: "Azure CLI 2.90.0 is the newest Microsoft RPM; it bundles its own Python packages under /usr/lib64/az. Lifted by the next Azure CLI release."
+    statement: "Azure CLI 2.91.0 is the newest Microsoft RPM (2026-10-05); it bundles its own Python packages under /usr/lib64/az. Lifted by the next Azure CLI release."
     expired_at: 2026-12-31
   - id: CVE-2026-49264
     paths:
       - "usr/lib64/az/lib/python3.12/site-packages/oauthlib-3.2.2.dist-info/METADATA"
-    statement: "Azure CLI 2.90.0 is the newest Microsoft RPM; it bundles its own Python packages under /usr/lib64/az. Lifted by the next Azure CLI release."
+    statement: "Azure CLI 2.91.0 is the newest Microsoft RPM (2026-10-05); it bundles its own Python packages under /usr/lib64/az. Lifted by the next Azure CLI release."
     expired_at: 2026-12-31
   - id: CVE-2026-49265
     paths:
       - "usr/lib64/az/lib/python3.12/site-packages/oauthlib-3.2.2.dist-info/METADATA"
-    statement: "Azure CLI 2.90.0 is the newest Microsoft RPM; it bundles its own Python packages under /usr/lib64/az. Lifted by the next Azure CLI release."
+    statement: "Azure CLI 2.91.0 is the newest Microsoft RPM (2026-10-05); it bundles its own Python packages under /usr/lib64/az. Lifted by the next Azure CLI release."
     expired_at: 2026-12-31
   - id: CVE-2026-69247
     paths:
       - "usr/lib64/az/lib/python3.12/site-packages/cryptography-48.0.1.dist-info/METADATA"
-    statement: "Azure CLI 2.90.0 is the newest Microsoft RPM; it bundles its own Python packages under /usr/lib64/az. Lifted by the next Azure CLI release."
+    statement: "Azure CLI 2.91.0 is the newest Microsoft RPM (2026-10-05); it bundles its own Python packages under /usr/lib64/az. Lifted by the next Azure CLI release."
     expired_at: 2026-12-31
   - id: CVE-2026-69248
     paths:
       - "usr/lib64/az/lib/python3.12/site-packages/cryptography-48.0.1.dist-info/METADATA"
-    statement: "Azure CLI 2.90.0 is the newest Microsoft RPM; it bundles its own Python packages under /usr/lib64/az. Lifted by the next Azure CLI release."
+    statement: "Azure CLI 2.91.0 is the newest Microsoft RPM (2026-10-05); it bundles its own Python packages under /usr/lib64/az. Lifted by the next Azure CLI release."
     expired_at: 2026-12-31
   - id: CVE-2026-69249
     paths:
       - "usr/lib64/az/lib/python3.12/site-packages/cryptography-48.0.1.dist-info/METADATA"
-    statement: "Azure CLI 2.90.0 is the newest Microsoft RPM; it bundles its own Python packages under /usr/lib64/az. Lifted by the next Azure CLI release."
+    statement: "Azure CLI 2.91.0 is the newest Microsoft RPM (2026-10-05); it bundles its own Python packages under /usr/lib64/az. Lifted by the next Azure CLI release."
     expired_at: 2026-12-31
   - id: CVE-2026-97687
     paths:
       - "usr/lib64/az/lib/python3.12/site-packages/urllib3-2.7.0.dist-info/METADATA"
-    statement: "Azure CLI 2.90.0 is the newest Microsoft RPM; it bundles its own Python packages under /usr/lib64/az. Lifted by the next Azure CLI release."
+    statement: "Azure CLI 2.91.0 is the newest Microsoft RPM (2026-10-05); it bundles its own Python packages under /usr/lib64/az. Lifted by the next Azure CLI release."
     expired_at: 2026-12-31
   - id: CVE-2026-97688
     paths:
       - "usr/lib64/az/lib/python3.12/site-packages/urllib3-2.7.0.dist-info/METADATA"
-    statement: "Azure CLI 2.90.0 is the newest Microsoft RPM; it bundles its own Python packages under /usr/lib64/az. Lifted by the next Azure CLI release."
+    statement: "Azure CLI 2.91.0 is the newest Microsoft RPM (2026-10-05); it bundles its own Python packages under /usr/lib64/az. Lifted by the next Azure CLI release."
     expired_at: 2026-12-31
   - id: CVE-2026-97689
     paths:
       - "usr/lib64/az/lib/python3.12/site-packages/urllib3-2.7.0.dist-info/METADATA"
-    statement: "Azure CLI 2.90.0 is the newest Microsoft RPM; it bundles its own Python packages under /usr/lib64/az. Lifted by the next Azure CLI release."
+    statement: "Azure CLI 2.91.0 is the newest Microsoft RPM (2026-10-05); it bundles its own Python packages under /usr/lib64/az. Lifted by the next Azure CLI release."
     expired_at: 2026-12-31
   - id: GHSA-6q48-6c7w-9gw2
     paths:
       - "usr/lib64/az/lib/python3.12/site-packages/certifi-2024.7.4.dist-info/METADATA"
-    statement: "Azure CLI 2.90.0 is the newest Microsoft RPM; it bundles its own Python packages under /usr/lib64/az. Lifted by the next Azure CLI release."
+    statement: "Azure CLI 2.91.0 is the newest Microsoft RPM (2026-10-05); it bundles its own Python packages under /usr/lib64/az. Lifted by the next Azure CLI release."
     expired_at: 2026-12-31
   - id: GHSA-pxh4-856f-4h89
     paths:
       - "usr/lib64/az/lib/python3.12/site-packages/pyjwt-2.13.0.dist-info/METADATA"
-    statement: "Azure CLI 2.90.0 is the newest Microsoft RPM; it bundles its own Python packages under /usr/lib64/az. Lifted by the next Azure CLI release."
+    statement: "Azure CLI 2.91.0 is the newest Microsoft RPM (2026-10-05); it bundles its own Python packages under /usr/lib64/az. Lifted by the next Azure CLI release."
     expired_at: 2026-12-31
   # ── gcloud
   - id: CVE-2026-111943

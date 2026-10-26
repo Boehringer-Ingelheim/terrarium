@@ -134,3 +134,12 @@ JSON
   [ "$status" -eq 1 ]
   [[ "$stderr" == *"UNMATCHED: GHSA-6q48-6c7w-9gw2 certifi 2025.7.14"* ]]
 }
+
+@test "A-03: the committed SAM statements name the SAM version that the accepted paths contain" {
+  # Every aws-sam-rie entry's statement must quote the version directory of
+  # the /usr/local/aws-sam-cli/<ver>/ paths it accepts (no stale "newest" claim).
+  paths_ver="$(grep -oE 'usr/local/aws-sam-cli/[0-9][0-9.]*/' "$IGNORE" | sort -u | sed -E 's#.*/aws-sam-cli/([^/]+)/#\1#')"
+  [ "$(wc -l <<<"$paths_ver")" -eq 1 ] || { echo "several SAM versions in paths: $paths_ver"; return 1; }
+  stated="$(grep -oE 'AWS SAM CLI [0-9][0-9.]* is the newest' "$IGNORE" | sort -u)"
+  [ "$stated" = "AWS SAM CLI ${paths_ver} is the newest" ] || { echo "stated: $stated, paths: $paths_ver"; return 1; }
+}
