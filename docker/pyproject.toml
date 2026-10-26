@@ -9,12 +9,19 @@ dependencies = [
     "azure-cli-core~=2.75",
     "boto3~=1.39.17",
     "botocore~=1.39.17",
-    "pipenv~=2024.0",
+    # Floor (INFIAAS-11916): certifi 2026.10.19 is the first release without the
+    # compromised eMudhra intermediates, and 2026.10.23 is the newest. It is
+    # transitive (requests, msrest, ...), so the floor is made explicit here.
+    "certifi>=2026.10.23",
+    # pipenv runs its own patched pip; 2024.x vendors pip 24.3.1 and with it a
+    # certifi that still trusts the eMudhra intermediates (INFIAAS-11916).
+    "pipenv~=2026.10",
     "pre-commit~=4.2.0",
     "pycodestyle~=2.14.0",
     "python-hcl2~=2.0",
     "requests~=2.33.0",
     "simplejson~=3.19",
-    "uv~=0.11.15",
-    "virtualenv~=20.36.1",
+    "uv~=0.13.5",
+    # 21.14.13 embeds pip 26.2.2, which every new virtualenv is seeded with.
+    "virtualenv~=21.14.13",
 ]
