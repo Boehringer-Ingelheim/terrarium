@@ -15,12 +15,12 @@ ARG BATS_CORE_VERSION=1.13.0
 ARG GO_VERSION=1.26.8
 ARG HELM_VERSION=3.22.0
 ARG KUBECTL_VERSION=1.35.9
-ARG NODEJS_VERSION=24.21.0
+ARG NODEJS_VERSION=24.22.1
 # npm bundled with Node lags its own dependency fixes; pin it explicitly (INFIAAS-9587)
 ARG NPM_VERSION=11.20.0
 # Fixed releases swapped in for packages npm bundles, until npm ships them
 # itself (INFIAAS-9587, docker/files/bin/npm_patch_bundled). Same major only.
-ARG NPM_BUNDLED_PATCHES="undici@6.28.1 ip-address@10.7.1 brace-expansion@5.0.12"
+ARG NPM_BUNDLED_PATCHES="undici@6.29.1 ip-address@10.7.5 brace-expansion@5.0.12"
 ARG OC_VERSION=4.19.48
 ARG OPENSTACK_RELEASE=2026.2
 # Security-only upgrades applied over the OpenStack upper-constraints, which
