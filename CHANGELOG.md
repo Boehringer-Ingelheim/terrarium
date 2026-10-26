@@ -1,5 +1,97 @@
 # Changelog
 
+## [4.9.6] 2026-10-26 — Node 24 LTS security release and emSign CA remediation
+
+This patch release covers two upstream incidents:
+
+- **The Node.js October 2026 security release**, which includes Node2Shell
+  (CVE-2026-111497).
+- **The eMudhra/emSign intermediate CA compromise.** The private keys of
+  eight eMudhra intermediates can be recovered from their public
+  certificates. Mozilla-derived stores trusted them through a cross-signature
+  by *emSign ECC Root CA - G3*, and some older stores also through Sectigo's
+  *AAA Certificate Services*.
+
+The OS update alone is not enough. pip, certifi, uv, Node and several vendor
+CLIs carry their own root stores, and every one of them was refreshed.
+
+### Security (INFIAAS-11916)
+
+- **Node.js 24.21.0 → 24.22.1.** This fixes CVE-2026-111497 and nine other
+  CVEs, and drops *emSign ECC Root CA - G3* from Node's built-in roots. npm
+  stays 11.20.0, since Node bundles npm 11.19.1. `NPM_BUNDLED_PATCHES`:
+  `undici` 6.28.1 → 6.29.1 (CVE-2026-109869, CVE-2026-109924) and
+  `ip-address` 10.7.1 → 10.7.5 (CVE-2026-111997). `brace-expansion` 5.0.12 is
+  unchanged.
+- **OS trust store:** `ca-certificates` 2025.2.80_v9.0.305-91.el9 →
+  2026.2.92_v9.0.319-90.3.el9_8 (RHSA-2026:88459).
+- **Python:**
+  - CPython 3.13.15 → 3.13.17. Its ensurepip seeds pip 26.2.2.
+  - pip 26.2.1 → ≥ 26.2.2 for the pyenv interpreter and the `/opt/openstack`
+    venv, via the new `PIP_MIN_VERSION` build-arg. Neither pip was ever
+    upgraded before. pip always loads its vendored certifi, so OS fixes do
+    not reach it.
+  - certifi:
+    - `/tmp/.venv`: 2025.7.14 → 2026.10.23, now an explicit floor in
+      `pyproject.toml`.
+    - `/opt/openstack`: 2026.7.22 → 2026.10.23 (`OPENSTACK_OVERRIDES`).
+  - uv 0.11.33 → 0.13.5 in `/tmp/.venv`, and 0.12.22 → 0.13.5 in
+    `~/.local/bin`.
+  - pipenv 2024.4.1 → 2026.10.3. Its patched pip was 24.3.1.
+  - virtualenv 21.14.9 → 21.14.13, which seeds pip 26.2.2.
+- **Go 1.26.8 → 1.26.10.**
+- **Findings published since 4.9.5 in components we pin.** The candidate's
+  release-gate scan found these:
+  - trivy 0.75.0 → 0.76.1 (Go stdlib / x/net, incl. CVE-2026-111943).
+  - Default terraform 1.16.4 → 1.16.7. tenv still installs whatever a
+    project pins.
+  - `NPM_BUNDLED_PATCHES` gains `postcss-selector-parser` 7.1.7. npm bundles
+    7.1.4 (CVE-2026-104844).
+  - filelock 3.25.2 → 4.2.4 in `/tmp/.venv` (CVE-2026-112940).
+- **`.trivyignore.yaml` regenerated** (expires 2026-12-31):
+  - New vendor-only rules for go-task 3.54.0, kubectl 1.35.9 and yq 4.54.1.
+    Each is the newest release, built with a Go older than 1.26.10/1.27.3.
+  - The Azure CLI RPM's pip-vendored certifi is listed with its exact purl.
+  - Most new ids are the Go stdlib CVEs fixed in Go 1.26.10/1.27.3. They now
+    show on every vendor Go binary built with an older toolchain.
+- **New in-image test: `docker/tests/15_ca_distrust.bats`.** It checks that
+  every CA store rejects all 16 compromised certificates (8 keys × 2
+  issuers) when the attacker's cross-signature is supplied. The stores are
+  the system bundle and its extractions, OpenSSL's default store, every
+  certifi, every pip we install, the pip that new venvs get, both uv
+  binaries, Node's roots, and every PEM CA file on disk. The suite is red on
+  4.9.5 (9 of 13 tests) and green on 4.9.6.
+- **Vendor CLIs re-fetched at their newest releases:**
+  - Google Cloud CLI 590.0.1 removed the distrusted roots.
+  - AWS CLI 2.38.5 removed AAA from its bundle (fixed in 2.38.4).
+- **Residuals.** Each of these ships the vendor's newest release, or is
+  unused. The bats suite lists and reports each one.
+  - **Azure CLI RPM 2.91.0.** Its bundled certifi and pip
+    (`/usr/lib64/az`) still trust the intermediates. The fix is merged on
+    Azure's dev branch but not released
+    ([Azure/azure-cli#34250](https://github.com/Azure/azure-cli/pull/34250),
+    [#34275](https://github.com/Azure/azure-cli/pull/34275)).
+    - Workaround: `uv run --directory /tmp az`, the fixed venv copy.
+    - Or set `REQUESTS_CA_BUNDLE=/etc/pki/tls/certs/ca-bundle.crt`.
+  - **AWS SAM CLI 1.170.0.** Its bundled certifi 2026.7.22 and botocore
+    still trust them
+    ([aws/aws-sam-cli#9359](https://github.com/aws/aws-sam-cli/pull/9359)).
+    - Workaround: `AWS_CA_BUNDLE=/etc/pki/tls/certs/ca-bundle.crt`.
+  - **`/tmp/.venv` botocore 1.39.x `cacert.pem`.** It is an unused fallback,
+    because botocore loads the fixed certifi first.
+
+### Changed
+
+- **`latest` and `<major>` move only for the highest release (INFIAAS-11916).**
+  The new `scripts/is-highest-release.sh` reuses `is-prerelease.sh` and
+  compares the tag against the highest stable tag, local and remote. It gates
+  `latest`, the per-arch `latest-linux-<arch>` and `<major>-linux-<arch>`
+  tags in `main.yaml`, and the manifest `latest` in `main.yaml` and
+  `release.yaml`. A maintenance release such as 4.8.4 can no longer move
+  them. `make guardrails` enforces the wiring.
+- **`SECURITY.md`:** the supported versions are now the default branch plus
+  the latest patch of the two most recent minor lines (4.9.x and 4.8.x).
+
 ## [4.9.5] 2026-10-02 — Release scan gate green
 
 The `v4.9.4` release published its images, but the release Trivy gate
