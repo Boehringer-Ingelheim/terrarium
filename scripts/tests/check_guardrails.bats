@@ -116,11 +116,15 @@ PINNED="driver-opts: image=moby/buildkit:v0.33.0@sha256:$(printf 'b%.0s' $(seq 1
 # ---- INFIAAS-11916 (S1.6): latest/{{major}} only for the highest release ----------
 
 # latest_rules <file> <rule>... — append a metadata step with these tag rules
-# and a step that computes move_latest with the guard script.
+# and a step that computes move_latest with the guard script. The step declares
+# `flavor: latest=false` like the real workflows (A-01); FLAVOR overrides it,
+# and FLAVOR=none omits the line.
 latest_rules() {
   local f="$1"; shift
   printf '      - id: rel\n        run: move_latest="$(scripts/is-highest-release.sh "$GITHUB_REF_NAME")"\n' >> "$WF_DIR/$f"
-  printf '      - uses: docker/metadata-action@%s # v6\n        with:\n          tags: |\n' "$SHA40" >> "$WF_DIR/$f"
+  printf '      - uses: docker/metadata-action@%s # v6\n        with:\n' "$SHA40" >> "$WF_DIR/$f"
+  [ "${FLAVOR:-latest=false}" = none ] || printf '          flavor: %s\n' "${FLAVOR:-latest=false}" >> "$WF_DIR/$f"
+  printf '          tags: |\n' >> "$WF_DIR/$f"
   local r; for r in "$@"; do printf '            %s\n' "$r" >> "$WF_DIR/$f"; done
 }
 
@@ -172,6 +176,55 @@ latest_rules() {
   run "$GUARD" "$DF"
   [ "$status" -eq 1 ]
   [[ "$output" == *"GUARDRAIL FAIL: latest not via highest-release guard = 1"* ]]
+}
+
+# ---- INFIAAS-11916 (A-01): every metadata-action step must declare latest=false ----
+# Without a flavour the action defaults to latest=auto, and its type=semver rule
+# emits `latest` for ANY release tag, bypassing the move_latest gate.
+
+@test "A-01: the manifest shape with NO flavor fails (type=semver + gated latest, implicit latest=auto)" {
+  wf main.yaml "$PINNED"
+  FLAVOR=none latest_rules main.yaml "type=semver,pattern={{version}}" \
+    "type=raw,value=latest,enable=\${{ steps.rel.outputs.move_latest == 'true' }}"
+  run "$GUARD" "$DF"
+  [ "$status" -eq 1 ]
+  [[ "$output" == *"metadata-action step without flavor latest=false: $WF_DIR/main.yaml:"* ]]
+  [[ "$output" == *"GUARDRAIL FAIL: metadata-action without latest=false = 1, expected -eq 0"* ]]
+}
+
+@test "A-01: the same step with flavor latest=false passes" {
+  wf main.yaml "$PINNED"
+  latest_rules main.yaml "type=semver,pattern={{version}}" \
+    "type=raw,value=latest,enable=\${{ steps.rel.outputs.move_latest == 'true' }}"
+  run "$GUARD" "$DF"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"ok: metadata-action without latest=false = 0"* ]]
+}
+
+@test "A-01: checked per step: a flavoured step does not cover an unflavoured one (same or other file)" {
+  wf main.yaml "$PINNED"
+  latest_rules main.yaml "type=semver,pattern={{version}}"
+  FLAVOR=none latest_rules main.yaml "type=semver,pattern={{version}}"
+  wf release.yaml "$PINNED"
+  FLAVOR=none latest_rules release.yaml "type=raw,value=v1.2.3"
+  run "$GUARD" "$DF"
+  [ "$status" -eq 1 ]
+  [[ "$output" == *"GUARDRAIL FAIL: metadata-action without latest=false = 2, expected -eq 0"* ]]
+}
+
+@test "A-01: a flavour without latest=false (suffix only) fails" {
+  wf main.yaml "$PINNED"
+  FLAVOR="suffix=-linux-amd64" latest_rules main.yaml "type=semver,pattern={{version}}"
+  run "$GUARD" "$DF"
+  [ "$status" -eq 1 ]
+  [[ "$output" == *"GUARDRAIL FAIL: metadata-action without latest=false = 1"* ]]
+}
+
+@test "A-01: the real workflows declare latest=false on every metadata-action step" {
+  WF_DIR="$BATS_TEST_DIRNAME/../../.github/workflows" run "$GUARD" "$DF"
+  [[ "$output" == *"ok: metadata-action without latest=false = 0"* ]]
+  n="$(grep -c 'docker/metadata-action@' "$BATS_TEST_DIRNAME"/../../.github/workflows/*.yaml | awk -F: '{s+=$2} END {print s}')"
+  [ "$n" -ge 3 ]
 }
 
 @test "workflows: a missing WF_DIR is an error, not a silent pass" {

@@ -341,6 +341,9 @@ jobs:
         uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
         with:
           images: ghcr.io/${{ github.repository }}
+          # INFIAAS-11916 (A-01): defence in depth. Only type=raw rules here, which
+          # never emit an implicit `latest`, but the default flavour is latest=auto.
+          flavor: latest=false
           tags: |
             type=raw,value=${{ steps.resolve.outputs.image_tag }}
             type=raw,value=latest,enable=${{ steps.resolve.outputs.move_latest == 'true' }}

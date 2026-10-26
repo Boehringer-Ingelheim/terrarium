@@ -254,6 +254,10 @@ jobs:
         uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
         with:
           images: ghcr.io/${{ github.repository }}
+          # INFIAAS-11916 (A-01): without an explicit flavour the action defaults
+          # to latest=auto, which adds `latest` for ANY release semver tag via
+          # the type=semver rule, bypassing the move_latest gate below.
+          flavor: latest=false
           tags: |
             type=semver,pattern={{version}}
             type=raw,value=latest,enable=${{ steps.rel.outputs.move_latest == 'true' }}
