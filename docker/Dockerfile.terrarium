@@ -31,11 +31,17 @@ ARG OPENSTACK_OVERRIDES="urllib3==2.8.0 cryptography==50.0.2 certifi==2026.10.23
 ARG OPENSTACK_VENV=/opt/openstack
 ARG OPENTOFU_VERSION=1.13.1
 ARG PACKER_VERSION=1.16.1
-# Floor for every pip the image installs: the pyenv CPython and the OpenStack
-# venv. pip always loads its vendored certifi in addition to the system store,
-# so OS CA fixes do not reach it. 26.2.2 is the first pip without the
-# compromised eMudhra intermediates (INFIAAS-11916, 15_ca_distrust.bats).
-ARG PIP_MIN_VERSION=26.2.2
+# Exact pip for every pip the image installs: the pyenv CPython and the
+# OpenStack venv. pip always loads its vendored certifi in addition to the
+# system store, so OS CA fixes do not reach it. 26.2.2 is the first pip without
+# the compromised eMudhra intermediates (INFIAAS-11916). Pinned exactly so a
+# rebuild is reproducible and .trivyignore.yaml's pip-vendor purls stay valid;
+# bump it deliberately (Dependabot cannot see it). ARG only, never ENV: pip
+# reads every PIP_* environment variable as configuration (A-07). The build-time
+# ARG is safe because pip explicitly skips PIP_VERSION and PIP_HELP
+# (pip/_internal/configuration.py ENV_NAMES_IGNORED). 15_ca_distrust.bats
+# keeps its own hard-coded floor as the independent guard.
+ARG PIP_VERSION=26.2.2
 ARG PYTHON_VERSION=3.13.17
 ARG SOPS_VERSION=3.13.3
 ARG STARSHIP_VERSION=1.24.2
@@ -54,7 +60,7 @@ ARG ZOXIDE_VERSION=0.9.9
 # docker.io/library/rockylinux is deprecated and stops at 9.3; the Rocky
 # Enterprise Software Foundation publishes current point releases here.
 FROM docker.io/rockylinux/rockylinux:${ROCKYLINUX_VERSION} AS buildlang
-ARG PIP_MIN_VERSION PYTHON_VERSION
+ARG PIP_VERSION PYTHON_VERSION
 
 ENV PYENV_ROOT=/opt/pyenv
 ENV PATH=${PYENV_ROOT}/shims:${PYENV_ROOT}/bin:$PATH
@@ -80,7 +86,7 @@ RUN umask 0002 \
     && git clone https://github.com/pyenv/pyenv-update.git ${PYENV_ROOT}/plugins/pyenv-update \
     && ${PYENV_ROOT}/bin/pyenv install ${PYTHON_VERSION} \
     && ${PYENV_ROOT}/bin/pyenv global  ${PYTHON_VERSION} \
-    && "${PYENV_ROOT}/versions/${PYTHON_VERSION}/bin/python" -m pip install --no-cache-dir --upgrade "pip>=${PIP_MIN_VERSION}" \
+    && "${PYENV_ROOT}/versions/${PYTHON_VERSION}/bin/python" -m pip install --no-cache-dir "pip==${PIP_VERSION}" \
     && python --version && pip --version
 
 # ---- Strip .git metadata from pyenv (saves space in the final image) ----
@@ -98,7 +104,7 @@ ARG AGE_VERSION AWS_CDK_VERSION BATS_CORE_VERSION
 ARG GO_VERSION HELM_VERSION KUBECTL_VERSION NODEJS_VERSION NPM_VERSION
 ARG NPM_BUNDLED_PATCHES
 ARG OC_VERSION OPENSTACK_OVERRIDES OPENSTACK_RELEASE OPENSTACK_VENV
-ARG OPENTOFU_VERSION PACKER_VERSION PIP_MIN_VERSION PYTHON_VERSION
+ARG OPENTOFU_VERSION PACKER_VERSION PIP_VERSION PYTHON_VERSION
 ARG SOPS_VERSION STARSHIP_VERSION TASK_VERSION TENV_VERSION
 ARG TERRAFORM_DOCS_VERSION TERRAFORM_VERSION
 ARG TFLINT_VERSION TRIVY_VERSION YQ_VERSION ZOXIDE_VERSION
@@ -118,7 +124,6 @@ ENV AGE_VERSION=${AGE_VERSION} \
     OPENSTACK_RELEASE=${OPENSTACK_RELEASE} \
     OPENTOFU_VERSION=${OPENTOFU_VERSION} \
     PACKER_VERSION=${PACKER_VERSION} \
-    PIP_MIN_VERSION=${PIP_MIN_VERSION} \
     PYTHON_VERSION=${PYTHON_VERSION} \
     SOPS_VERSION=${SOPS_VERSION} \
     STARSHIP_VERSION=${STARSHIP_VERSION} \
@@ -680,10 +685,10 @@ RUN arch="${TARGETARCH:-$(echo "${TARGETPLATFORM:-linux/amd64}" | cut -d/ -f2)}"
 
 # --- OpenStack CLI -----------------------------------------------------------
 # Versions match the upper constraints (minus OPENSTACK_OVERRIDES) https://opendev.org/openstack/requirements/src/branch/stable/${OPENSTACK_RELEASE}/upper-constraints.txt
-# The venv's pip comes from ensurepip; raise it to the same floor as the pyenv
-# interpreter's (PIP_MIN_VERSION, INFIAAS-11916) before it downloads anything.
+# The venv's pip comes from ensurepip; pin it to the same pip as the pyenv
+# interpreter's (PIP_VERSION, INFIAAS-11916) before it downloads anything.
 RUN python -m venv ${OPENSTACK_VENV} \
-    && ${OPENSTACK_VENV}/bin/python -m pip install --no-cache-dir --upgrade "pip>=${PIP_MIN_VERSION}" \
+    && ${OPENSTACK_VENV}/bin/python -m pip install --no-cache-dir "pip==${PIP_VERSION}" \
     && ${OPENSTACK_VENV}/bin/pip install --no-cache-dir \
     python-openstackclient \
     python-barbicanclient \
