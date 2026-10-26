@@ -17,7 +17,9 @@ on:
     branches: [master]
     tags: ["v*"]
   pull_request:
-    branches: [master]
+    # release/** = maintenance lines (e.g. release/4.8, INFIAAS-11916): PRs
+    # into a maintenance branch get the same gates as PRs into master.
+    branches: [master, "release/**"]
   workflow_dispatch:
     inputs:
       debug_context:

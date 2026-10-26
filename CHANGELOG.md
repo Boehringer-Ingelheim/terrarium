@@ -50,6 +50,16 @@
 
 ### Changed
 
+- **4.8 maintenance line: `release/4.8` (INFIAAS-11916).** This branch is cut
+  from `v4.8.3` and carries the INFIAAS-11804 publish fixes above (BuildKit pin,
+  signed standalone SBOM, pre-release `latest` guard, release-tag scan, tenv
+  token) plus the release Trivy gate (`.trivyignore.yaml`,
+  `scripts/trivy-residuals.sh`), backported from `master`. PRs into
+  `release/**` now run `main.yaml` (build & test) and `lint.yaml`, as PRs into
+  `master` do (`scripts/tests/ci_triggers.bats`). The `.trivyignore.yaml`
+  residuals were derived from the 4.9.x package set and are re-derived for
+  4.8 when its versions are bumped.
+
 - **BuildKit pinned** to `v0.33.0@sha256:6c2fa84a…` in `main.yaml` and
   `release.yaml` (`setup-buildx-action` `driver-opts`). A new guardrail
   (`make guardrails` → "buildkit pinned") fails if any buildx setup is unpinned
