@@ -2,7 +2,176 @@
 
 ## [Unreleased]
 
-### Fixed
+## [4.8.4] 2026-10-26 — Maintenance-line security release: Node 24 LTS, emSign CA remediation, Go 1.26
+
+4.8 is the line for Ruby, kitchen-terraform and InSpec users. Everyone
+else should use 4.9.6. This patch release ships the same security fixes as
+4.9.6, for two upstream incidents:
+
+- **The Node.js October 2026 security release**, which includes Node2Shell
+  (CVE-2026-111497).
+- **The eMudhra/emSign intermediate CA compromise.** The private keys of
+  eight eMudhra intermediates can be recovered from their public
+  certificates. Mozilla-derived stores trusted them through a cross-signature
+  by *emSign ECC Root CA - G3*, and some older stores also through Sectigo's
+  *AAA Certificate Services*.
+
+The OS update alone is not enough. pip, certifi, uv, Node, several vendor
+CLIs and, on this line, several Ruby gems carry their own root stores, and
+every one of them was refreshed. The 4.8.4 date above is a placeholder until
+the tag.
+
+### Security (INFIAAS-11916)
+
+- **Node.js 24.14.0 → 24.22.1.** This fixes CVE-2026-111497 and nine other
+  CVEs, and drops *emSign ECC Root CA - G3* from Node's built-in roots. The
+  Node major is unchanged.
+  - npm is now pinned to 11.20.0 (`NPM_VERSION`); Node bundles 11.19.1.
+  - New `NPM_BUNDLED_PATCHES`: `undici` 6.29.1, `ip-address` 10.7.5,
+    `brace-expansion` 5.0.12 and `postcss-selector-parser` 7.1.7. These are
+    swapped into npm's own `node_modules` by the new `npm_patch_bundled`
+    helper (from master, INFIAAS-9587), because npm 11.20.0 still bundles the
+    vulnerable versions.
+- **OS trust store:** `ca-certificates` 2026.2.92_v9.0.319-90.3.el9_8
+  (RHSA-2026:88459). The base images move to UBI 9.8 and Rocky 9.8; Rocky
+  9.3 had been EOL since 9.4.
+- **Python:**
+  - CPython 3.13.12 → 3.13.17. Its ensurepip seeds pip 26.2.2.
+    `PYTHON_VERSION` is now in the image ENV, so `10_python.bats` really
+    checks the interpreter. Before, it compared against an empty string.
+  - pip → 26.2.2 for the pyenv interpreter and the `/opt/openstack` venv,
+    pinned exactly via the new `PIP_VERSION` build-arg (build-time only, never
+    ENV). Neither pip was ever upgraded before. pip always loads its vendored
+    certifi, so OS fixes do not reach it.
+  - certifi:
+    - `/tmp/.venv`: 2025.7.14 → 2026.10.23, now an explicit floor in
+      `pyproject.toml`.
+    - `/opt/openstack`: 2026.10.23 via the new `OPENSTACK_OVERRIDES`.
+  - uv 0.11.15 → 0.13.5 in `/tmp/.venv`, and 0.13.5 in `~/.local/bin`.
+  - pipenv 2024.4.1 → 2026.10.3. Its patched pip was 24.3.1.
+  - virtualenv 20.36.1 → 21.14.13, which seeds pip 26.2.2.
+  - The uv download cache is no longer shipped in `~/.cache/uv` (from master,
+    INFIAAS-9587). It held a second, stale botocore CA bundle.
+- **Go 1.21.13 → 1.26.10** (user toolchain at `/usr/local/go`). Go 1.21 has
+  been EOL since 2024-08. The prebuilt Go tools are unaffected.
+- **Ruby gem CA bundles (4.8 only).** aws-sdk-core 3.234.0, excon 0.112.0,
+  httpclient 2.9.0 (two bundles) and ms_rest 0.7.6 ship their own frozen
+  Mozilla bundles, and all of them still trusted the compromised
+  intermediates. httpclient and ms_rest have no newer release, so the new
+  `link_system_ca_bundle` helper relinks each bundle to
+  `/etc/pki/tls/certs/ca-bundle.crt`. The gems now trust exactly what the OS
+  trusts. The gem versions are unchanged.
+- **Findings in components we pin**, cleared where the fix stays inside this
+  line's rules (security fixes only, no major tool moves; the release-gate
+  scan found them):
+  - oc 4.19.0 → 4.19.51 and kubectl 1.35.3 → 1.35.9 (newest patches).
+  - helm 3.20.1 → 3.22.0, sops 3.12.2 → 3.13.3, tenv 4.11.1 → 4.15.1,
+    yq 4.52.4 → 4.54.1, trivy 0.69.3 → 0.76.1.
+  - OpenTofu 1.11.5 → 1.11.14 (newest 1.11.z).
+  - `/opt/openstack` (OpenStack constraints stay 2025.1): urllib3 2.8.0,
+    cryptography 50.0.2, requests 2.34.2, idna 3.18 and msgpack 1.2.1 via
+    `OPENSTACK_OVERRIDES`. `pip check` passes.
+  - `/tmp/.venv`: PyJWT 2.13.0 → 2.15.1 (critical), urllib3 2.7.0 → 2.8.0,
+    oauthlib 3.3.1 → 4.0.0, cryptography 46.0.7 → 47.0.0, filelock 3.25.2 →
+    4.2.4.
+- **`.trivyignore.yaml` re-derived for the 4.8 package set** (amd64 scan,
+  1109 entries, all expiring 2026-12-31, each scoped to an exact path or
+  purl). Besides the vendor-only rules shared with 4.9.6, it lists what this
+  line deliberately keeps, with a statement saying so:
+  - **Tools that follow the ODS terraform-2408 agent:** the default
+    Terraform 1.9.4 (tenv installs whatever a project pins), terraform-docs
+    v0.18.0, packer 1.11.2, tflint 0.52.0, age 1.2.0 and go-task 3.38.0.
+  - **Ruby 3.3.4 and its default gems.** A patch bump would break projects
+    that pin `.ruby-version` 3.3.4.
+  - **The kitchen-terraform/InSpec gem set** (`Gemfile.lock`). excon,
+    rubyzip and mongo need a major or a minor inside the InSpec stack.
+  - **`/tmp/.venv` cryptography 47.0.0 and PyNaCl 1.5.0**, held by
+    azure-cli 2.75.0. The RPM `az` 2.91.0 resolves first on PATH.
+  - **terraform-config-inspect v0.2.0**, the fork's newest release.
+
+  All of these are lifted by moving to terrarium 4.9.
+- **New in-image test: `docker/tests/15_ca_distrust.bats`** (from master). It
+  checks that every CA store rejects all 16 compromised certificates (8 keys ×
+  2 issuers) when the attacker's cross-signature is supplied. The stores are
+  the system bundle and its extractions, OpenSSL's default store, every
+  certifi, every pip we install, the pip that new venvs get, both uv
+  binaries, Node's roots, and every PEM CA file on disk that carries any of
+  the four roots. On this candidate it is green, 15/15.
+- **Vendor CLIs re-fetched at their newest releases:** Google Cloud CLI
+  590.0.1 removed the distrusted roots, and AWS CLI 2.38.5 removed AAA from
+  its bundle.
+- **Residuals.** Each of these ships the vendor's newest release, or is
+  unused. The bats suite lists and reports each one, with an expiry.
+  - **Azure CLI RPM 2.91.0.** Its bundled certifi and pip
+    (`/usr/lib64/az`) still trust the intermediates. The fix is merged on
+    Azure's dev branch but not released
+    ([Azure/azure-cli#34250](https://github.com/Azure/azure-cli/pull/34250),
+    [#34275](https://github.com/Azure/azure-cli/pull/34275)).
+    - Workaround: `uv run --directory /tmp az`, the fixed venv copy.
+    - Or set `REQUESTS_CA_BUNDLE=/etc/pki/tls/certs/ca-bundle.crt`.
+  - **AWS SAM CLI 1.170.0.** Its bundled certifi 2026.7.22 and botocore
+    still trust them
+    ([aws/aws-sam-cli#9359](https://github.com/aws/aws-sam-cli/pull/9359)).
+    - Workaround: `AWS_CA_BUNDLE=/etc/pki/tls/certs/ca-bundle.crt`.
+  - **The `/tmp/.venv` botocore 1.39.x CA bundle.** It is an unused fallback,
+    because botocore loads the fixed certifi first.
+
+### Known issues
+
+**Legacy quickstarter projects: `make init` fails while installing
+`bigdecimal`**
+([INFIAAS-11725](https://jira.biscrum.com/browse/INFIAAS-11725))
+
+- **Symptom:** `make init` in a project generated from the legacy (AGE)
+  Terraform quickstarter stops with `An error occurred while installing
+  bigdecimal (…), and Bundler cannot continue.`
+- **Cause:** the image ships no C compiler (since 4.8.1, by design), and the
+  legacy quickstarter installs its Ruby gems into the project
+  (`vendor/bundle`), which forces native gems to be compiled. The image itself
+  is not broken: its pre-built gems at `/opt/bundle` are complete, and
+  `kitchen` and `cinc-auditor` work out of the box.
+- **Remediation, in order of preference:**
+  1. **Migrate** to the current (CCG) OpenTofu quickstarter, which has no Ruby
+     at all.
+  2. **Apply the three-change quickstarter patch**
+     ([rec-a-makefile.patch](https://bitbucket.biscrum.com/projects/CCG/repos/click.stack.ship.workflow.artifacts/browse/quickstarter/INFIAAS-11725-ruby-bundler-issue-with-old-qs-in-terrarium-4.8.1/rec-a-makefile.patch)):
+     delete `.ruby-version`, make `install-ruby-gems` use the image's
+     pre-built gems, and call the `kitchen` / `cinc-auditor` wrappers.
+     `make init` then succeeds without a compiler, root or a rebuild.
+  3. **Immediate unblock:** skip `make install-ruby-gems`; `kitchen` and
+     `cinc-auditor` already work in the image.
+- **Discouraged:** running the container as root and installing a compiler.
+  It rebuilds hundreds of gems in every workspace, and leaves root-owned
+  files that break the next non-root run.
+- **Ownership:** keeping a generated project's toolchain current is the
+  **project team's** responsibility. The legacy quickstarter still pins Ruby
+  2.7.5, which has been end of life since March 2023.
+
+### Changed (INFIAAS-11916)
+
+- **On release tags, `latest` and `<major>-linux-<arch>` move only for the
+  highest release.** The new `scripts/is-highest-release.sh` reuses
+  `is-prerelease.sh` and compares the tag against the highest stable tag,
+  local and remote. On a tag push it gates the multi-arch `latest` manifest
+  (`main.yaml`, `release.yaml`) and the per-arch `latest-linux-<arch>` and
+  `<major>-linux-<arch>` tags (`main.yaml`). Every `docker/metadata-action`
+  step sets `flavor: latest=false`, so the action's default `latest=auto`
+  cannot bypass the guard. 4.8.4 therefore cannot move `latest` away from
+  4.9.x. `make guardrails` enforces the wiring.
+  - Unchanged: on every **master push**, the per-arch `latest-linux-<arch>`
+    tags track master.
+  - No multi-arch `<major>` (e.g. `4`) tag is published, only
+    `<major>-linux-<arch>`.
+- **`make lint` is blocking, hadolint included.** The two config heredocs
+  (the google-cloud repo and the tenv profile) are now static files under
+  `docker/files/`. hadolint is pinned to v2.15.1 by digest.
+- **`make guardrails` checks pin freshness** (`GO_VERSION`,
+  `ROCKYLINUX_VERSION`, `UBI9_VERSION`), as on master.
+- **`SECURITY.md`:** the supported versions are now the default branch plus
+  the latest patch of the two most recent minor lines (4.9.x and 4.8.x). It
+  also lists the published tags and how each one moves.
+
+### Fixed (INFIAAS-11804, release pipeline)
 
 - **Builds no longer fail on GitHub's anonymous API rate limit (INFIAAS-11804).**
   `tenv tofu install` looks up OpenTofu releases through `api.github.com`,
@@ -48,7 +217,7 @@
   A table-format Trivy step prints the findings in the job log; it is
   informational, and the SARIF scan still gates.
 
-### Changed
+### Changed (INFIAAS-11804, release pipeline)
 
 - **4.8 maintenance line: `release/4.8` (INFIAAS-11916).** This branch is cut
   from `v4.8.3` and carries the INFIAAS-11804 publish fixes above (BuildKit pin,
@@ -57,8 +226,7 @@
   `scripts/trivy-residuals.sh`), backported from `master`. PRs into
   `release/**` now run `main.yaml` (build & test) and `lint.yaml`, as PRs into
   `master` do (`scripts/tests/ci_triggers.bats`). The `.trivyignore.yaml`
-  residuals were derived from the 4.9.x package set and are re-derived for
-  4.8 when its versions are bumped.
+  residuals are re-derived for the 4.8 package set (see Security above).
 
 - **BuildKit pinned** to `v0.33.0@sha256:6c2fa84a…` in `main.yaml` and
   `release.yaml` (`setup-buildx-action` `driver-opts`). A new guardrail
