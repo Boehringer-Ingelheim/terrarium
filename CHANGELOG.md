@@ -47,7 +47,9 @@ the tag.
     - `/tmp/.venv`: 2025.7.14 → 2026.10.23, now an explicit floor in
       `pyproject.toml`.
     - `/opt/openstack`: 2026.10.23 via the new `OPENSTACK_OVERRIDES`.
-  - uv 0.11.15 → 0.13.5 in `/tmp/.venv`, and 0.13.5 in `~/.local/bin`.
+  - uv 0.11.15 → 0.13.5 in `/tmp/.venv`. The `~/.local/bin` uv comes from
+    the upstream installer and is the newest release at build time (0.13.5
+    for this build); `15_ca_distrust.bats` enforces the 0.13.5 floor.
   - pipenv 2024.4.1 → 2026.10.3. Its patched pip was 24.3.1.
   - virtualenv 20.36.1 → 21.14.13, which seeds pip 26.2.2.
   - The uv download cache is no longer shipped in `~/.cache/uv` (from master,
