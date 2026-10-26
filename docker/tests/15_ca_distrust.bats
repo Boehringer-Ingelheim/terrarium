@@ -57,35 +57,43 @@ FIXTURES="$BATS_TEST_DIRNAME/fixtures/emudhra-compromised"
 # Vendor-bundled stores that we neither build nor can patch in place. Per
 # PRD Q2 the release ships with them documented as residuals (CHANGELOG and
 # INFIAAS-11916 evidence/2026-10-26-vendor-ca-inventory-4.9.6/inventory.md).
-# Format: "<shell glob>|<why / vendor tracking link>". Every run reports them
-# on fd 3, and reports any that the vendor has fixed so the entry can go.
+# Format: "<shell glob>|<expires YYYY-MM-DD>|<why / vendor tracking link>".
+# Every run reports them on fd 3, and reports any that the vendor has fixed so
+# the entry can go. An entry past its expiry no longer excuses anything and
+# fails the "residuals" test, so each one must be re-justified (A-06; aligned
+# with .trivyignore.yaml's expired_at). A glob that matches nothing is allowed:
+# arm64 installs SAM via pip, so its paths differ there.
 CA_RESIDUALS=(
     # Azure CLI RPM 2.91.0 (newest, 2026-10-05) bundles certifi and pip with the
     # old roots. Fixed on dev, not yet released: Azure/azure-cli#34250 (certifi),
     # Azure/azure-cli#34275 (embedded Python 3.14.9).
-    "/usr/lib64/az/lib/python3*/site-packages/certifi/cacert.pem|Azure CLI RPM: fix unreleased, https://github.com/Azure/azure-cli/pull/34250"
-    "/usr/lib64/az/lib/python3*/site-packages/pip/_vendor/certifi/cacert.pem|Azure CLI RPM: fix unreleased, https://github.com/Azure/azure-cli/pull/34275"
+    "/usr/lib64/az/lib/python3*/site-packages/certifi/cacert.pem|2026-12-31|Azure CLI RPM: fix unreleased, https://github.com/Azure/azure-cli/pull/34250"
+    "/usr/lib64/az/lib/python3*/site-packages/pip/_vendor/certifi/cacert.pem|2026-12-31|Azure CLI RPM: fix unreleased, https://github.com/Azure/azure-cli/pull/34275"
     # AWS SAM CLI 1.170.0 (newest, 2026-10-22) bundles certifi 2026.7.22 and
     # botocore's AAA-carrying bundle. Tracked: aws/aws-sam-cli#9359.
-    "/usr/local/aws-sam-cli/*/dist/_internal/certifi/cacert.pem|AWS SAM CLI: no fixed release, https://github.com/aws/aws-sam-cli/pull/9359"
-    "/usr/local/aws-sam-cli/*/dist/_internal/botocore/cacert.pem|AWS SAM CLI: no fixed release, https://github.com/aws/aws-sam-cli/pull/9359"
+    "/usr/local/aws-sam-cli/*/dist/_internal/certifi/cacert.pem|2026-12-31|AWS SAM CLI: no fixed release, https://github.com/aws/aws-sam-cli/pull/9359"
+    "/usr/local/aws-sam-cli/*/dist/_internal/botocore/cacert.pem|2026-12-31|AWS SAM CLI: no fixed release, https://github.com/aws/aws-sam-cli/pull/9359"
     # botocore 1.39.x's own bundle (still has AAA) is only a fallback: botocore
     # uses certifi whenever it is importable, and /tmp/.venv has certifi
     # >= 2026.10.23. boto3/botocore are held at ~=1.39 (botocore 1.43.x drops AAA).
-    "/tmp/.venv/lib/python3*/site-packages/botocore/cacert.pem|unused fallback: botocore loads certifi (fixed) first; lifted by the boto3/botocore 1.43 bump"
+    "/tmp/.venv/lib/python3*/site-packages/botocore/cacert.pem|2026-12-31|unused fallback: botocore loads certifi (fixed) first; lifted by the boto3/botocore 1.43 bump"
 )
 
 setup_file() {
     # One file holding both cross-signatures, for -untrusted.
     cat "$FIXTURES"/cross-signs/*.crt >"$BATS_FILE_TMPDIR/untrusted.crt"
     export UNTRUSTED="$BATS_FILE_TMPDIR/untrusted.crt"
-    # Content needles for discovering CA files: PEM line 8 of each cross-signer
-    # root. Both lines fall inside the subjectPublicKeyInfo, so they are tied
-    # to the key and are the same in every 64-column PEM bundle that carries
-    # the root.
-    NEEDLE_EMSIGN="$(sed -n 8p "$FIXTURES/roots/emsign-ecc-root-ca-g3.crt")"
-    NEEDLE_AAA="$(sed -n 8p "$FIXTURES/roots/aaa-certificate-services.crt")"
-    export NEEDLE_EMSIGN NEEDLE_AAA
+    # Content needles for discovering CA files: PEM line 8 of EACH of the four
+    # roots (A-05): the two cross-signers (emSign ECC Root CA - G3, AAA) and the
+    # intermediates' direct issuers (emSign Root TLS/CS CA - G3), which a
+    # vendor store might carry as anchors. Line 8 falls inside the
+    # subjectPublicKeyInfo, so it is tied to the key and is the same in every
+    # 64-column PEM bundle that carries the root.
+    local r
+    : >"$BATS_FILE_TMPDIR/needles"
+    for r in "$FIXTURES"/roots/*.crt; do sed -n 8p "$r" >>"$BATS_FILE_TMPDIR/needles"; done
+    export NEEDLES="$BATS_FILE_TMPDIR/needles"
+    export CA_RESIDUALS_TODAY="${CA_RESIDUALS_TODAY:-$(date -u +%F)}"
 }
 
 # version_ge HAVE WANT: true when HAVE >= WANT (sort -V); false for an empty HAVE.
@@ -134,18 +142,39 @@ _find_ca_files() {
         -o -path "${BATS_RUN_TMPDIR:-/nonexistent}" \) -prune -o \
         -type f \( -name '*.pem' -o -name '*.crt' -o -name '*.cer' -o -name 'cacert*' -o -name '*bundle*.txt' \) \
         -print0 2>/dev/null |
-        xargs -0 -r grep -lIZF -e "$NEEDLE_EMSIGN" -e "$NEEDLE_AAA" 2>/dev/null || true
+        xargs -0 -r grep -lIZF -f "$NEEDLES" 2>/dev/null || true
 }
 
-# _residual_reason FILE: print the CA_RESIDUALS reason when FILE matches an entry.
+# _residual_reason FILE [ENTRY...]: print the reason of the first unexpired
+# entry (default: CA_RESIDUALS) whose glob matches FILE. An expired entry
+# excuses nothing.
 _residual_reason() {
-    local entry glob
-    for entry in "${CA_RESIDUALS[@]}"; do
-        glob="${entry%%|*}"
+    local f="$1" entry glob rest expires; shift
+    [ "$#" -gt 0 ] || set -- "${CA_RESIDUALS[@]}"
+    for entry in "$@"; do
+        glob="${entry%%|*}" rest="${entry#*|}"
+        expires="${rest%%|*}"
         # shellcheck disable=SC2053  # the glob is meant to match
-        [[ "$1" == $glob ]] && { echo "${entry#*|}"; return 0; }
+        [[ "$f" == $glob ]] || continue
+        [[ "$expires" < "$CA_RESIDUALS_TODAY" ]] && continue
+        echo "${rest#*|}"; return 0
     done
     return 1
+}
+
+# _residuals_invalid [ENTRY...]: print every entry (default: CA_RESIDUALS)
+# that is malformed or past its expiry date (the expiry day itself is valid).
+_residuals_invalid() {
+    local entry rest expires
+    [ "$#" -gt 0 ] || set -- "${CA_RESIDUALS[@]}"
+    for entry in "$@"; do
+        rest="${entry#*|}" expires="${rest%%|*}"
+        if [[ "$entry" != /*"|"*"|"?* || ! "$expires" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]]; then
+            echo "malformed: $entry"
+        elif [[ "$expires" < "$CA_RESIDUALS_TODAY" ]]; then
+            echo "expired ${expires}: ${entry%%|*}"
+        fi
+    done
 }
 
 # Print the pip version of interpreter $1 ("" if it has no pip).
@@ -198,12 +227,41 @@ _owned_pythons() {
     [ "${#bad[@]}" -eq 0 ] || fail "fixtures not verifiable against their own roots: ${bad[*]}"
 }
 
-@test "positive control: CA-file discovery finds a bundle that carries a cross-signer root" {
-    [ "${#NEEDLE_EMSIGN}" -eq 64 ] && [ "${#NEEDLE_AAA}" -eq 64 ] || fail "needles must be full 64-column PEM lines"
+@test "positive control: CA-file discovery finds a bundle carrying any of the four roots" {
+    [ "$(wc -l <"$NEEDLES")" -eq 4 ] || fail "expected 4 needles (one per fixture root)"
+    [ -z "$(awk 'length($0) != 64' "$NEEDLES")" ] || fail "needles must be full 64-column PEM lines"
     local found
     found="$(_find_ca_files "$FIXTURES/roots" | tr '\0' '\n' | sort)"
-    [ "$found" = "$(printf '%s\n' "$FIXTURES/roots/aaa-certificate-services.crt" "$FIXTURES/roots/emsign-ecc-root-ca-g3.crt")" ] \
-        || fail "discovery found: ${found:-<nothing>}"
+    [ "$found" = "$(printf '%s\n' "$FIXTURES"/roots/*.crt | sort)" ] || fail "discovery found: ${found:-<nothing>}"
+    # A vendor-style bundle that carries only a direct issuer (emSign Root TLS
+    # CA - G3, after an unrelated certificate) is discovered too (A-05).
+    cat "$FIXTURES/cross-signs/emsign-root-cs-ca-g3--by-emsign-ecc-root-ca-g3.crt" \
+        "$FIXTURES/roots/emsign-root-tls-ca-g3.crt" >"$BATS_TEST_TMPDIR/vendor-cacert.pem"
+    found="$(_find_ca_files "$BATS_TEST_TMPDIR" | tr '\0' '\n')"
+    [ "$found" = "$BATS_TEST_TMPDIR/vendor-cacert.pem" ] || fail "direct-issuer bundle not discovered: ${found:-<nothing>}"
+}
+
+@test "residuals: every CA_RESIDUALS entry is well-formed and not past its expiry" {
+    local bad
+    bad="$(_residuals_invalid)"
+    [ -z "$bad" ] || fail "$(printf '%s\n' "re-justify or remove these CA_RESIDUALS entries (A-06):" "$bad")"
+}
+
+@test "residuals: an expired entry is reported and excuses nothing; a live one does" {
+    local live="/x/cacert.pem|2026-12-31|live" dead="/x/cacert.pem|2026-01-01|dead"
+    CA_RESIDUALS_TODAY=2026-10-26
+    [ -z "$(_residuals_invalid "$live")" ]
+    [ "$(_residuals_invalid "$dead")" = "expired 2026-01-01: /x/cacert.pem" ]
+    [[ "$(_residuals_invalid "/x/cacert.pem|soon|r")" == malformed:* ]]
+    [[ "$(_residuals_invalid "/x/cacert.pem|r")" == malformed:* ]]
+    [ "$(_residual_reason /x/cacert.pem "$live")" = live ]
+    run _residual_reason /x/cacert.pem "$dead"
+    [ "$status" -eq 1 ]
+    CA_RESIDUALS_TODAY=2026-12-31
+    [ "$(_residual_reason /x/cacert.pem "$live")" = live ]   # the expiry day itself is still valid
+    CA_RESIDUALS_TODAY=2027-01-01
+    run _residual_reason /x/cacert.pem "$live"
+    [ "$status" -eq 1 ]
 }
 
 # ----------------------------------------------------------------------------
@@ -307,7 +365,7 @@ _owned_pythons() {
 # Everything else on disk (vendor CLIs and their bundled Pythons)
 # ----------------------------------------------------------------------------
 
-@test "every PEM CA file on disk that carries a cross-signer root distrusts (documented residuals excepted)" {
+@test "every PEM CA file on disk that carries any of the four roots distrusts (unexpired documented residuals excepted)" {
     local f reason failed=()
     while IFS= read -r -d '' f; do
         if grep -q -- '-----BEGIN TRUSTED CERTIFICATE-----' "$f"; then
