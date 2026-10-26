@@ -44,9 +44,23 @@ If you need a public credit, let us know your preferred attribution.
 
 ## Supported Versions
 
-- We support the **default branch** and the **most recent tagged release** (if tags are used).
-- Security fixes are generally only backported to the most recent minor release.
-- Users should prefer the **latest image/tag** and verify by **digest**.
+- We support the **default branch**, plus the **latest patch of the two most
+  recent minor lines**, currently **4.9.x** and **4.8.x**. When a new minor
+  line ships, the oldest supported line reaches end of life.
+- Security fixes land on the default branch first. They are then backported
+  to the previous minor line's maintenance branch (`release/<major>.<minor>`)
+  and shipped there as a new patch release.
+- Published tags:
+  - `<version>`: multi-arch, per release.
+  - `<version>-linux-<arch>`, `<major>.<minor>-linux-<arch>` and
+    `<major>-linux-<arch>`: per arch.
+  - `latest`: multi-arch.
+  - `latest-linux-<arch>`, `master-linux-<arch>`, `sha-*`: per arch.
+- On release tags, `latest` and `<major>-linux-<arch>` move only for the
+  highest release. A maintenance release of an older line never moves them.
+- On master pushes, `latest-linux-<arch>` (and `master-linux-<arch>`) track
+  the default branch.
+- Pin a `<version>` tag and verify by **digest**.
 
 ## How We Build & Verify
 

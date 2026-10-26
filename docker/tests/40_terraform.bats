@@ -22,3 +22,10 @@ load 'test_helper/common.bash'
   assert_success
 }
 
+
+@test "tenv login profile is installed, parses, and keeps tenv's PATH entries (INFIAAS-11916)" {
+  run bash -n /etc/profile.d/tenv.sh
+  assert_success
+  run bash -lc 'command -v terraform && command -v tofu'
+  assert_success
+}

@@ -316,21 +316,34 @@ jobs:
           if [ "$FLAG_PRERELEASE" = "true" ] || [ "$NAME_PRERELEASE" = "true" ]; then
             IS_PRERELEASE="true"
           fi
+          # INFIAAS-11916 (S1.6): `latest` moves only for the highest release,
+          # so a maintenance release (v4.8.4 after v4.9.6) leaves it alone. The
+          # shallow checkout has no tags; the script asks the remote too, and
+          # exits 2 (failing this step) if it cannot decide.
+          MOVE_LATEST="false"
+          if [ "$IS_PRERELEASE" = "false" ]; then
+            MOVE_LATEST="$(scripts/is-highest-release.sh "v${TAG#v}")"
+          fi
           echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
           echo "image_tag=${TAG#v}" >> "$GITHUB_OUTPUT"
           echo "is_prerelease=${IS_PRERELEASE}" >> "$GITHUB_OUTPUT"
+          echo "move_latest=${MOVE_LATEST}" >> "$GITHUB_OUTPUT"
           # lowercase image ref for the manifest sources below (a with: block can't use bash ${,,})
           echo "image=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
-          echo "::notice::Tag=${TAG}, Pre-release=${IS_PRERELEASE}"
+          echo "::notice::Tag=${TAG}, Pre-release=${IS_PRERELEASE}, highest release (moves latest)=${MOVE_LATEST}"
 
       - name: Docker metadata
         id: meta
         uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
         with:
           images: ghcr.io/${{ github.repository }}
+          # INFIAAS-11916 (A-01): defence in depth; type=raw never auto-adds
+          # latest, but every metadata step must say latest=false explicitly
+          # (check-guardrails.sh), so a later type=semver rule cannot bypass the guard.
+          flavor: latest=false
           tags: |
             type=raw,value=${{ steps.resolve.outputs.image_tag }}
-            type=raw,value=latest,enable=${{ steps.resolve.outputs.is_prerelease == 'false' }}
+            type=raw,value=latest,enable=${{ steps.resolve.outputs.move_latest == 'true' }}
 
       - name: Create and push manifest
         uses: int128/docker-manifest-create-action@a118e9fe12455375d4810aa318c20e6dba77288e # v2.29.0

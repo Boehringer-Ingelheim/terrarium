@@ -4,7 +4,7 @@ This file lists all tools bundled in the terrarium container image and their
 open-source licenses. Consumers of this image should review these licenses for
 compliance with their organization's policies.
 
-> **Last updated:** 2026-07-24 (reviewed under INFIAAS-11426; `latest` rows
+> **Last updated:** 2026-10-26 (INFIAAS-11916 version bumps; reviewed under INFIAAS-11426; `latest` rows
 > reflect tools installed unpinned — pyenv/uv and the
 > dnf-repo/installer CLIs — and remain accurate)
 > For a machine-readable SBOM, see the BuildKit SBOM attestation attached to
@@ -19,9 +19,9 @@ compliance with their organization's policies.
 
 | Tool | Version | License | Source |
 |------|---------|---------|--------|
-| Python | 3.13.15 (via pyenv) | [PSF-2.0](https://docs.python.org/3/license.html) | github.com/pyenv/pyenv → python.org |
-| Go | 1.26.8 | [BSD-3-Clause](https://go.dev/LICENSE) | go.dev |
-| Node.js | 24.21.0 | [MIT](https://github.com/nodejs/node/blob/main/LICENSE) | nodejs.org |
+| Python | 3.13.17 (via pyenv; pip >= 26.2.2) | [PSF-2.0](https://docs.python.org/3/license.html) | github.com/pyenv/pyenv → python.org |
+| Go | 1.26.10 | [BSD-3-Clause](https://go.dev/LICENSE) | go.dev |
+| Node.js | 24.22.1 | [MIT](https://github.com/nodejs/node/blob/main/LICENSE) | nodejs.org |
 | npm | 11.20.0 (pinned over the Node-bundled npm) | [Artistic-2.0](https://github.com/npm/cli/blob/latest/LICENSE) | registry.npmjs.org |
 
 ## Version Managers
@@ -30,13 +30,13 @@ compliance with their organization's policies.
 |------|---------|---------|--------|
 | pyenv | latest (git clone) | [MIT](https://github.com/pyenv/pyenv/blob/master/LICENSE) | github.com/pyenv/pyenv |
 | tenv | 4.15.1 | [Apache-2.0](https://github.com/tofuutils/tenv/blob/main/LICENSE) | github.com/tofuutils/tenv |
-| uv | latest (install script) | [Apache-2.0](https://github.com/astral-sh/uv/blob/main/LICENSE-APACHE) | astral.sh/uv |
+| uv | latest (install script, `~/.local/bin`) and ~0.13.5 (`/tmp/.venv`, uv.lock) | [Apache-2.0](https://github.com/astral-sh/uv/blob/main/LICENSE-APACHE) | astral.sh/uv |
 
 ## Infrastructure as Code
 
 | Tool | Version | License | Source |
 |------|---------|---------|--------|
-| Terraform | 1.16.4 (via tenv; the default — tenv installs any other version on demand) | [BUSL-1.1](https://github.com/hashicorp/terraform/blob/main/LICENSE) | releases.hashicorp.com |
+| Terraform | 1.16.7 (via tenv; the default — tenv installs any other version on demand) | [BUSL-1.1](https://github.com/hashicorp/terraform/blob/main/LICENSE) | releases.hashicorp.com |
 | OpenTofu | 1.13.1 (via tenv) | [MPL-2.0](https://github.com/opentofu/opentofu/blob/main/LICENSE) | opentofu.org |
 | Packer | 1.16.1 | [BUSL-1.1](https://github.com/hashicorp/packer/blob/main/LICENSE) | releases.hashicorp.com |
 | terraform-docs | v0.24.0 | [MIT](https://github.com/terraform-docs/terraform-docs/blob/master/LICENSE) | github.com/terraform-docs/terraform-docs |
@@ -66,7 +66,7 @@ compliance with their organization's policies.
 
 | Tool | Version | License | Source |
 |------|---------|---------|--------|
-| Trivy | 0.75.0 | [Apache-2.0](https://github.com/aquasecurity/trivy/blob/main/LICENSE) | github.com/aquasecurity/trivy |
+| Trivy | 0.76.1 | [Apache-2.0](https://github.com/aquasecurity/trivy/blob/main/LICENSE) | github.com/aquasecurity/trivy |
 | sops | 3.13.3 | [MPL-2.0](https://github.com/getsops/sops/blob/main/LICENSE) | github.com/getsops/sops |
 | age | 1.3.2 | [BSD-3-Clause](https://github.com/FiloSottile/age/blob/main/LICENSE) | github.com/FiloSottile/age |
 
@@ -99,10 +99,11 @@ The following packages are installed via `pyproject.toml` / `uv.lock`:
 | pre-commit (~> 4.2) | MIT | pypi.org |
 | requests (~> 2.32) | Apache-2.0 | pypi.org |
 | python-hcl2 (~> 2.0) | MIT | pypi.org |
-| pipenv (~> 2024.0) | MIT | pypi.org |
+| pipenv (~> 2026.10) | MIT | pypi.org |
 | pycodestyle (~> 2.14) | MIT | pypi.org |
 | simplejson (~> 3.19) | MIT / Academic Free License | pypi.org |
-| virtualenv (~> 20.32) | MIT | pypi.org |
+| virtualenv (~> 21.14.13) | MIT | pypi.org |
+| certifi (>= 2026.10.23) | MPL-2.0 | pypi.org |
 
 > For the complete list of transitive Python dependencies and their licenses,
 > inspect `docker/uv.lock` or run `uv pip list --format columns` inside the container.

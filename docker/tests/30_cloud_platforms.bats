@@ -62,3 +62,11 @@ load 'test_helper/common.bash'
     run /opt/openstack/bin/pip check
     assert_success
 }
+
+@test "gcloud repo is the static file and dnf's \$basearch resolved to this image's arch (INFIAAS-11916)" {
+  run grep -F 'baseurl=https://packages.cloud.google.com/yum/repos/cloud-sdk-el9-$basearch' /etc/yum.repos.d/google-cloud-sdk.repo
+  assert_success
+  run rpm -q --qf '%{ARCH}' google-cloud-cli
+  assert_success
+  assert_output "$(uname -m)"
+}

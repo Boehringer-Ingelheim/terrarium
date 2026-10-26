@@ -27,9 +27,11 @@ PIN_DIRS=("$WF_DIR")
 
 # ── Ratchet thresholds ───────────────────────────────────────────────────────
 # Tighten these as extraction phases land. Do not loosen.
-#   heredocs:      baseline 10 → target 2 (the two config heredocs at :557,:642)
+#   heredocs:      baseline 10 → 2 → 0 (INFIAAS-11916: the two config heredocs became
+#                  docker/files/yum.repos.d/ and docker/files/profile.d/ COPYs, so
+#                  hadolint can parse the Dockerfile and `make lint` is blocking)
 #   longest RUN:   baseline 68 → target 20
-HEREDOC_MAX=2    # Phase 5: import_vendor_key extracted (3→2) — FINAL target: the 2 config heredocs (:557,:642)
+HEREDOC_MAX=0    # INFIAAS-11916: config heredocs replaced by static files — FINAL (hadolint cannot parse heredocs)
 RUN_MAX=20       # Phase 6: age/sops + node keyring decomposed — FINAL target reached
 
 fail=0
@@ -56,6 +58,9 @@ chk() { # name actual op expected  (op ∈ -ge|-le|-eq; literal so shellcheck pa
 BIN_DIR="$(dirname "$DF")/files/bin"
 VSRC=("$DF")
 for f in "$BIN_DIR"/*; do [ -f "$f" ] && VSRC+=("$f"); done
+# INFIAAS-11916: the google-cloud repo definition (gpgcheck/repo_gpgcheck/gpgkey)
+# moved from a Dockerfile heredoc to docker/files/yum.repos.d/; count it too.
+for f in "$(dirname "$DF")"/files/yum.repos.d/*; do [ -f "$f" ] && VSRC+=("$f"); done
 chk "sha256 refs"        "$(grep -h sha256 "${VSRC[@]}" 2>/dev/null | grep -c sha256 || true)"        -ge 23
 chk "gpg/pgp refs"       "$(grep -hiE 'gpg|pgp' "${VSRC[@]}" 2>/dev/null | grep -ciE 'gpg|pgp' || true)" -ge 66
 # Floor lowered 42 -> 38 by INFIAAS-11797 (Ruby removal dropped BUNDLER_VERSION,
@@ -80,6 +85,36 @@ chk "buildkit pinned"    "$buildkit_pins" -eq "$buildx_setups"
 # pre-release tag can never move `latest` (tag-driven rules use
 # scripts/is-prerelease.sh; the branch rule uses {{is_default_branch}}).
 chk "unguarded latest"   "$(wf_all | grep -E 'value=latest' | grep -cv 'enable=' || true)" -eq 0
+# INFIAAS-11916 (S1.6): `latest` and `{{major}}` move only for the HIGHEST
+# release, so a maintenance release (v4.8.4 after v4.9.6) cannot move them
+# back. Every `latest` rule must be the default-branch rule or be gated on the
+# `move_latest` output, which scripts/is-highest-release.sh computes. The
+# `{{major}}` rule must be gated the same way. A metadata flavour of
+# latest=auto|true would add `latest` for any release tag, so it is banned.
+# Every workflow that gates on move_latest must compute it with the script.
+guard_expr="enable=\\$\\{\\{ steps\\.[a-z_]+\\.outputs\\.move_latest == 'true' \\}\\}"
+chk "latest not via highest-release guard" \
+  "$(wf_all | grep -E 'value=latest' | grep -vE "enable=\\{\\{is_default_branch\\}\\}|${guard_expr}" | grep -c . || true)" -eq 0
+chk "major not via highest-release guard" \
+  "$(wf_all | grep -E 'pattern=\{\{major\}\}([^.]|$)' | grep -vE "$guard_expr" | grep -c . || true)" -eq 0
+chk "flavor latest=auto|true" "$(wf_all | grep -cE 'flavor:.*latest=(auto|true)' || true)" -eq 0
+# INFIAAS-11916 (A-01): a metadata-action step WITHOUT a flavor still gets the
+# action's default latest=auto, which adds `latest` for any release tag via
+# type=semver, whatever the move_latest guard says. So every
+# docker/metadata-action step must declare `flavor:` with latest=false. Each
+# step's block runs from its `uses:` line to the next `- ` step item.
+meta_unflavored="$(find "$WF_DIR" -type f \( -name '*.yml' -o -name '*.yaml' \) -exec awk '
+  FNR == 1 { if (inmeta && !ok) bad++; inmeta = 0 }
+  /uses: docker\/metadata-action@/ { if (inmeta && !ok) bad++; inmeta = 1; ok = 0; next }
+  inmeta && /^[[:space:]]*- [a-z_-]+:/ { if (!ok) bad++; inmeta = 0 }
+  inmeta && /^[[:space:]]*flavor:.*latest=false/ { ok = 1 }
+  END { if (inmeta && !ok) bad++; print bad + 0 }' {} + | awk '{s += $1} END {print s + 0}')"
+chk "metadata-action without latest=false" "$meta_unflavored" -eq 0
+unwired=0
+while IFS= read -r f; do
+  grep -q 'scripts/is-highest-release.sh' "$f" || { echo "  move_latest used without scripts/is-highest-release.sh: $f"; unwired=$((unwired + 1)); }
+done < <(grep -rlE 'outputs\.move_latest' "$WF_DIR" 2>/dev/null || true)
+chk "move_latest without guard script" "$unwired" -eq 0
 
 # ── Ratchet metrics ──────────────────────────────────────────────────────────
 chk "helper heredocs"    "$(grep -cE '<<.?(EOF|EOS|EOT)' "$DF" || true)" -le "$HEREDOC_MAX"

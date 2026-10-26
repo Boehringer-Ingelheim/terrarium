@@ -5,8 +5,8 @@
 #                  freshness (GO/ROCKYLINUX/UBI9 pins current; network, blocking;
 #                  dated exceptions in scripts/pin-freshness-allowlist.txt)
 #   - shellcheck : severity=warning over shell sources (blocking)
-#   - hadolint   : Dockerfile lint (INFORMATIONAL until INFIAAS-11426 heredoc
-#                  extraction lets hadolint parse the file; then made blocking)
+#   - hadolint   : Dockerfile lint, error threshold (blocking since INFIAAS-11916
+#                  replaced the last two config heredocs with static files)
 name: Lint
 
 on:
@@ -59,13 +59,9 @@ jobs:
           "$RUNNER_TEMP/bats/install.sh" "$HOME/.local"
           PATH="$HOME/.local/bin:$PATH" make test-scripts
 
-      # Informational: hadolint 2.14 cannot parse Dockerfile.terrarium because of
-      # the two BY-DESIGN config heredocs (the google-cloud repo `<<EOF`, which
-      # must expand at write time, and the tenv profile) — a parser limitation,
-      # not a rule finding, that no ignore entry can suppress. The helper
-      # shell-heredocs were all removed by INFIAAS-11426; these two remain by
-      # design (out of scope). Flip to blocking if hadolint gains heredoc support
-      # or the config heredocs are ever restructured.
-      - name: Hadolint (informational)
-        continue-on-error: true
+      # Blocking (INFIAAS-11916): hadolint cannot parse heredocs, and the last
+      # two (google-cloud repo, tenv profile) are now static files under
+      # docker/files/ (HEREDOC_MAX=0 in check-guardrails.sh keeps it that way).
+      # The image is pinned by digest in the Makefile (HADOLINT_IMAGE).
+      - name: Hadolint
         run: make hadolint

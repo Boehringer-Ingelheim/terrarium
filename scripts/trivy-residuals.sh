@@ -44,11 +44,14 @@ rule_for() { # <path> <pkg> → prints the rule key, or nothing
     usr/local/bin/packer) echo packer ;;
     usr/local/bin/age|usr/local/bin/age-keygen) echo age ;;
     usr/local/bin/helm) echo helm ;;
+    usr/bin/task) echo task ;;
+    usr/local/bin/kubectl) echo kubectl ;;
+    usr/local/bin/yq) echo yq ;;
     */samcli/local/rapid/aws-lambda-rie-*) echo aws-sam-rie ;;
     usr/lib64/az/*) echo azure-cli-rpm ;;
     usr/lib64/google-cloud-sdk/*) echo gcloud ;;
     tmp/.venv/lib/python*/site-packages/cryptography-*) echo venv-cryptography ;;
-    "") case "$2" in msgpack|setuptools|urllib3) echo pip-vendor ;; esac ;;
+    "") case "$2" in msgpack|setuptools|urllib3) echo pip-vendor ;; certifi) echo az-pip-certifi ;; esac ;;
   esac
 }
 
@@ -62,12 +65,16 @@ reason_for() {
     tflint) echo "tflint 0.64.0 is the newest release (go1.26.3). Lifted by the next tflint release." ;;
     packer) echo "packer 1.16.1 is the newest release. Lifted by the next packer release." ;;
     age) echo "age 1.3.2 is the newest release (x/crypto v0.55.0). Lifted by the next age release." ;;
+    task) echo "go-task 3.54.0 is the newest release (go1.27.1, x/net v0.59.0). Lifted by the next go-task release." ;;
+    kubectl) echo "kubectl 1.35.9 is the newest 1.35.z (go1.26.8, x/net v0.56.0); kubectl stays within one minor of the clusters. Lifted by the next 1.35 patch release." ;;
+    yq) echo "yq 4.54.1 is the newest release (go1.27.1, x/net v0.59.0). Lifted by the next yq release." ;;
+    az-pip-certifi) echo "The Azure CLI 2.91.0 RPM (newest) ships pip 26.2.1 under /usr/lib64/az, which vendors certifi 2026.6.17 (eMudhra, INFIAAS-11916); Trivy reports pip-vendored packages without a path. The fix is merged upstream but unreleased (Azure/azure-cli#34250). Lifted by the next Azure CLI release." ;;
     helm) echo "helm 3.22.0 is the newest v3 release (x/crypto v0.55.0); helm 4.3.0 has the same x/crypto. Lifted by the next helm release." ;;
-    aws-sam-rie) echo "AWS SAM CLI 1.166.2 is the newest release; it bundles the Lambda Runtime Interface Emulator (chi v5.2.2), which only runs locally under 'sam local'. Lifted by the next SAM CLI release." ;;
-    azure-cli-rpm) echo "Azure CLI 2.90.0 is the newest Microsoft RPM; it bundles its own Python packages under /usr/lib64/az. Lifted by the next Azure CLI release." ;;
+    aws-sam-rie) echo "AWS SAM CLI 1.170.0 is the newest release (2026-10-22); it bundles the Lambda Runtime Interface Emulator (Go, chi), which only runs locally under 'sam local'. Lifted by the next SAM CLI release." ;;
+    azure-cli-rpm) echo "Azure CLI 2.91.0 is the newest Microsoft RPM (2026-10-05); it bundles its own Python packages under /usr/lib64/az. Lifted by the next Azure CLI release." ;;
     gcloud) echo "Google Cloud CLI is installed unpinned from Google's repo (newest release); it bundles its own Python under /usr/lib64/google-cloud-sdk. Lifted by the next Cloud SDK release." ;;
     venv-cryptography) echo "azure-cli-core 2.90.0 (newest) pins msal==1.36.0, which requires cryptography<49, so /tmp/.venv stays on cryptography 48.0.1. Lifted when Azure CLI moves to a newer msal." ;;
-    pip-vendor) echo "pip 26.2.1 (newest; pip main too) vendors these, listed in pip/_vendor/vendor.txt of every pip in the image; Trivy reports them without a path. pip vendors only pkg_resources from setuptools. Lifted by the next pip release." ;;
+    pip-vendor) echo "pip 26.2.2 (newest, INFIAAS-11916; the Azure CLI RPM still ships 26.2.1) vendors these, listed in pip/_vendor/vendor.txt of every pip in the image; Trivy reports them without a path. pip vendors only pkg_resources from setuptools. Lifted by the next pip release." ;;
   esac
 }
 
