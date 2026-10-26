@@ -27,9 +27,11 @@ PIN_DIRS=("$WF_DIR")
 
 # ── Ratchet thresholds ───────────────────────────────────────────────────────
 # Tighten these as extraction phases land. Do not loosen.
-#   heredocs:      baseline 10 → target 2 (the two config heredocs at :557,:642)
+#   heredocs:      baseline 10 → 2 → 0 (INFIAAS-11916: the two config heredocs became
+#                  docker/files/yum.repos.d/ and docker/files/profile.d/ COPYs, so
+#                  hadolint can parse the Dockerfile and `make lint` is blocking)
 #   longest RUN:   baseline 68 → target 20
-HEREDOC_MAX=2    # Phase 5: import_vendor_key extracted (3→2) — FINAL target: the 2 config heredocs (:557,:642)
+HEREDOC_MAX=0    # INFIAAS-11916: config heredocs replaced by static files — FINAL (hadolint cannot parse heredocs)
 RUN_MAX=20       # Phase 6: age/sops + node keyring decomposed — FINAL target reached
 
 fail=0
@@ -56,6 +58,9 @@ chk() { # name actual op expected  (op ∈ -ge|-le|-eq; literal so shellcheck pa
 BIN_DIR="$(dirname "$DF")/files/bin"
 VSRC=("$DF")
 for f in "$BIN_DIR"/*; do [ -f "$f" ] && VSRC+=("$f"); done
+# INFIAAS-11916: the google-cloud repo definition (gpgcheck/repo_gpgcheck/gpgkey)
+# moved from a Dockerfile heredoc to docker/files/yum.repos.d/; count it too.
+for f in "$(dirname "$DF")"/files/yum.repos.d/*; do [ -f "$f" ] && VSRC+=("$f"); done
 chk "sha256 refs"        "$(grep -h sha256 "${VSRC[@]}" 2>/dev/null | grep -c sha256 || true)"        -ge 23
 chk "gpg/pgp refs"       "$(grep -hiE 'gpg|pgp' "${VSRC[@]}" 2>/dev/null | grep -ciE 'gpg|pgp' || true)" -ge 66
 # Floor lowered 42 -> 38 by INFIAAS-11797 (Ruby removal dropped BUNDLER_VERSION,
