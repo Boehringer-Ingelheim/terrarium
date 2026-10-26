@@ -50,9 +50,17 @@ If you need a public credit, let us know your preferred attribution.
 - Security fixes land on the default branch first. They are then backported
   to the previous minor line's maintenance branch (`release/<major>.<minor>`)
   and shipped there as a new patch release.
-- `latest` (and the `<major>` tag) always points at the highest release. A
-  maintenance release of an older line never moves it. Pin a `<version>` tag
-  and verify by **digest**.
+- Published tags:
+  - `<version>`: multi-arch, per release.
+  - `<version>-linux-<arch>`, `<major>.<minor>-linux-<arch>` and
+    `<major>-linux-<arch>`: per arch.
+  - `latest`: multi-arch.
+  - `latest-linux-<arch>`, `master-linux-<arch>`, `sha-*`: per arch.
+- On release tags, `latest` and `<major>-linux-<arch>` move only for the
+  highest release. A maintenance release of an older line never moves them.
+- On master pushes, `latest-linux-<arch>` (and `master-linux-<arch>`) track
+  the default branch.
+- Pin a `<version>` tag and verify by **digest**.
 
 ## How We Build & Verify
 

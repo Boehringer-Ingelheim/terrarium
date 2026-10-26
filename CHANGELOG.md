@@ -27,8 +27,8 @@ CLIs carry their own root stores, and every one of them was refreshed.
   2026.2.92_v9.0.319-90.3.el9_8 (RHSA-2026:88459).
 - **Python:**
   - CPython 3.13.15 → 3.13.17. Its ensurepip seeds pip 26.2.2.
-  - pip 26.2.1 → ≥ 26.2.2 for the pyenv interpreter and the `/opt/openstack`
-    venv, via the new `PIP_MIN_VERSION` build-arg. Neither pip was ever
+  - pip 26.2.1 → 26.2.2 for the pyenv interpreter and the `/opt/openstack`
+    venv, pinned exactly by the new `PIP_VERSION` build-arg. Neither pip was ever
     upgraded before. pip always loads its vendored certifi, so OS fixes do
     not reach it.
   - certifi:
@@ -38,7 +38,7 @@ CLIs carry their own root stores, and every one of them was refreshed.
   - uv 0.11.33 → 0.13.5 in `/tmp/.venv`, and 0.12.22 → 0.13.5 in
     `~/.local/bin`.
   - pipenv 2024.4.1 → 2026.10.3. Its patched pip was 24.3.1.
-  - virtualenv 21.14.9 → 21.14.13, which seeds pip 26.2.2.
+  - virtualenv 21.7.13 → 21.14.13, which seeds pip 26.2.2.
 - **Go 1.26.8 → 1.26.10.**
 - **Findings published since 4.9.5 in components we pin.** The candidate's
   release-gate scan found these:
@@ -82,13 +82,26 @@ CLIs carry their own root stores, and every one of them was refreshed.
 
 ### Changed
 
-- **`latest` and `<major>` move only for the highest release (INFIAAS-11916).**
-  The new `scripts/is-highest-release.sh` reuses `is-prerelease.sh` and
-  compares the tag against the highest stable tag, local and remote. It gates
-  `latest`, the per-arch `latest-linux-<arch>` and `<major>-linux-<arch>`
-  tags in `main.yaml`, and the manifest `latest` in `main.yaml` and
-  `release.yaml`. A maintenance release such as 4.8.4 can no longer move
-  them. `make guardrails` enforces the wiring.
+- **On release tags, `latest` and `<major>-linux-<arch>` move only for the
+  highest release (INFIAAS-11916).** The new `scripts/is-highest-release.sh`
+  reuses `is-prerelease.sh` and compares the tag against the highest stable
+  tag, local and remote. On a tag push it gates the multi-arch `latest`
+  manifest (`main.yaml`, `release.yaml`) and the per-arch
+  `latest-linux-<arch>` and `<major>-linux-<arch>` tags (`main.yaml`). Every
+  `docker/metadata-action` step sets `flavor: latest=false`, so the action's
+  default `latest=auto` cannot bypass the guard. A maintenance release such
+  as 4.8.4 can no longer move them. `make guardrails` enforces the wiring.
+  - Unchanged: on every **master push**, the per-arch `latest-linux-<arch>`
+    tags track master. The post-merge scan (`scan.yaml`) uses them. Pin
+    `<version>` (or `<version>-linux-<arch>`) for releases.
+  - No multi-arch `<major>` (e.g. `4`) tag is published, only
+    `<major>-linux-<arch>`.
+- **`make lint` is blocking, hadolint included.** The two config heredocs
+  (the google-cloud repo and the tenv profile) are now static files under
+  `docker/files/`, because hadolint cannot parse heredocs. hadolint is pinned
+  to v2.15.1 by digest.
+- **pip is pinned exactly** (`ARG PIP_VERSION=26.2.2`, build-time only) in
+  both places.
 - **`SECURITY.md`:** the supported versions are now the default branch plus
   the latest patch of the two most recent minor lines (4.9.x and 4.8.x).
 
