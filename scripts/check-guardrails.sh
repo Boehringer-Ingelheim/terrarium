@@ -80,6 +80,24 @@ chk "buildkit pinned"    "$buildkit_pins" -eq "$buildx_setups"
 # pre-release tag can never move `latest` (tag-driven rules use
 # scripts/is-prerelease.sh; the branch rule uses {{is_default_branch}}).
 chk "unguarded latest"   "$(wf_all | grep -E 'value=latest' | grep -cv 'enable=' || true)" -eq 0
+# INFIAAS-11916 (S1.6): `latest` and `{{major}}` move only for the HIGHEST
+# release, so a maintenance release (v4.8.4 after v4.9.6) cannot move them
+# back. Every `latest` rule must be the default-branch rule or be gated on the
+# `move_latest` output, which scripts/is-highest-release.sh computes. The
+# `{{major}}` rule must be gated the same way. A metadata flavour of
+# latest=auto|true would add `latest` for any release tag, so it is banned.
+# Every workflow that gates on move_latest must compute it with the script.
+guard_expr="enable=\\$\\{\\{ steps\\.[a-z_]+\\.outputs\\.move_latest == 'true' \\}\\}"
+chk "latest not via highest-release guard" \
+  "$(wf_all | grep -E 'value=latest' | grep -vE "enable=\\{\\{is_default_branch\\}\\}|${guard_expr}" | grep -c . || true)" -eq 0
+chk "major not via highest-release guard" \
+  "$(wf_all | grep -E 'pattern=\{\{major\}\}([^.]|$)' | grep -vE "$guard_expr" | grep -c . || true)" -eq 0
+chk "flavor latest=auto|true" "$(wf_all | grep -cE 'flavor:.*latest=(auto|true)' || true)" -eq 0
+unwired=0
+while IFS= read -r f; do
+  grep -q 'scripts/is-highest-release.sh' "$f" || { echo "  move_latest used without scripts/is-highest-release.sh: $f"; unwired=$((unwired + 1)); }
+done < <(grep -rlE 'outputs\.move_latest' "$WF_DIR" 2>/dev/null || true)
+chk "move_latest without guard script" "$unwired" -eq 0
 
 # ── Ratchet metrics ──────────────────────────────────────────────────────────
 chk "helper heredocs"    "$(grep -cE '<<.?(EOF|EOS|EOT)' "$DF" || true)" -le "$HEREDOC_MAX"
