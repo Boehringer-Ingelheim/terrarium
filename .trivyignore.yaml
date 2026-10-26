@@ -6,7 +6,31 @@
 # fails the gate.
 vulnerabilities:
   # ── age
+  - id: CVE-2026-111943
+    paths:
+      - "usr/local/bin/age"
+      - "usr/local/bin/age-keygen"
+    statement: "age 1.3.2 is the newest release (x/crypto v0.55.0). Lifted by the next age release."
+    expired_at: 2026-12-31
   - id: CVE-2026-56855
+    paths:
+      - "usr/local/bin/age"
+      - "usr/local/bin/age-keygen"
+    statement: "age 1.3.2 is the newest release (x/crypto v0.55.0). Lifted by the next age release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-56866
+    paths:
+      - "usr/local/bin/age"
+      - "usr/local/bin/age-keygen"
+    statement: "age 1.3.2 is the newest release (x/crypto v0.55.0). Lifted by the next age release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-78659
+    paths:
+      - "usr/local/bin/age"
+      - "usr/local/bin/age-keygen"
+    statement: "age 1.3.2 is the newest release (x/crypto v0.55.0). Lifted by the next age release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-78660
     paths:
       - "usr/local/bin/age"
       - "usr/local/bin/age-keygen"
@@ -18,14 +42,156 @@ vulnerabilities:
       - "usr/local/bin/age-keygen"
     statement: "age 1.3.2 is the newest release (x/crypto v0.55.0). Lifted by the next age release."
     expired_at: 2026-12-31
+  - id: CVE-2026-78663
+    paths:
+      - "usr/local/bin/age"
+      - "usr/local/bin/age-keygen"
+    statement: "age 1.3.2 is the newest release (x/crypto v0.55.0). Lifted by the next age release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-78667
+    paths:
+      - "usr/local/bin/age"
+      - "usr/local/bin/age-keygen"
+    statement: "age 1.3.2 is the newest release (x/crypto v0.55.0). Lifted by the next age release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-78669
+    paths:
+      - "usr/local/bin/age"
+      - "usr/local/bin/age-keygen"
+    statement: "age 1.3.2 is the newest release (x/crypto v0.55.0). Lifted by the next age release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-94439
+    paths:
+      - "usr/local/bin/age"
+      - "usr/local/bin/age-keygen"
+    statement: "age 1.3.2 is the newest release (x/crypto v0.55.0). Lifted by the next age release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-94440
+    paths:
+      - "usr/local/bin/age"
+      - "usr/local/bin/age-keygen"
+    statement: "age 1.3.2 is the newest release (x/crypto v0.55.0). Lifted by the next age release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-94448
+    paths:
+      - "usr/local/bin/age"
+      - "usr/local/bin/age-keygen"
+    statement: "age 1.3.2 is the newest release (x/crypto v0.55.0). Lifted by the next age release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-97030
+    paths:
+      - "usr/local/bin/age"
+      - "usr/local/bin/age-keygen"
+    statement: "age 1.3.2 is the newest release (x/crypto v0.55.0). Lifted by the next age release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-97031
+    paths:
+      - "usr/local/bin/age"
+      - "usr/local/bin/age-keygen"
+    statement: "age 1.3.2 is the newest release (x/crypto v0.55.0). Lifted by the next age release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-97032
+    paths:
+      - "usr/local/bin/age"
+      - "usr/local/bin/age-keygen"
+    statement: "age 1.3.2 is the newest release (x/crypto v0.55.0). Lifted by the next age release."
+    expired_at: 2026-12-31
   # ── aws-sam-rie
   - id: CVE-2025-69725
     paths:
-      - "opt/pyenv/versions/3.13.15/lib/python3.13/site-packages/samcli/local/rapid/aws-lambda-rie-arm64"
-      - "opt/pyenv/versions/3.13.15/lib/python3.13/site-packages/samcli/local/rapid/aws-lambda-rie-x86_64"
-      - "usr/local/aws-sam-cli/1.166.2/dist/_internal/samcli/local/rapid/aws-lambda-rie-arm64"
-      - "usr/local/aws-sam-cli/1.166.2/dist/_internal/samcli/local/rapid/aws-lambda-rie-x86_64"
+      - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-arm64"
+      - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-x86_64"
     statement: "AWS SAM CLI 1.166.2 is the newest release; it bundles the Lambda Runtime Interface Emulator (chi v5.2.2), which only runs locally under 'sam local'. Lifted by the next SAM CLI release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-111943
+    paths:
+      - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-arm64"
+      - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-x86_64"
+    statement: "AWS SAM CLI 1.166.2 is the newest release; it bundles the Lambda Runtime Interface Emulator (chi v5.2.2), which only runs locally under 'sam local'. Lifted by the next SAM CLI release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-114437
+    paths:
+      - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-arm64"
+      - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-x86_64"
+    statement: "AWS SAM CLI 1.166.2 is the newest release; it bundles the Lambda Runtime Interface Emulator (chi v5.2.2), which only runs locally under 'sam local'. Lifted by the next SAM CLI release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-56866
+    paths:
+      - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-arm64"
+      - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-x86_64"
+    statement: "AWS SAM CLI 1.166.2 is the newest release; it bundles the Lambda Runtime Interface Emulator (chi v5.2.2), which only runs locally under 'sam local'. Lifted by the next SAM CLI release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-78659
+    paths:
+      - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-arm64"
+      - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-x86_64"
+    statement: "AWS SAM CLI 1.166.2 is the newest release; it bundles the Lambda Runtime Interface Emulator (chi v5.2.2), which only runs locally under 'sam local'. Lifted by the next SAM CLI release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-78660
+    paths:
+      - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-arm64"
+      - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-x86_64"
+    statement: "AWS SAM CLI 1.166.2 is the newest release; it bundles the Lambda Runtime Interface Emulator (chi v5.2.2), which only runs locally under 'sam local'. Lifted by the next SAM CLI release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-78663
+    paths:
+      - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-arm64"
+      - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-x86_64"
+    statement: "AWS SAM CLI 1.166.2 is the newest release; it bundles the Lambda Runtime Interface Emulator (chi v5.2.2), which only runs locally under 'sam local'. Lifted by the next SAM CLI release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-78667
+    paths:
+      - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-arm64"
+      - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-x86_64"
+    statement: "AWS SAM CLI 1.166.2 is the newest release; it bundles the Lambda Runtime Interface Emulator (chi v5.2.2), which only runs locally under 'sam local'. Lifted by the next SAM CLI release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-78669
+    paths:
+      - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-arm64"
+      - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-x86_64"
+    statement: "AWS SAM CLI 1.166.2 is the newest release; it bundles the Lambda Runtime Interface Emulator (chi v5.2.2), which only runs locally under 'sam local'. Lifted by the next SAM CLI release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-94439
+    paths:
+      - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-arm64"
+      - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-x86_64"
+    statement: "AWS SAM CLI 1.166.2 is the newest release; it bundles the Lambda Runtime Interface Emulator (chi v5.2.2), which only runs locally under 'sam local'. Lifted by the next SAM CLI release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-94440
+    paths:
+      - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-arm64"
+      - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-x86_64"
+    statement: "AWS SAM CLI 1.166.2 is the newest release; it bundles the Lambda Runtime Interface Emulator (chi v5.2.2), which only runs locally under 'sam local'. Lifted by the next SAM CLI release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-94448
+    paths:
+      - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-arm64"
+      - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-x86_64"
+    statement: "AWS SAM CLI 1.166.2 is the newest release; it bundles the Lambda Runtime Interface Emulator (chi v5.2.2), which only runs locally under 'sam local'. Lifted by the next SAM CLI release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-97030
+    paths:
+      - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-arm64"
+      - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-x86_64"
+    statement: "AWS SAM CLI 1.166.2 is the newest release; it bundles the Lambda Runtime Interface Emulator (chi v5.2.2), which only runs locally under 'sam local'. Lifted by the next SAM CLI release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-97031
+    paths:
+      - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-arm64"
+      - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-x86_64"
+    statement: "AWS SAM CLI 1.166.2 is the newest release; it bundles the Lambda Runtime Interface Emulator (chi v5.2.2), which only runs locally under 'sam local'. Lifted by the next SAM CLI release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-97032
+    paths:
+      - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-arm64"
+      - "usr/local/aws-sam-cli/1.170.0/dist/_internal/samcli/local/rapid/aws-lambda-rie-x86_64"
+    statement: "AWS SAM CLI 1.166.2 is the newest release; it bundles the Lambda Runtime Interface Emulator (chi v5.2.2), which only runs locally under 'sam local'. Lifted by the next SAM CLI release."
+    expired_at: 2026-12-31
+  # ── az-pip-certifi
+  - id: GHSA-6q48-6c7w-9gw2
+    purls:
+      - "pkg:pypi/certifi@2026.6.17"
+    statement: "The Azure CLI 2.91.0 RPM (newest) ships pip 26.2.1 under /usr/lib64/az, which vendors certifi 2026.6.17 (eMudhra, INFIAAS-11916); Trivy reports pip-vendored packages without a path. The fix is merged upstream but unreleased (Azure/azure-cli#34250). Lifted by the next Azure CLI release."
     expired_at: 2026-12-31
   # ── azure-cli-rpm
   - id: CVE-2026-101917
@@ -88,6 +254,11 @@ vulnerabilities:
       - "usr/lib64/az/lib/python3.12/site-packages/pyjwt-2.13.0.dist-info/METADATA"
     statement: "Azure CLI 2.90.0 is the newest Microsoft RPM; it bundles its own Python packages under /usr/lib64/az. Lifted by the next Azure CLI release."
     expired_at: 2026-12-31
+  - id: CVE-2026-102275
+    paths:
+      - "usr/lib64/az/lib/python3.12/site-packages/pyjwt-2.13.0.dist-info/METADATA"
+    statement: "Azure CLI 2.90.0 is the newest Microsoft RPM; it bundles its own Python packages under /usr/lib64/az. Lifted by the next Azure CLI release."
+    expired_at: 2026-12-31
   - id: CVE-2026-49264
     paths:
       - "usr/lib64/az/lib/python3.12/site-packages/oauthlib-3.2.2.dist-info/METADATA"
@@ -128,29 +299,44 @@ vulnerabilities:
       - "usr/lib64/az/lib/python3.12/site-packages/urllib3-2.7.0.dist-info/METADATA"
     statement: "Azure CLI 2.90.0 is the newest Microsoft RPM; it bundles its own Python packages under /usr/lib64/az. Lifted by the next Azure CLI release."
     expired_at: 2026-12-31
+  - id: GHSA-6q48-6c7w-9gw2
+    paths:
+      - "usr/lib64/az/lib/python3.12/site-packages/certifi-2024.7.4.dist-info/METADATA"
+    statement: "Azure CLI 2.90.0 is the newest Microsoft RPM; it bundles its own Python packages under /usr/lib64/az. Lifted by the next Azure CLI release."
+    expired_at: 2026-12-31
+  - id: GHSA-pxh4-856f-4h89
+    paths:
+      - "usr/lib64/az/lib/python3.12/site-packages/pyjwt-2.13.0.dist-info/METADATA"
+    statement: "Azure CLI 2.90.0 is the newest Microsoft RPM; it bundles its own Python packages under /usr/lib64/az. Lifted by the next Azure CLI release."
+    expired_at: 2026-12-31
   # ── gcloud
-  - id: CVE-2026-69247
+  - id: CVE-2026-111943
     paths:
-      - "usr/lib64/google-cloud-sdk/platform/bundledpythonunix/lib/python3.14/site-packages/cryptography-46.0.7.dist-info/METADATA"
-    statement: "Google Cloud CLI is installed unpinned from Google's repo (newest release); it bundles its own Python under /usr/lib64/google-cloud-sdk. Lifted by the next Cloud SDK release."
-    expired_at: 2026-12-31
-  - id: CVE-2026-69248
-    paths:
-      - "usr/lib64/google-cloud-sdk/platform/bundledpythonunix/lib/python3.14/site-packages/cryptography-46.0.7.dist-info/METADATA"
-    statement: "Google Cloud CLI is installed unpinned from Google's repo (newest release); it bundles its own Python under /usr/lib64/google-cloud-sdk. Lifted by the next Cloud SDK release."
-    expired_at: 2026-12-31
-  - id: CVE-2026-69249
-    paths:
-      - "usr/lib64/google-cloud-sdk/platform/bundledpythonunix/lib/python3.14/site-packages/cryptography-46.0.7.dist-info/METADATA"
-    statement: "Google Cloud CLI is installed unpinned from Google's repo (newest release); it bundles its own Python under /usr/lib64/google-cloud-sdk. Lifted by the next Cloud SDK release."
-    expired_at: 2026-12-31
-  - id: GHSA-537c-gmf6-5ccf
-    paths:
-      - "usr/lib64/google-cloud-sdk/platform/bundledpythonunix/lib/python3.14/site-packages/cryptography-46.0.7.dist-info/METADATA"
+      - "usr/lib64/google-cloud-sdk/bin/gcloud-crc32c"
     statement: "Google Cloud CLI is installed unpinned from Google's repo (newest release); it bundles its own Python under /usr/lib64/google-cloud-sdk. Lifted by the next Cloud SDK release."
     expired_at: 2026-12-31
   # ── helm
+  - id: CVE-2026-111943
+    paths:
+      - "usr/local/bin/helm"
+    statement: "helm 3.22.0 is the newest v3 release (x/crypto v0.55.0); helm 4.3.0 has the same x/crypto. Lifted by the next helm release."
+    expired_at: 2026-12-31
   - id: CVE-2026-56855
+    paths:
+      - "usr/local/bin/helm"
+    statement: "helm 3.22.0 is the newest v3 release (x/crypto v0.55.0); helm 4.3.0 has the same x/crypto. Lifted by the next helm release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-56866
+    paths:
+      - "usr/local/bin/helm"
+    statement: "helm 3.22.0 is the newest v3 release (x/crypto v0.55.0); helm 4.3.0 has the same x/crypto. Lifted by the next helm release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-78659
+    paths:
+      - "usr/local/bin/helm"
+    statement: "helm 3.22.0 is the newest v3 release (x/crypto v0.55.0); helm 4.3.0 has the same x/crypto. Lifted by the next helm release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-78660
     paths:
       - "usr/local/bin/helm"
     statement: "helm 3.22.0 is the newest v3 release (x/crypto v0.55.0); helm 4.3.0 has the same x/crypto. Lifted by the next helm release."
@@ -159,6 +345,122 @@ vulnerabilities:
     paths:
       - "usr/local/bin/helm"
     statement: "helm 3.22.0 is the newest v3 release (x/crypto v0.55.0); helm 4.3.0 has the same x/crypto. Lifted by the next helm release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-78663
+    paths:
+      - "usr/local/bin/helm"
+    statement: "helm 3.22.0 is the newest v3 release (x/crypto v0.55.0); helm 4.3.0 has the same x/crypto. Lifted by the next helm release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-78667
+    paths:
+      - "usr/local/bin/helm"
+    statement: "helm 3.22.0 is the newest v3 release (x/crypto v0.55.0); helm 4.3.0 has the same x/crypto. Lifted by the next helm release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-78669
+    paths:
+      - "usr/local/bin/helm"
+    statement: "helm 3.22.0 is the newest v3 release (x/crypto v0.55.0); helm 4.3.0 has the same x/crypto. Lifted by the next helm release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-94439
+    paths:
+      - "usr/local/bin/helm"
+    statement: "helm 3.22.0 is the newest v3 release (x/crypto v0.55.0); helm 4.3.0 has the same x/crypto. Lifted by the next helm release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-94440
+    paths:
+      - "usr/local/bin/helm"
+    statement: "helm 3.22.0 is the newest v3 release (x/crypto v0.55.0); helm 4.3.0 has the same x/crypto. Lifted by the next helm release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-94448
+    paths:
+      - "usr/local/bin/helm"
+    statement: "helm 3.22.0 is the newest v3 release (x/crypto v0.55.0); helm 4.3.0 has the same x/crypto. Lifted by the next helm release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-97030
+    paths:
+      - "usr/local/bin/helm"
+    statement: "helm 3.22.0 is the newest v3 release (x/crypto v0.55.0); helm 4.3.0 has the same x/crypto. Lifted by the next helm release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-97031
+    paths:
+      - "usr/local/bin/helm"
+    statement: "helm 3.22.0 is the newest v3 release (x/crypto v0.55.0); helm 4.3.0 has the same x/crypto. Lifted by the next helm release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-97032
+    paths:
+      - "usr/local/bin/helm"
+    statement: "helm 3.22.0 is the newest v3 release (x/crypto v0.55.0); helm 4.3.0 has the same x/crypto. Lifted by the next helm release."
+    expired_at: 2026-12-31
+  # ── kubectl
+  - id: CVE-2026-111943
+    paths:
+      - "usr/local/bin/kubectl"
+    statement: "kubectl 1.35.9 is the newest 1.35.z (go1.26.8, x/net v0.56.0); kubectl stays within one minor of the clusters. Lifted by the next 1.35 patch release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-56851
+    paths:
+      - "usr/local/bin/kubectl"
+    statement: "kubectl 1.35.9 is the newest 1.35.z (go1.26.8, x/net v0.56.0); kubectl stays within one minor of the clusters. Lifted by the next 1.35 patch release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-56866
+    paths:
+      - "usr/local/bin/kubectl"
+    statement: "kubectl 1.35.9 is the newest 1.35.z (go1.26.8, x/net v0.56.0); kubectl stays within one minor of the clusters. Lifted by the next 1.35 patch release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-78659
+    paths:
+      - "usr/local/bin/kubectl"
+    statement: "kubectl 1.35.9 is the newest 1.35.z (go1.26.8, x/net v0.56.0); kubectl stays within one minor of the clusters. Lifted by the next 1.35 patch release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-78660
+    paths:
+      - "usr/local/bin/kubectl"
+    statement: "kubectl 1.35.9 is the newest 1.35.z (go1.26.8, x/net v0.56.0); kubectl stays within one minor of the clusters. Lifted by the next 1.35 patch release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-78663
+    paths:
+      - "usr/local/bin/kubectl"
+    statement: "kubectl 1.35.9 is the newest 1.35.z (go1.26.8, x/net v0.56.0); kubectl stays within one minor of the clusters. Lifted by the next 1.35 patch release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-78667
+    paths:
+      - "usr/local/bin/kubectl"
+    statement: "kubectl 1.35.9 is the newest 1.35.z (go1.26.8, x/net v0.56.0); kubectl stays within one minor of the clusters. Lifted by the next 1.35 patch release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-78669
+    paths:
+      - "usr/local/bin/kubectl"
+    statement: "kubectl 1.35.9 is the newest 1.35.z (go1.26.8, x/net v0.56.0); kubectl stays within one minor of the clusters. Lifted by the next 1.35 patch release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-94439
+    paths:
+      - "usr/local/bin/kubectl"
+    statement: "kubectl 1.35.9 is the newest 1.35.z (go1.26.8, x/net v0.56.0); kubectl stays within one minor of the clusters. Lifted by the next 1.35 patch release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-94440
+    paths:
+      - "usr/local/bin/kubectl"
+    statement: "kubectl 1.35.9 is the newest 1.35.z (go1.26.8, x/net v0.56.0); kubectl stays within one minor of the clusters. Lifted by the next 1.35 patch release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-94448
+    paths:
+      - "usr/local/bin/kubectl"
+    statement: "kubectl 1.35.9 is the newest 1.35.z (go1.26.8, x/net v0.56.0); kubectl stays within one minor of the clusters. Lifted by the next 1.35 patch release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-97030
+    paths:
+      - "usr/local/bin/kubectl"
+    statement: "kubectl 1.35.9 is the newest 1.35.z (go1.26.8, x/net v0.56.0); kubectl stays within one minor of the clusters. Lifted by the next 1.35 patch release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-97031
+    paths:
+      - "usr/local/bin/kubectl"
+    statement: "kubectl 1.35.9 is the newest 1.35.z (go1.26.8, x/net v0.56.0); kubectl stays within one minor of the clusters. Lifted by the next 1.35 patch release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-97032
+    paths:
+      - "usr/local/bin/kubectl"
+    statement: "kubectl 1.35.9 is the newest 1.35.z (go1.26.8, x/net v0.56.0); kubectl stays within one minor of the clusters. Lifted by the next 1.35 patch release."
     expired_at: 2026-12-31
   # ── oc
   - id: CVE-2024-25621
@@ -177,6 +479,21 @@ vulnerabilities:
     statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
     expired_at: 2026-12-31
   - id: CVE-2025-31133
+    paths:
+      - "usr/local/bin/oc"
+    statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
+    expired_at: 2026-12-31
+  - id: CVE-2025-47906
+    paths:
+      - "usr/local/bin/oc"
+    statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
+    expired_at: 2026-12-31
+  - id: CVE-2025-47907
+    paths:
+      - "usr/local/bin/oc"
+    statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
+    expired_at: 2026-12-31
+  - id: CVE-2025-47912
     paths:
       - "usr/local/bin/oc"
     statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
@@ -211,12 +528,87 @@ vulnerabilities:
       - "usr/local/bin/oc"
     statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
     expired_at: 2026-12-31
+  - id: CVE-2025-58183
+    paths:
+      - "usr/local/bin/oc"
+    statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
+    expired_at: 2026-12-31
+  - id: CVE-2025-58185
+    paths:
+      - "usr/local/bin/oc"
+    statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
+    expired_at: 2026-12-31
+  - id: CVE-2025-58187
+    paths:
+      - "usr/local/bin/oc"
+    statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
+    expired_at: 2026-12-31
+  - id: CVE-2025-58188
+    paths:
+      - "usr/local/bin/oc"
+    statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
+    expired_at: 2026-12-31
+  - id: CVE-2025-58189
+    paths:
+      - "usr/local/bin/oc"
+    statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
+    expired_at: 2026-12-31
+  - id: CVE-2025-61723
+    paths:
+      - "usr/local/bin/oc"
+    statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
+    expired_at: 2026-12-31
+  - id: CVE-2025-61724
+    paths:
+      - "usr/local/bin/oc"
+    statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
+    expired_at: 2026-12-31
+  - id: CVE-2025-61725
+    paths:
+      - "usr/local/bin/oc"
+    statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
+    expired_at: 2026-12-31
+  - id: CVE-2025-61726
+    paths:
+      - "usr/local/bin/oc"
+    statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
+    expired_at: 2026-12-31
+  - id: CVE-2025-61727
+    paths:
+      - "usr/local/bin/oc"
+    statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
+    expired_at: 2026-12-31
+  - id: CVE-2025-61728
+    paths:
+      - "usr/local/bin/oc"
+    statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
+    expired_at: 2026-12-31
+  - id: CVE-2025-61729
+    paths:
+      - "usr/local/bin/oc"
+    statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
+    expired_at: 2026-12-31
+  - id: CVE-2025-61730
+    paths:
+      - "usr/local/bin/oc"
+    statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
+    expired_at: 2026-12-31
   - id: CVE-2025-64329
     paths:
       - "usr/local/bin/oc"
     statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
     expired_at: 2026-12-31
   - id: CVE-2025-66506
+    paths:
+      - "usr/local/bin/oc"
+    statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
+    expired_at: 2026-12-31
+  - id: CVE-2025-68121
+    paths:
+      - "usr/local/bin/oc"
+    statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
+    expired_at: 2026-12-31
+  - id: CVE-2026-111943
     paths:
       - "usr/local/bin/oc"
     statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
@@ -246,7 +638,52 @@ vulnerabilities:
       - "usr/local/bin/oc"
     statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
     expired_at: 2026-12-31
+  - id: CVE-2026-25679
+    paths:
+      - "usr/local/bin/oc"
+    statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
+    expired_at: 2026-12-31
   - id: CVE-2026-25934
+    paths:
+      - "usr/local/bin/oc"
+    statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
+    expired_at: 2026-12-31
+  - id: CVE-2026-27142
+    paths:
+      - "usr/local/bin/oc"
+    statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
+    expired_at: 2026-12-31
+  - id: CVE-2026-27145
+    paths:
+      - "usr/local/bin/oc"
+    statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
+    expired_at: 2026-12-31
+  - id: CVE-2026-32280
+    paths:
+      - "usr/local/bin/oc"
+    statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
+    expired_at: 2026-12-31
+  - id: CVE-2026-32281
+    paths:
+      - "usr/local/bin/oc"
+    statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
+    expired_at: 2026-12-31
+  - id: CVE-2026-32282
+    paths:
+      - "usr/local/bin/oc"
+    statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
+    expired_at: 2026-12-31
+  - id: CVE-2026-32283
+    paths:
+      - "usr/local/bin/oc"
+    statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
+    expired_at: 2026-12-31
+  - id: CVE-2026-32288
+    paths:
+      - "usr/local/bin/oc"
+    statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
+    expired_at: 2026-12-31
+  - id: CVE-2026-32289
     paths:
       - "usr/local/bin/oc"
     statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
@@ -267,6 +704,21 @@ vulnerabilities:
     statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
     expired_at: 2026-12-31
   - id: CVE-2026-33748
+    paths:
+      - "usr/local/bin/oc"
+    statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
+    expired_at: 2026-12-31
+  - id: CVE-2026-33811
+    paths:
+      - "usr/local/bin/oc"
+    statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
+    expired_at: 2026-12-31
+  - id: CVE-2026-33814
+    paths:
+      - "usr/local/bin/oc"
+    statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
+    expired_at: 2026-12-31
+  - id: CVE-2026-33818
     paths:
       - "usr/local/bin/oc"
     statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
@@ -292,6 +744,36 @@ vulnerabilities:
     statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
     expired_at: 2026-12-31
   - id: CVE-2026-35469
+    paths:
+      - "usr/local/bin/oc"
+    statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
+    expired_at: 2026-12-31
+  - id: CVE-2026-39820
+    paths:
+      - "usr/local/bin/oc"
+    statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
+    expired_at: 2026-12-31
+  - id: CVE-2026-39821
+    paths:
+      - "usr/local/bin/oc"
+    statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
+    expired_at: 2026-12-31
+  - id: CVE-2026-39822
+    paths:
+      - "usr/local/bin/oc"
+    statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
+    expired_at: 2026-12-31
+  - id: CVE-2026-39823
+    paths:
+      - "usr/local/bin/oc"
+    statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
+    expired_at: 2026-12-31
+  - id: CVE-2026-39825
+    paths:
+      - "usr/local/bin/oc"
+    statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
+    expired_at: 2026-12-31
+  - id: CVE-2026-39826
     paths:
       - "usr/local/bin/oc"
     statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
@@ -341,6 +823,11 @@ vulnerabilities:
       - "usr/local/bin/oc"
     statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
     expired_at: 2026-12-31
+  - id: CVE-2026-39836
+    paths:
+      - "usr/local/bin/oc"
+    statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
+    expired_at: 2026-12-31
   - id: CVE-2026-41506
     paths:
       - "usr/local/bin/oc"
@@ -352,6 +839,26 @@ vulnerabilities:
     statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
     expired_at: 2026-12-31
   - id: CVE-2026-41888
+    paths:
+      - "usr/local/bin/oc"
+    statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
+    expired_at: 2026-12-31
+  - id: CVE-2026-42499
+    paths:
+      - "usr/local/bin/oc"
+    statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
+    expired_at: 2026-12-31
+  - id: CVE-2026-42504
+    paths:
+      - "usr/local/bin/oc"
+    statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
+    expired_at: 2026-12-31
+  - id: CVE-2026-42505
+    paths:
+      - "usr/local/bin/oc"
+    statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
+    expired_at: 2026-12-31
+  - id: CVE-2026-42507
     paths:
       - "usr/local/bin/oc"
     statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
@@ -426,7 +933,17 @@ vulnerabilities:
       - "usr/local/bin/oc"
     statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
     expired_at: 2026-12-31
+  - id: CVE-2026-56851
+    paths:
+      - "usr/local/bin/oc"
+    statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
+    expired_at: 2026-12-31
   - id: CVE-2026-56852
+    paths:
+      - "usr/local/bin/oc"
+    statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
+    expired_at: 2026-12-31
+  - id: CVE-2026-56853
     paths:
       - "usr/local/bin/oc"
     statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
@@ -441,7 +958,42 @@ vulnerabilities:
       - "usr/local/bin/oc"
     statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
     expired_at: 2026-12-31
+  - id: CVE-2026-56858
+    paths:
+      - "usr/local/bin/oc"
+    statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
+    expired_at: 2026-12-31
+  - id: CVE-2026-56859
+    paths:
+      - "usr/local/bin/oc"
+    statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
+    expired_at: 2026-12-31
+  - id: CVE-2026-56860
+    paths:
+      - "usr/local/bin/oc"
+    statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
+    expired_at: 2026-12-31
+  - id: CVE-2026-56862
+    paths:
+      - "usr/local/bin/oc"
+    statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
+    expired_at: 2026-12-31
+  - id: CVE-2026-56866
+    paths:
+      - "usr/local/bin/oc"
+    statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
+    expired_at: 2026-12-31
   - id: CVE-2026-61711
+    paths:
+      - "usr/local/bin/oc"
+    statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
+    expired_at: 2026-12-31
+  - id: CVE-2026-61801
+    paths:
+      - "usr/local/bin/oc"
+    statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
+    expired_at: 2026-12-31
+  - id: CVE-2026-63209
     paths:
       - "usr/local/bin/oc"
     statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
@@ -456,7 +1008,72 @@ vulnerabilities:
       - "usr/local/bin/oc"
     statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
     expired_at: 2026-12-31
+  - id: CVE-2026-78659
+    paths:
+      - "usr/local/bin/oc"
+    statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
+    expired_at: 2026-12-31
+  - id: CVE-2026-78660
+    paths:
+      - "usr/local/bin/oc"
+    statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
+    expired_at: 2026-12-31
   - id: CVE-2026-78662
+    paths:
+      - "usr/local/bin/oc"
+    statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
+    expired_at: 2026-12-31
+  - id: CVE-2026-78663
+    paths:
+      - "usr/local/bin/oc"
+    statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
+    expired_at: 2026-12-31
+  - id: CVE-2026-78667
+    paths:
+      - "usr/local/bin/oc"
+    statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
+    expired_at: 2026-12-31
+  - id: CVE-2026-78669
+    paths:
+      - "usr/local/bin/oc"
+    statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
+    expired_at: 2026-12-31
+  - id: CVE-2026-85747
+    paths:
+      - "usr/local/bin/oc"
+    statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
+    expired_at: 2026-12-31
+  - id: CVE-2026-94439
+    paths:
+      - "usr/local/bin/oc"
+    statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
+    expired_at: 2026-12-31
+  - id: CVE-2026-94440
+    paths:
+      - "usr/local/bin/oc"
+    statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
+    expired_at: 2026-12-31
+  - id: CVE-2026-94448
+    paths:
+      - "usr/local/bin/oc"
+    statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
+    expired_at: 2026-12-31
+  - id: CVE-2026-95838
+    paths:
+      - "usr/local/bin/oc"
+    statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
+    expired_at: 2026-12-31
+  - id: CVE-2026-97030
+    paths:
+      - "usr/local/bin/oc"
+    statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
+    expired_at: 2026-12-31
+  - id: CVE-2026-97031
+    paths:
+      - "usr/local/bin/oc"
+    statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
+    expired_at: 2026-12-31
+  - id: CVE-2026-97032
     paths:
       - "usr/local/bin/oc"
     statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
@@ -472,6 +1089,11 @@ vulnerabilities:
     statement: "oc 4.19.48 is the newest 4.19.z (Red Hat build, Go 1.23 with 2023-era modules); even oc 4.22.15 carries 62 of these. oc stays within one minor of the ODS clusters. Lifted by a Red Hat 4.19.z rebuild or the cluster move to a newer minor."
     expired_at: 2026-12-31
   # ── opentofu
+  - id: CVE-2026-111943
+    paths:
+      - "opt/tenv/OpenTofu/1.13.1/tofu"
+    statement: "OpenTofu 1.13.1 is the newest release (go1.27.1); the remaining modules (x/mod, grpc) are fixed only in releases newer than its build. Lifted by the next OpenTofu patch."
+    expired_at: 2026-12-31
   - id: CVE-2026-56864
     paths:
       - "opt/tenv/OpenTofu/1.13.1/tofu"
@@ -482,13 +1104,143 @@ vulnerabilities:
       - "opt/tenv/OpenTofu/1.13.1/tofu"
     statement: "OpenTofu 1.13.1 is the newest release (go1.27.1); the remaining modules (x/mod, grpc) are fixed only in releases newer than its build. Lifted by the next OpenTofu patch."
     expired_at: 2026-12-31
+  - id: CVE-2026-56866
+    paths:
+      - "opt/tenv/OpenTofu/1.13.1/tofu"
+    statement: "OpenTofu 1.13.1 is the newest release (go1.27.1); the remaining modules (x/mod, grpc) are fixed only in releases newer than its build. Lifted by the next OpenTofu patch."
+    expired_at: 2026-12-31
+  - id: CVE-2026-78659
+    paths:
+      - "opt/tenv/OpenTofu/1.13.1/tofu"
+    statement: "OpenTofu 1.13.1 is the newest release (go1.27.1); the remaining modules (x/mod, grpc) are fixed only in releases newer than its build. Lifted by the next OpenTofu patch."
+    expired_at: 2026-12-31
+  - id: CVE-2026-78660
+    paths:
+      - "opt/tenv/OpenTofu/1.13.1/tofu"
+    statement: "OpenTofu 1.13.1 is the newest release (go1.27.1); the remaining modules (x/mod, grpc) are fixed only in releases newer than its build. Lifted by the next OpenTofu patch."
+    expired_at: 2026-12-31
+  - id: CVE-2026-78663
+    paths:
+      - "opt/tenv/OpenTofu/1.13.1/tofu"
+    statement: "OpenTofu 1.13.1 is the newest release (go1.27.1); the remaining modules (x/mod, grpc) are fixed only in releases newer than its build. Lifted by the next OpenTofu patch."
+    expired_at: 2026-12-31
+  - id: CVE-2026-78667
+    paths:
+      - "opt/tenv/OpenTofu/1.13.1/tofu"
+    statement: "OpenTofu 1.13.1 is the newest release (go1.27.1); the remaining modules (x/mod, grpc) are fixed only in releases newer than its build. Lifted by the next OpenTofu patch."
+    expired_at: 2026-12-31
+  - id: CVE-2026-78669
+    paths:
+      - "opt/tenv/OpenTofu/1.13.1/tofu"
+    statement: "OpenTofu 1.13.1 is the newest release (go1.27.1); the remaining modules (x/mod, grpc) are fixed only in releases newer than its build. Lifted by the next OpenTofu patch."
+    expired_at: 2026-12-31
   - id: CVE-2026-84445
     paths:
       - "opt/tenv/OpenTofu/1.13.1/tofu"
     statement: "OpenTofu 1.13.1 is the newest release (go1.27.1); the remaining modules (x/mod, grpc) are fixed only in releases newer than its build. Lifted by the next OpenTofu patch."
     expired_at: 2026-12-31
+  - id: CVE-2026-94439
+    paths:
+      - "opt/tenv/OpenTofu/1.13.1/tofu"
+    statement: "OpenTofu 1.13.1 is the newest release (go1.27.1); the remaining modules (x/mod, grpc) are fixed only in releases newer than its build. Lifted by the next OpenTofu patch."
+    expired_at: 2026-12-31
+  - id: CVE-2026-94440
+    paths:
+      - "opt/tenv/OpenTofu/1.13.1/tofu"
+    statement: "OpenTofu 1.13.1 is the newest release (go1.27.1); the remaining modules (x/mod, grpc) are fixed only in releases newer than its build. Lifted by the next OpenTofu patch."
+    expired_at: 2026-12-31
+  - id: CVE-2026-94448
+    paths:
+      - "opt/tenv/OpenTofu/1.13.1/tofu"
+    statement: "OpenTofu 1.13.1 is the newest release (go1.27.1); the remaining modules (x/mod, grpc) are fixed only in releases newer than its build. Lifted by the next OpenTofu patch."
+    expired_at: 2026-12-31
+  - id: CVE-2026-97030
+    paths:
+      - "opt/tenv/OpenTofu/1.13.1/tofu"
+    statement: "OpenTofu 1.13.1 is the newest release (go1.27.1); the remaining modules (x/mod, grpc) are fixed only in releases newer than its build. Lifted by the next OpenTofu patch."
+    expired_at: 2026-12-31
+  - id: CVE-2026-97031
+    paths:
+      - "opt/tenv/OpenTofu/1.13.1/tofu"
+    statement: "OpenTofu 1.13.1 is the newest release (go1.27.1); the remaining modules (x/mod, grpc) are fixed only in releases newer than its build. Lifted by the next OpenTofu patch."
+    expired_at: 2026-12-31
+  - id: CVE-2026-97032
+    paths:
+      - "opt/tenv/OpenTofu/1.13.1/tofu"
+    statement: "OpenTofu 1.13.1 is the newest release (go1.27.1); the remaining modules (x/mod, grpc) are fixed only in releases newer than its build. Lifted by the next OpenTofu patch."
+    expired_at: 2026-12-31
   # ── packer
+  - id: CVE-2026-111943
+    paths:
+      - "usr/local/bin/packer"
+    statement: "packer 1.16.1 is the newest release. Lifted by the next packer release."
+    expired_at: 2026-12-31
   - id: CVE-2026-53493
+    paths:
+      - "usr/local/bin/packer"
+    statement: "packer 1.16.1 is the newest release. Lifted by the next packer release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-56866
+    paths:
+      - "usr/local/bin/packer"
+    statement: "packer 1.16.1 is the newest release. Lifted by the next packer release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-61801
+    paths:
+      - "usr/local/bin/packer"
+    statement: "packer 1.16.1 is the newest release. Lifted by the next packer release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-78659
+    paths:
+      - "usr/local/bin/packer"
+    statement: "packer 1.16.1 is the newest release. Lifted by the next packer release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-78660
+    paths:
+      - "usr/local/bin/packer"
+    statement: "packer 1.16.1 is the newest release. Lifted by the next packer release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-78663
+    paths:
+      - "usr/local/bin/packer"
+    statement: "packer 1.16.1 is the newest release. Lifted by the next packer release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-78667
+    paths:
+      - "usr/local/bin/packer"
+    statement: "packer 1.16.1 is the newest release. Lifted by the next packer release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-78669
+    paths:
+      - "usr/local/bin/packer"
+    statement: "packer 1.16.1 is the newest release. Lifted by the next packer release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-94439
+    paths:
+      - "usr/local/bin/packer"
+    statement: "packer 1.16.1 is the newest release. Lifted by the next packer release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-94440
+    paths:
+      - "usr/local/bin/packer"
+    statement: "packer 1.16.1 is the newest release. Lifted by the next packer release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-94448
+    paths:
+      - "usr/local/bin/packer"
+    statement: "packer 1.16.1 is the newest release. Lifted by the next packer release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-97030
+    paths:
+      - "usr/local/bin/packer"
+    statement: "packer 1.16.1 is the newest release. Lifted by the next packer release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-97031
+    paths:
+      - "usr/local/bin/packer"
+    statement: "packer 1.16.1 is the newest release. Lifted by the next packer release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-97032
     paths:
       - "usr/local/bin/packer"
     statement: "packer 1.16.1 is the newest release. Lifted by the next packer release."
@@ -497,34 +1249,39 @@ vulnerabilities:
   - id: CVE-2025-47273
     purls:
       - "pkg:pypi/setuptools@70.3.0"
-    statement: "pip 26.2.1 (newest; pip main too) vendors these, listed in pip/_vendor/vendor.txt of every pip in the image; Trivy reports them without a path. pip vendors only pkg_resources from setuptools. Lifted by the next pip release."
+    statement: "pip 26.2.2 (newest, INFIAAS-11916; the Azure CLI RPM still ships 26.2.1) vendors these, listed in pip/_vendor/vendor.txt of every pip in the image; Trivy reports them without a path. pip vendors only pkg_resources from setuptools. Lifted by the next pip release."
     expired_at: 2026-12-31
   - id: CVE-2026-59890
     purls:
       - "pkg:pypi/setuptools@70.3.0"
-    statement: "pip 26.2.1 (newest; pip main too) vendors these, listed in pip/_vendor/vendor.txt of every pip in the image; Trivy reports them without a path. pip vendors only pkg_resources from setuptools. Lifted by the next pip release."
+    statement: "pip 26.2.2 (newest, INFIAAS-11916; the Azure CLI RPM still ships 26.2.1) vendors these, listed in pip/_vendor/vendor.txt of every pip in the image; Trivy reports them without a path. pip vendors only pkg_resources from setuptools. Lifted by the next pip release."
     expired_at: 2026-12-31
   - id: CVE-2026-97687
     purls:
       - "pkg:pypi/urllib3@2.7.0"
-    statement: "pip 26.2.1 (newest; pip main too) vendors these, listed in pip/_vendor/vendor.txt of every pip in the image; Trivy reports them without a path. pip vendors only pkg_resources from setuptools. Lifted by the next pip release."
+    statement: "pip 26.2.2 (newest, INFIAAS-11916; the Azure CLI RPM still ships 26.2.1) vendors these, listed in pip/_vendor/vendor.txt of every pip in the image; Trivy reports them without a path. pip vendors only pkg_resources from setuptools. Lifted by the next pip release."
     expired_at: 2026-12-31
   - id: CVE-2026-97688
     purls:
       - "pkg:pypi/urllib3@2.7.0"
-    statement: "pip 26.2.1 (newest; pip main too) vendors these, listed in pip/_vendor/vendor.txt of every pip in the image; Trivy reports them without a path. pip vendors only pkg_resources from setuptools. Lifted by the next pip release."
+    statement: "pip 26.2.2 (newest, INFIAAS-11916; the Azure CLI RPM still ships 26.2.1) vendors these, listed in pip/_vendor/vendor.txt of every pip in the image; Trivy reports them without a path. pip vendors only pkg_resources from setuptools. Lifted by the next pip release."
     expired_at: 2026-12-31
   - id: CVE-2026-97689
     purls:
       - "pkg:pypi/urllib3@2.7.0"
-    statement: "pip 26.2.1 (newest; pip main too) vendors these, listed in pip/_vendor/vendor.txt of every pip in the image; Trivy reports them without a path. pip vendors only pkg_resources from setuptools. Lifted by the next pip release."
+    statement: "pip 26.2.2 (newest, INFIAAS-11916; the Azure CLI RPM still ships 26.2.1) vendors these, listed in pip/_vendor/vendor.txt of every pip in the image; Trivy reports them without a path. pip vendors only pkg_resources from setuptools. Lifted by the next pip release."
     expired_at: 2026-12-31
   - id: GHSA-6v7p-g79w-8964
     purls:
       - "pkg:pypi/msgpack@1.1.2"
-    statement: "pip 26.2.1 (newest; pip main too) vendors these, listed in pip/_vendor/vendor.txt of every pip in the image; Trivy reports them without a path. pip vendors only pkg_resources from setuptools. Lifted by the next pip release."
+    statement: "pip 26.2.2 (newest, INFIAAS-11916; the Azure CLI RPM still ships 26.2.1) vendors these, listed in pip/_vendor/vendor.txt of every pip in the image; Trivy reports them without a path. pip vendors only pkg_resources from setuptools. Lifted by the next pip release."
     expired_at: 2026-12-31
   # ── sops
+  - id: CVE-2026-111943
+    paths:
+      - "usr/bin/sops"
+    statement: "sops 3.13.3 is the newest release (go1.26.5). Lifted by the next sops release."
+    expired_at: 2026-12-31
   - id: CVE-2026-33818
     paths:
       - "usr/bin/sops"
@@ -536,6 +1293,11 @@ vulnerabilities:
     statement: "sops 3.13.3 is the newest release (go1.26.5). Lifted by the next sops release."
     expired_at: 2026-12-31
   - id: CVE-2026-46600
+    paths:
+      - "usr/bin/sops"
+    statement: "sops 3.13.3 is the newest release (go1.26.5). Lifted by the next sops release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-56851
     paths:
       - "usr/bin/sops"
     statement: "sops 3.13.3 is the newest release (go1.26.5). Lifted by the next sops release."
@@ -575,7 +1337,37 @@ vulnerabilities:
       - "usr/bin/sops"
     statement: "sops 3.13.3 is the newest release (go1.26.5). Lifted by the next sops release."
     expired_at: 2026-12-31
+  - id: CVE-2026-56866
+    paths:
+      - "usr/bin/sops"
+    statement: "sops 3.13.3 is the newest release (go1.26.5). Lifted by the next sops release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-78659
+    paths:
+      - "usr/bin/sops"
+    statement: "sops 3.13.3 is the newest release (go1.26.5). Lifted by the next sops release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-78660
+    paths:
+      - "usr/bin/sops"
+    statement: "sops 3.13.3 is the newest release (go1.26.5). Lifted by the next sops release."
+    expired_at: 2026-12-31
   - id: CVE-2026-78662
+    paths:
+      - "usr/bin/sops"
+    statement: "sops 3.13.3 is the newest release (go1.26.5). Lifted by the next sops release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-78663
+    paths:
+      - "usr/bin/sops"
+    statement: "sops 3.13.3 is the newest release (go1.26.5). Lifted by the next sops release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-78667
+    paths:
+      - "usr/bin/sops"
+    statement: "sops 3.13.3 is the newest release (go1.26.5). Lifted by the next sops release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-78669
     paths:
       - "usr/bin/sops"
     statement: "sops 3.13.3 is the newest release (go1.26.5). Lifted by the next sops release."
@@ -595,7 +1387,114 @@ vulnerabilities:
       - "usr/bin/sops"
     statement: "sops 3.13.3 is the newest release (go1.26.5). Lifted by the next sops release."
     expired_at: 2026-12-31
+  - id: CVE-2026-94439
+    paths:
+      - "usr/bin/sops"
+    statement: "sops 3.13.3 is the newest release (go1.26.5). Lifted by the next sops release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-94440
+    paths:
+      - "usr/bin/sops"
+    statement: "sops 3.13.3 is the newest release (go1.26.5). Lifted by the next sops release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-94448
+    paths:
+      - "usr/bin/sops"
+    statement: "sops 3.13.3 is the newest release (go1.26.5). Lifted by the next sops release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-97030
+    paths:
+      - "usr/bin/sops"
+    statement: "sops 3.13.3 is the newest release (go1.26.5). Lifted by the next sops release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-97031
+    paths:
+      - "usr/bin/sops"
+    statement: "sops 3.13.3 is the newest release (go1.26.5). Lifted by the next sops release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-97032
+    paths:
+      - "usr/bin/sops"
+    statement: "sops 3.13.3 is the newest release (go1.26.5). Lifted by the next sops release."
+    expired_at: 2026-12-31
+  # ── task
+  - id: CVE-2026-111943
+    paths:
+      - "usr/bin/task"
+    statement: "go-task 3.54.0 is the newest release (go1.27.1, x/net v0.59.0). Lifted by the next go-task release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-56866
+    paths:
+      - "usr/bin/task"
+    statement: "go-task 3.54.0 is the newest release (go1.27.1, x/net v0.59.0). Lifted by the next go-task release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-78659
+    paths:
+      - "usr/bin/task"
+    statement: "go-task 3.54.0 is the newest release (go1.27.1, x/net v0.59.0). Lifted by the next go-task release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-78660
+    paths:
+      - "usr/bin/task"
+    statement: "go-task 3.54.0 is the newest release (go1.27.1, x/net v0.59.0). Lifted by the next go-task release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-78663
+    paths:
+      - "usr/bin/task"
+    statement: "go-task 3.54.0 is the newest release (go1.27.1, x/net v0.59.0). Lifted by the next go-task release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-78667
+    paths:
+      - "usr/bin/task"
+    statement: "go-task 3.54.0 is the newest release (go1.27.1, x/net v0.59.0). Lifted by the next go-task release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-78669
+    paths:
+      - "usr/bin/task"
+    statement: "go-task 3.54.0 is the newest release (go1.27.1, x/net v0.59.0). Lifted by the next go-task release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-94439
+    paths:
+      - "usr/bin/task"
+    statement: "go-task 3.54.0 is the newest release (go1.27.1, x/net v0.59.0). Lifted by the next go-task release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-94440
+    paths:
+      - "usr/bin/task"
+    statement: "go-task 3.54.0 is the newest release (go1.27.1, x/net v0.59.0). Lifted by the next go-task release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-94448
+    paths:
+      - "usr/bin/task"
+    statement: "go-task 3.54.0 is the newest release (go1.27.1, x/net v0.59.0). Lifted by the next go-task release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-97030
+    paths:
+      - "usr/bin/task"
+    statement: "go-task 3.54.0 is the newest release (go1.27.1, x/net v0.59.0). Lifted by the next go-task release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-97031
+    paths:
+      - "usr/bin/task"
+    statement: "go-task 3.54.0 is the newest release (go1.27.1, x/net v0.59.0). Lifted by the next go-task release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-97032
+    paths:
+      - "usr/bin/task"
+    statement: "go-task 3.54.0 is the newest release (go1.27.1, x/net v0.59.0). Lifted by the next go-task release."
+    expired_at: 2026-12-31
   # ── tenv
+  - id: CVE-2026-111943
+    paths:
+      - "usr/bin/atmos"
+      - "usr/bin/tenv"
+      - "usr/bin/terraform"
+      - "usr/bin/terragrunt"
+      - "usr/bin/terramate"
+      - "usr/bin/tf"
+      - "usr/bin/tofu"
+    statement: "tenv 4.15.1 is the newest release and is built with go1.25.12; /usr/bin/{atmos,terraform,terragrunt,terramate,tf,tofu} are tenv's own proxy binaries. Lifted by the next tenv release."
+    expired_at: 2026-12-31
   - id: CVE-2026-33818
     paths:
       - "usr/bin/atmos"
@@ -616,6 +1515,11 @@ vulnerabilities:
       - "usr/bin/terramate"
       - "usr/bin/tf"
       - "usr/bin/tofu"
+    statement: "tenv 4.15.1 is the newest release and is built with go1.25.12; /usr/bin/{atmos,terraform,terragrunt,terramate,tf,tofu} are tenv's own proxy binaries. Lifted by the next tenv release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-56851
+    paths:
+      - "usr/bin/tenv"
     statement: "tenv 4.15.1 is the newest release and is built with go1.25.12; /usr/bin/{atmos,terraform,terragrunt,terramate,tf,tofu} are tenv's own proxy binaries. Lifted by the next tenv release."
     expired_at: 2026-12-31
   - id: CVE-2026-56853
@@ -683,12 +1587,149 @@ vulnerabilities:
       - "usr/bin/tofu"
     statement: "tenv 4.15.1 is the newest release and is built with go1.25.12; /usr/bin/{atmos,terraform,terragrunt,terramate,tf,tofu} are tenv's own proxy binaries. Lifted by the next tenv release."
     expired_at: 2026-12-31
+  - id: CVE-2026-56866
+    paths:
+      - "usr/bin/atmos"
+      - "usr/bin/tenv"
+      - "usr/bin/terraform"
+      - "usr/bin/terragrunt"
+      - "usr/bin/terramate"
+      - "usr/bin/tf"
+      - "usr/bin/tofu"
+    statement: "tenv 4.15.1 is the newest release and is built with go1.25.12; /usr/bin/{atmos,terraform,terragrunt,terramate,tf,tofu} are tenv's own proxy binaries. Lifted by the next tenv release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-78659
+    paths:
+      - "usr/bin/atmos"
+      - "usr/bin/tenv"
+      - "usr/bin/terraform"
+      - "usr/bin/terragrunt"
+      - "usr/bin/terramate"
+      - "usr/bin/tf"
+      - "usr/bin/tofu"
+    statement: "tenv 4.15.1 is the newest release and is built with go1.25.12; /usr/bin/{atmos,terraform,terragrunt,terramate,tf,tofu} are tenv's own proxy binaries. Lifted by the next tenv release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-78660
+    paths:
+      - "usr/bin/atmos"
+      - "usr/bin/tenv"
+      - "usr/bin/terraform"
+      - "usr/bin/terragrunt"
+      - "usr/bin/terramate"
+      - "usr/bin/tf"
+      - "usr/bin/tofu"
+    statement: "tenv 4.15.1 is the newest release and is built with go1.25.12; /usr/bin/{atmos,terraform,terragrunt,terramate,tf,tofu} are tenv's own proxy binaries. Lifted by the next tenv release."
+    expired_at: 2026-12-31
   - id: CVE-2026-78662
     paths:
       - "usr/bin/tenv"
     statement: "tenv 4.15.1 is the newest release and is built with go1.25.12; /usr/bin/{atmos,terraform,terragrunt,terramate,tf,tofu} are tenv's own proxy binaries. Lifted by the next tenv release."
     expired_at: 2026-12-31
+  - id: CVE-2026-78663
+    paths:
+      - "usr/bin/atmos"
+      - "usr/bin/tenv"
+      - "usr/bin/terraform"
+      - "usr/bin/terragrunt"
+      - "usr/bin/terramate"
+      - "usr/bin/tf"
+      - "usr/bin/tofu"
+    statement: "tenv 4.15.1 is the newest release and is built with go1.25.12; /usr/bin/{atmos,terraform,terragrunt,terramate,tf,tofu} are tenv's own proxy binaries. Lifted by the next tenv release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-78667
+    paths:
+      - "usr/bin/atmos"
+      - "usr/bin/tenv"
+      - "usr/bin/terraform"
+      - "usr/bin/terragrunt"
+      - "usr/bin/terramate"
+      - "usr/bin/tf"
+      - "usr/bin/tofu"
+    statement: "tenv 4.15.1 is the newest release and is built with go1.25.12; /usr/bin/{atmos,terraform,terragrunt,terramate,tf,tofu} are tenv's own proxy binaries. Lifted by the next tenv release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-78669
+    paths:
+      - "usr/bin/atmos"
+      - "usr/bin/tenv"
+      - "usr/bin/terraform"
+      - "usr/bin/terragrunt"
+      - "usr/bin/terramate"
+      - "usr/bin/tf"
+      - "usr/bin/tofu"
+    statement: "tenv 4.15.1 is the newest release and is built with go1.25.12; /usr/bin/{atmos,terraform,terragrunt,terramate,tf,tofu} are tenv's own proxy binaries. Lifted by the next tenv release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-94439
+    paths:
+      - "usr/bin/atmos"
+      - "usr/bin/tenv"
+      - "usr/bin/terraform"
+      - "usr/bin/terragrunt"
+      - "usr/bin/terramate"
+      - "usr/bin/tf"
+      - "usr/bin/tofu"
+    statement: "tenv 4.15.1 is the newest release and is built with go1.25.12; /usr/bin/{atmos,terraform,terragrunt,terramate,tf,tofu} are tenv's own proxy binaries. Lifted by the next tenv release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-94440
+    paths:
+      - "usr/bin/atmos"
+      - "usr/bin/tenv"
+      - "usr/bin/terraform"
+      - "usr/bin/terragrunt"
+      - "usr/bin/terramate"
+      - "usr/bin/tf"
+      - "usr/bin/tofu"
+    statement: "tenv 4.15.1 is the newest release and is built with go1.25.12; /usr/bin/{atmos,terraform,terragrunt,terramate,tf,tofu} are tenv's own proxy binaries. Lifted by the next tenv release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-94448
+    paths:
+      - "usr/bin/atmos"
+      - "usr/bin/tenv"
+      - "usr/bin/terraform"
+      - "usr/bin/terragrunt"
+      - "usr/bin/terramate"
+      - "usr/bin/tf"
+      - "usr/bin/tofu"
+    statement: "tenv 4.15.1 is the newest release and is built with go1.25.12; /usr/bin/{atmos,terraform,terragrunt,terramate,tf,tofu} are tenv's own proxy binaries. Lifted by the next tenv release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-97030
+    paths:
+      - "usr/bin/atmos"
+      - "usr/bin/tenv"
+      - "usr/bin/terraform"
+      - "usr/bin/terragrunt"
+      - "usr/bin/terramate"
+      - "usr/bin/tf"
+      - "usr/bin/tofu"
+    statement: "tenv 4.15.1 is the newest release and is built with go1.25.12; /usr/bin/{atmos,terraform,terragrunt,terramate,tf,tofu} are tenv's own proxy binaries. Lifted by the next tenv release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-97031
+    paths:
+      - "usr/bin/atmos"
+      - "usr/bin/tenv"
+      - "usr/bin/terraform"
+      - "usr/bin/terragrunt"
+      - "usr/bin/terramate"
+      - "usr/bin/tf"
+      - "usr/bin/tofu"
+    statement: "tenv 4.15.1 is the newest release and is built with go1.25.12; /usr/bin/{atmos,terraform,terragrunt,terramate,tf,tofu} are tenv's own proxy binaries. Lifted by the next tenv release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-97032
+    paths:
+      - "usr/bin/atmos"
+      - "usr/bin/tenv"
+      - "usr/bin/terraform"
+      - "usr/bin/terragrunt"
+      - "usr/bin/terramate"
+      - "usr/bin/tf"
+      - "usr/bin/tofu"
+    statement: "tenv 4.15.1 is the newest release and is built with go1.25.12; /usr/bin/{atmos,terraform,terragrunt,terramate,tf,tofu} are tenv's own proxy binaries. Lifted by the next tenv release."
+    expired_at: 2026-12-31
   # ── terraform-docs
+  - id: CVE-2026-111943
+    paths:
+      - "usr/local/bin/terraform-docs"
+    statement: "terraform-docs v0.24.0 is the newest release (go1.25.8). Lifted by the next terraform-docs release."
+    expired_at: 2026-12-31
   - id: CVE-2026-25680
     paths:
       - "usr/local/bin/terraform-docs"
@@ -889,6 +1930,11 @@ vulnerabilities:
       - "usr/local/bin/terraform-docs"
     statement: "terraform-docs v0.24.0 is the newest release (go1.25.8). Lifted by the next terraform-docs release."
     expired_at: 2026-12-31
+  - id: CVE-2026-56851
+    paths:
+      - "usr/local/bin/terraform-docs"
+    statement: "terraform-docs v0.24.0 is the newest release (go1.25.8). Lifted by the next terraform-docs release."
+    expired_at: 2026-12-31
   - id: CVE-2026-56852
     paths:
       - "usr/local/bin/terraform-docs"
@@ -929,7 +1975,37 @@ vulnerabilities:
       - "usr/local/bin/terraform-docs"
     statement: "terraform-docs v0.24.0 is the newest release (go1.25.8). Lifted by the next terraform-docs release."
     expired_at: 2026-12-31
+  - id: CVE-2026-56866
+    paths:
+      - "usr/local/bin/terraform-docs"
+    statement: "terraform-docs v0.24.0 is the newest release (go1.25.8). Lifted by the next terraform-docs release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-78659
+    paths:
+      - "usr/local/bin/terraform-docs"
+    statement: "terraform-docs v0.24.0 is the newest release (go1.25.8). Lifted by the next terraform-docs release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-78660
+    paths:
+      - "usr/local/bin/terraform-docs"
+    statement: "terraform-docs v0.24.0 is the newest release (go1.25.8). Lifted by the next terraform-docs release."
+    expired_at: 2026-12-31
   - id: CVE-2026-78662
+    paths:
+      - "usr/local/bin/terraform-docs"
+    statement: "terraform-docs v0.24.0 is the newest release (go1.25.8). Lifted by the next terraform-docs release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-78663
+    paths:
+      - "usr/local/bin/terraform-docs"
+    statement: "terraform-docs v0.24.0 is the newest release (go1.25.8). Lifted by the next terraform-docs release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-78667
+    paths:
+      - "usr/local/bin/terraform-docs"
+    statement: "terraform-docs v0.24.0 is the newest release (go1.25.8). Lifted by the next terraform-docs release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-78669
     paths:
       - "usr/local/bin/terraform-docs"
     statement: "terraform-docs v0.24.0 is the newest release (go1.25.8). Lifted by the next terraform-docs release."
@@ -949,12 +2025,47 @@ vulnerabilities:
       - "usr/local/bin/terraform-docs"
     statement: "terraform-docs v0.24.0 is the newest release (go1.25.8). Lifted by the next terraform-docs release."
     expired_at: 2026-12-31
+  - id: CVE-2026-94439
+    paths:
+      - "usr/local/bin/terraform-docs"
+    statement: "terraform-docs v0.24.0 is the newest release (go1.25.8). Lifted by the next terraform-docs release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-94440
+    paths:
+      - "usr/local/bin/terraform-docs"
+    statement: "terraform-docs v0.24.0 is the newest release (go1.25.8). Lifted by the next terraform-docs release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-94448
+    paths:
+      - "usr/local/bin/terraform-docs"
+    statement: "terraform-docs v0.24.0 is the newest release (go1.25.8). Lifted by the next terraform-docs release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-97030
+    paths:
+      - "usr/local/bin/terraform-docs"
+    statement: "terraform-docs v0.24.0 is the newest release (go1.25.8). Lifted by the next terraform-docs release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-97031
+    paths:
+      - "usr/local/bin/terraform-docs"
+    statement: "terraform-docs v0.24.0 is the newest release (go1.25.8). Lifted by the next terraform-docs release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-97032
+    paths:
+      - "usr/local/bin/terraform-docs"
+    statement: "terraform-docs v0.24.0 is the newest release (go1.25.8). Lifted by the next terraform-docs release."
+    expired_at: 2026-12-31
   - id: GHSA-hrxh-6v49-42gf
     paths:
       - "usr/local/bin/terraform-docs"
     statement: "terraform-docs v0.24.0 is the newest release (go1.25.8). Lifted by the next terraform-docs release."
     expired_at: 2026-12-31
   # ── tflint
+  - id: CVE-2026-111943
+    paths:
+      - "usr/local/bin/tflint"
+    statement: "tflint 0.64.0 is the newest release (go1.26.3). Lifted by the next tflint release."
+    expired_at: 2026-12-31
   - id: CVE-2026-27145
     paths:
       - "usr/local/bin/tflint"
@@ -991,6 +2102,11 @@ vulnerabilities:
     statement: "tflint 0.64.0 is the newest release (go1.26.3). Lifted by the next tflint release."
     expired_at: 2026-12-31
   - id: CVE-2026-46600
+    paths:
+      - "usr/local/bin/tflint"
+    statement: "tflint 0.64.0 is the newest release (go1.26.3). Lifted by the next tflint release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-56851
     paths:
       - "usr/local/bin/tflint"
     statement: "tflint 0.64.0 is the newest release (go1.26.3). Lifted by the next tflint release."
@@ -1040,7 +2156,42 @@ vulnerabilities:
       - "usr/local/bin/tflint"
     statement: "tflint 0.64.0 is the newest release (go1.26.3). Lifted by the next tflint release."
     expired_at: 2026-12-31
+  - id: CVE-2026-56866
+    paths:
+      - "usr/local/bin/tflint"
+    statement: "tflint 0.64.0 is the newest release (go1.26.3). Lifted by the next tflint release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-63209
+    paths:
+      - "usr/local/bin/tflint"
+    statement: "tflint 0.64.0 is the newest release (go1.26.3). Lifted by the next tflint release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-78659
+    paths:
+      - "usr/local/bin/tflint"
+    statement: "tflint 0.64.0 is the newest release (go1.26.3). Lifted by the next tflint release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-78660
+    paths:
+      - "usr/local/bin/tflint"
+    statement: "tflint 0.64.0 is the newest release (go1.26.3). Lifted by the next tflint release."
+    expired_at: 2026-12-31
   - id: CVE-2026-78662
+    paths:
+      - "usr/local/bin/tflint"
+    statement: "tflint 0.64.0 is the newest release (go1.26.3). Lifted by the next tflint release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-78663
+    paths:
+      - "usr/local/bin/tflint"
+    statement: "tflint 0.64.0 is the newest release (go1.26.3). Lifted by the next tflint release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-78667
+    paths:
+      - "usr/local/bin/tflint"
+    statement: "tflint 0.64.0 is the newest release (go1.26.3). Lifted by the next tflint release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-78669
     paths:
       - "usr/local/bin/tflint"
     statement: "tflint 0.64.0 is the newest release (go1.26.3). Lifted by the next tflint release."
@@ -1060,24 +2211,104 @@ vulnerabilities:
       - "usr/local/bin/tflint"
     statement: "tflint 0.64.0 is the newest release (go1.26.3). Lifted by the next tflint release."
     expired_at: 2026-12-31
+  - id: CVE-2026-94439
+    paths:
+      - "usr/local/bin/tflint"
+    statement: "tflint 0.64.0 is the newest release (go1.26.3). Lifted by the next tflint release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-94440
+    paths:
+      - "usr/local/bin/tflint"
+    statement: "tflint 0.64.0 is the newest release (go1.26.3). Lifted by the next tflint release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-94448
+    paths:
+      - "usr/local/bin/tflint"
+    statement: "tflint 0.64.0 is the newest release (go1.26.3). Lifted by the next tflint release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-97030
+    paths:
+      - "usr/local/bin/tflint"
+    statement: "tflint 0.64.0 is the newest release (go1.26.3). Lifted by the next tflint release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-97031
+    paths:
+      - "usr/local/bin/tflint"
+    statement: "tflint 0.64.0 is the newest release (go1.26.3). Lifted by the next tflint release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-97032
+    paths:
+      - "usr/local/bin/tflint"
+    statement: "tflint 0.64.0 is the newest release (go1.26.3). Lifted by the next tflint release."
+    expired_at: 2026-12-31
   - id: GHSA-hrxh-6v49-42gf
     paths:
       - "usr/local/bin/tflint"
     statement: "tflint 0.64.0 is the newest release (go1.26.3). Lifted by the next tflint release."
     expired_at: 2026-12-31
-  # ── venv-cryptography
-  - id: CVE-2026-69247
+  # ── yq
+  - id: CVE-2026-111943
     paths:
-      - "tmp/.venv/lib/python3.13/site-packages/cryptography-48.0.1.dist-info/METADATA"
-    statement: "azure-cli-core 2.90.0 (newest) pins msal==1.36.0, which requires cryptography<49, so /tmp/.venv stays on cryptography 48.0.1. Lifted when Azure CLI moves to a newer msal."
+      - "usr/local/bin/yq"
+    statement: "yq 4.54.1 is the newest release (go1.27.1, x/net v0.59.0). Lifted by the next yq release."
     expired_at: 2026-12-31
-  - id: CVE-2026-69248
+  - id: CVE-2026-56866
     paths:
-      - "tmp/.venv/lib/python3.13/site-packages/cryptography-48.0.1.dist-info/METADATA"
-    statement: "azure-cli-core 2.90.0 (newest) pins msal==1.36.0, which requires cryptography<49, so /tmp/.venv stays on cryptography 48.0.1. Lifted when Azure CLI moves to a newer msal."
+      - "usr/local/bin/yq"
+    statement: "yq 4.54.1 is the newest release (go1.27.1, x/net v0.59.0). Lifted by the next yq release."
     expired_at: 2026-12-31
-  - id: CVE-2026-69249
+  - id: CVE-2026-78659
     paths:
-      - "tmp/.venv/lib/python3.13/site-packages/cryptography-48.0.1.dist-info/METADATA"
-    statement: "azure-cli-core 2.90.0 (newest) pins msal==1.36.0, which requires cryptography<49, so /tmp/.venv stays on cryptography 48.0.1. Lifted when Azure CLI moves to a newer msal."
+      - "usr/local/bin/yq"
+    statement: "yq 4.54.1 is the newest release (go1.27.1, x/net v0.59.0). Lifted by the next yq release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-78660
+    paths:
+      - "usr/local/bin/yq"
+    statement: "yq 4.54.1 is the newest release (go1.27.1, x/net v0.59.0). Lifted by the next yq release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-78663
+    paths:
+      - "usr/local/bin/yq"
+    statement: "yq 4.54.1 is the newest release (go1.27.1, x/net v0.59.0). Lifted by the next yq release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-78667
+    paths:
+      - "usr/local/bin/yq"
+    statement: "yq 4.54.1 is the newest release (go1.27.1, x/net v0.59.0). Lifted by the next yq release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-78669
+    paths:
+      - "usr/local/bin/yq"
+    statement: "yq 4.54.1 is the newest release (go1.27.1, x/net v0.59.0). Lifted by the next yq release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-94439
+    paths:
+      - "usr/local/bin/yq"
+    statement: "yq 4.54.1 is the newest release (go1.27.1, x/net v0.59.0). Lifted by the next yq release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-94440
+    paths:
+      - "usr/local/bin/yq"
+    statement: "yq 4.54.1 is the newest release (go1.27.1, x/net v0.59.0). Lifted by the next yq release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-94448
+    paths:
+      - "usr/local/bin/yq"
+    statement: "yq 4.54.1 is the newest release (go1.27.1, x/net v0.59.0). Lifted by the next yq release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-97030
+    paths:
+      - "usr/local/bin/yq"
+    statement: "yq 4.54.1 is the newest release (go1.27.1, x/net v0.59.0). Lifted by the next yq release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-97031
+    paths:
+      - "usr/local/bin/yq"
+    statement: "yq 4.54.1 is the newest release (go1.27.1, x/net v0.59.0). Lifted by the next yq release."
+    expired_at: 2026-12-31
+  - id: CVE-2026-97032
+    paths:
+      - "usr/local/bin/yq"
+    statement: "yq 4.54.1 is the newest release (go1.27.1, x/net v0.59.0). Lifted by the next yq release."
     expired_at: 2026-12-31
