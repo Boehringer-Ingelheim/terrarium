@@ -60,7 +60,7 @@ CLIs carry their own root stores, and every one of them was refreshed.
   the system bundle and its extractions, OpenSSL's default store, every
   certifi, every pip we install, the pip that new venvs get, both uv
   binaries, Node's roots, and every PEM CA file on disk. The suite is red on
-  4.9.5 (9 of 13 tests) and green on 4.9.6.
+  4.9.5 (9 of 15 tests) and green on 4.9.6.
 - **Vendor CLIs re-fetched at their newest releases:**
   - Google Cloud CLI 590.0.1 removed the distrusted roots.
   - AWS CLI 2.38.5 removed AAA from its bundle (fixed in 2.38.4).
