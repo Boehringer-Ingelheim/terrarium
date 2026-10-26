@@ -53,7 +53,8 @@ load 'test_helper/common.bash'
 
 # @openstack
 @test "openstack venv has OPENSTACK_OVERRIDES applied and is consistent (INFIAAS-9587)" {
-    [ -n "${OPENSTACK_OVERRIDES:-}" ] || skip "OPENSTACK_OVERRIDES is empty"
+    # 4.8 always sets it (certifi floor, INFIAAS-11916); empty would be vacuous.
+    [ -n "${OPENSTACK_OVERRIDES:-}" ] || fail "OPENSTACK_OVERRIDES is not set in the image ENV"
     for spec in ${OPENSTACK_OVERRIDES}; do
         run /opt/openstack/bin/pip show "${spec%%==*}"
         assert_success
