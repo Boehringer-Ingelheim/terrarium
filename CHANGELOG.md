@@ -2,6 +2,28 @@
 
 ## [Unreleased]
 
+## [4.8.5] 2026-10-27 — net-ssh security fix for the 4.8 Ruby bundle
+
+4.8.5 is 4.8.4 plus one gem update. Two net-ssh advisories were published
+after the 4.8.4 pre-release scan, and the v4.8.4 release scan flagged them.
+net-ssh is the SSH transport of Test Kitchen and InSpec, the reason the 4.8
+line exists. Everything in the 4.8.4 entry below still applies, including the
+INFIAAS-11725 known issue.
+
+### Security (INFIAAS-11916)
+
+- **net-ssh 7.3.2 → 7.3.8** in the Ruby bundle (`/opt/bundle`, `docker/Gemfile.lock`;
+  only net-ssh changed, `bundle lock --update net-ssh --conservative`). It is
+  the newest 7.3.x and stays inside the `< 8.0` bound of test-kitchen,
+  train-core and net-scp (net-ssh-gateway only needs `>= 4.0.0`). Its new
+  `logger` dependency was already in the bundle (1.7.0).
+  - [GHSA-qpg5-fx6p-8cq3](https://github.com/advisories/GHSA-qpg5-fx6p-8cq3)
+    (HIGH): port forwarding silently gave the server access to the local SSH
+    agent. Fixed in 7.3.5.
+  - [GHSA-vxj5-fg65-x765](https://github.com/advisories/GHSA-vxj5-fg65-x765)
+    (HIGH): host-certificate authentication bypass (`@cert-authority` did not
+    check `valid_principals`). Fixed in 7.3.4.
+
 ## [4.8.4] 2026-10-27 — Maintenance-line security release: Node 24 LTS, emSign CA remediation, Go 1.26
 
 4.8 is the line for Ruby, kitchen-terraform and InSpec users. Everyone
