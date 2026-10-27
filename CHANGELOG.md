@@ -2,7 +2,7 @@
 
 ## [Unreleased]
 
-## [4.8.4] 2026-10-26 — Maintenance-line security release: Node 24 LTS, emSign CA remediation, Go 1.26
+## [4.8.4] 2026-10-27 — Maintenance-line security release: Node 24 LTS, emSign CA remediation, Go 1.26
 
 4.8 is the line for Ruby, kitchen-terraform and InSpec users. Everyone
 else should use 4.9.6. This patch release ships the same security fixes as
@@ -18,8 +18,7 @@ else should use 4.9.6. This patch release ships the same security fixes as
 
 The OS update alone is not enough. pip, certifi, uv, Node, several vendor
 CLIs and, on this line, several Ruby gems carry their own root stores, and
-every one of them was refreshed. The 4.8.4 date above is a placeholder until
-the tag.
+every one of them was refreshed.
 
 ### Security (INFIAAS-11916)
 
