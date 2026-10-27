@@ -1,0 +1,70 @@
+#!/usr/bin/env bash
+# npm_patch_bundled — replace packages bundled inside the global npm install
+# with a fixed patch/minor release of the same major (INFIAAS-9587).
+#
+# npm ships its own dependencies in <npm>/node_modules. A global npm cannot use
+# `overrides` on itself, and even the newest npm releases bundle e.g. undici
+# 6.28.0 (CVE-2026-19534), so the release Trivy gate stays red until npm cuts a
+# release. This swaps the bundled copy for the registry tarball of the fixed
+# version. `npm pack` verifies the tarball against the registry's integrity
+# hash, and the helper checks the unpacked name and version before swapping.
+#
+# Usage: npm_patch_bundled <name>@<version> [<name>@<version> ...]
+#
+# Rules (each fails the build unless noted):
+#   - the spec must be <name>@<x.y.z> (scoped names are not supported);
+#   - npm must still bundle <name> at the top level of its node_modules;
+#   - the target must have the same major as the bundled copy (semver-safe);
+#   - if the bundled copy is already >= the target, it is left alone and a
+#     NOTE asks to drop the spec (not an error: a newer npm fixed it itself).
+#
+# NPM_ROOT (default /opt/node/lib/node_modules/npm) and NPM_BIN (default npm)
+# are overridable so the helper is unit-testable without Node or network.
+set -euo pipefail
+: "${NPM_ROOT:=/opt/node/lib/node_modules/npm}"
+: "${NPM_BIN:=npm}"
+
+[ "$#" -ge 1 ] || { echo "usage: npm_patch_bundled <name>@<version> ..." >&2; exit 2; }
+[ -d "$NPM_ROOT/node_modules" ] || { echo "ERROR: no npm install at ${NPM_ROOT}" >&2; exit 1; }
+
+# "version" field of a package.json, without needing node or jq.
+pkg_field() { sed -n "s/^[[:space:]]*\"$2\":[[:space:]]*\"\([^\"]*\)\".*/\1/p" "$1" | head -n1; }
+
+tmp="$(mktemp -d)"; trap 'rm -rf "$tmp"' EXIT
+
+for spec in "$@"; do
+  [[ "$spec" =~ ^([a-z0-9][a-z0-9._-]*)@([0-9]+)\.([0-9]+)\.([0-9]+)$ ]] \
+    || { echo "ERROR: invalid spec '${spec}' (want name@x.y.z)" >&2; exit 1; }
+  name="${BASH_REMATCH[1]}"; want="${spec#*@}"; want_major="${BASH_REMATCH[2]}"
+  dir="$NPM_ROOT/node_modules/$name"
+
+  [ -f "$dir/package.json" ] \
+    || { echo "ERROR: npm no longer bundles ${name}; drop '${spec}' from the patch list" >&2; exit 1; }
+  have="$(pkg_field "$dir/package.json" version)"
+  [ -n "$have" ] || { echo "ERROR: cannot read the bundled ${name} version" >&2; exit 1; }
+
+  if [ "${have%%.*}" != "$want_major" ]; then
+    echo "ERROR: bundled ${name} is ${have}; ${want} is a different major, refusing" >&2; exit 1
+  fi
+  if [ "$(printf '%s\n%s\n' "$have" "$want" | sort -V | tail -n1)" = "$have" ]; then
+    echo "NOTE: bundled ${name} is already ${have} (>= ${want}); drop '${spec}' from the patch list"
+    continue
+  fi
+
+  rm -rf "$tmp/pack" "$tmp/new"; mkdir -p "$tmp/pack" "$tmp/new"
+  tgz="$("$NPM_BIN" pack --silent --pack-destination "$tmp/pack" "$spec" | tail -n1)"
+  [ -f "$tmp/pack/$tgz" ] || { echo "ERROR: npm pack ${spec} produced no tarball" >&2; exit 1; }
+  tar -xzf "$tmp/pack/$tgz" -C "$tmp/new" --strip-components=1
+
+  got_name="$(pkg_field "$tmp/new/package.json" name)"
+  got_ver="$(pkg_field "$tmp/new/package.json" version)"
+  if [ "$got_name" != "$name" ] || [ "$got_ver" != "$want" ]; then
+    echo "ERROR: ${spec} tarball contains ${got_name}@${got_ver}" >&2; exit 1
+  fi
+
+  # Swap: the old copy is removed only once the new one is complete.
+  mv "$dir" "$tmp/old"
+  mv "$tmp/new" "$dir"
+  rm -rf "$tmp/old"
+  echo "patched bundled ${name} ${have} -> ${want}"
+done

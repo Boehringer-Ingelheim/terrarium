@@ -67,3 +67,33 @@ BIN
     assert_success
     assert_output ""
 }
+
+# 4.8 has no 02_pinned_versions.bats, so the Node/npm pins are asserted here
+# (INFIAAS-11916). The ENV pins must be set: an empty pin would make the
+# --partial match vacuous.
+@test "node matches NODEJS_VERSION (INFIAAS-11916)" {
+    [ -n "${NODEJS_VERSION:-}" ] || fail "NODEJS_VERSION is not set in the image ENV"
+    run node --version
+    assert_success
+    assert_output "v${NODEJS_VERSION}"
+}
+
+@test "npm matches NPM_VERSION, not the npm bundled with Node (INFIAAS-9587)" {
+    [ -n "${NPM_VERSION:-}" ] || fail "NPM_VERSION is not set in the image ENV"
+    run npm --version
+    assert_success
+    assert_output "${NPM_VERSION}"
+}
+
+@test "npm's bundled packages are at least NPM_BUNDLED_PATCHES (INFIAAS-9587)" {
+    [ -n "${NPM_BUNDLED_PATCHES:-}" ] || fail "NPM_BUNDLED_PATCHES is not set in the image ENV"
+    root=/opt/node/lib/node_modules/npm/node_modules
+    for spec in ${NPM_BUNDLED_PATCHES}; do
+        name="${spec%@*}" want="${spec#*@}"
+        run node -p "require('${root}/${name}/package.json').version"
+        assert_success
+        # sort -V: the bundled copy must not be older than the patch target
+        [ "$(printf '%s\n%s\n' "$output" "$want" | sort -V | head -n1)" = "$want" ] \
+            || fail "bundled ${name} is ${output}, expected >= ${want}"
+    done
+}

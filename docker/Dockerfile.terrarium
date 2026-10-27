@@ -1,49 +1,77 @@
 # --------- Global args — single source of truth for all versions ---------
 # Sorted alphabetically. Referenced by ARG in each stage that needs them.
-# Base images pinned for build determinism
-# Default Versions need to match the Jenkins Build containers as defined at https://github.com/opendevstack/ods-quickstarters/blob/master/common/jenkins-agents/terraform-2408/docker/Dockerfile.ubi9#L26
-ARG ROCKYLINUX_VERSION=9.3
-ARG UBI9_VERSION=9.5
+# Base images pinned for build determinism. Keep both on the newest EL9 minor:
+# Rocky point releases go EOL when the next one ships, and
+# scripts/check-pin-freshness.sh (make guardrails) fails on a stale pin.
+# Default tool versions on the 4.8 line (security fixes only) still match the
+# Jenkins build containers, e.g. TERRAFORM_VERSION, see
+# https://github.com/opendevstack/ods-quickstarters/blob/master/common/jenkins-agents/terraform-2408/docker/Dockerfile.ubi9#L26
+ARG ROCKYLINUX_VERSION=9.8
+ARG UBI9_VERSION=9.8
 ARG AGE_VERSION=1.2.0
 ARG AWS_CDK_VERSION=2.1024.0
 ARG BATS_CORE_VERSION=1.13.0
 ARG BUNDLER_VERSION=2.5.17
 ARG GEM_HOME=/opt/bundle
-ARG GO_VERSION=1.21.13
-ARG HELM_VERSION=3.20.1
-ARG KUBECTL_VERSION=1.35.3
-ARG NODEJS_VERSION=24.14.0
-ARG OC_VERSION=4.19.0
+ARG GO_VERSION=1.26.10
+ARG HELM_VERSION=3.22.0
+ARG KUBECTL_VERSION=1.35.9
+ARG NODEJS_VERSION=24.22.1
+# npm bundled with Node lags its own dependency fixes; pin it explicitly (INFIAAS-9587)
+ARG NPM_VERSION=11.20.0
+# Fixed releases swapped in for packages npm bundles, until npm ships them
+# itself (INFIAAS-9587, docker/files/bin/npm_patch_bundled). Same major only.
+ARG NPM_BUNDLED_PATCHES="undici@6.29.1 ip-address@10.7.5 brace-expansion@5.0.12 postcss-selector-parser@7.1.7"
+ARG OC_VERSION=4.19.51
 ARG OPENSTACK_RELEASE=2025.1
+# Security-only upgrades applied over the OpenStack upper-constraints (as on
+# master, INFIAAS-9587). `pip check` must pass. OPENSTACK_RELEASE stays 2025.1
+# on the 4.8 line; the versions are the ones master validates (stable/2026.2
+# constraints plus its overrides). certifi: the eMudhra intermediates are only
+# gone from 2026.10.19 on (INFIAAS-11916).
+ARG OPENSTACK_OVERRIDES="urllib3==2.8.0 cryptography==50.0.2 requests==2.34.2 idna==3.18 msgpack==1.2.1 certifi==2026.10.23"
 ARG OPENSTACK_VENV=/opt/openstack
-ARG OPENTOFU_VERSION=1.11.5
+ARG OPENTOFU_VERSION=1.11.14
 ARG PACKER_VERSION=1.11.2
-ARG PYTHON_VERSION=3.13.12
+# Exact pip for every pip the image installs: the pyenv CPython and the
+# OpenStack venv. pip always loads its vendored certifi in addition to the
+# system store, so OS CA fixes do not reach it. 26.2.2 is the first pip without
+# the compromised eMudhra intermediates (INFIAAS-11916). Pinned exactly so a
+# rebuild is reproducible and .trivyignore.yaml's pip-vendor purls stay valid;
+# bump it deliberately (Dependabot cannot see it). ARG only, never ENV: pip
+# reads every PIP_* environment variable as configuration (A-07). The build-time
+# ARG is safe because pip explicitly skips PIP_VERSION and PIP_HELP
+# (pip/_internal/configuration.py ENV_NAMES_IGNORED). 15_ca_distrust.bats
+# keeps its own hard-coded floor as the independent guard.
+ARG PIP_VERSION=26.2.2
+ARG PYTHON_VERSION=3.13.17
 ARG RUBY_VERSION=3.3.4
-ARG SOPS_VERSION=3.12.2
+ARG SOPS_VERSION=3.13.3
 ARG STARSHIP_VERSION=1.24.2
 ARG TASK_VERSION=3.38.0
-ARG TENV_VERSION=4.11.1
+ARG TENV_VERSION=4.15.1
 ARG TERRAFORM_CONFIG_INSPECT_VERSION=0.2.0
 ARG TERRAFORM_DOCS_VERSION=v0.18.0
 ARG TERRAFORM_VERSION=1.9.4
 ARG TFLINT_VERSION=0.52.0
-ARG TRIVY_VERSION=0.69.3
+ARG TRIVY_VERSION=0.76.1
 # ARG UV_VERSION=0.11.6 Defined in docker/pyproject.toml
-ARG YQ_VERSION=4.52.4
+ARG YQ_VERSION=4.54.1
 ARG ZOXIDE_VERSION=0.9.9
 
 
 # ================= Stage 0 — buildlang (compile on Rocky 9) =================
-FROM rockylinux:${ROCKYLINUX_VERSION} AS buildlang
-ARG PYTHON_VERSION RUBY_VERSION BUNDLER_VERSION GEM_HOME
+# docker.io/library/rockylinux is deprecated and stops at 9.3; the Rocky
+# Enterprise Software Foundation publishes current point releases here.
+FROM docker.io/rockylinux/rockylinux:${ROCKYLINUX_VERSION} AS buildlang
+ARG PIP_VERSION PYTHON_VERSION RUBY_VERSION BUNDLER_VERSION GEM_HOME
 
 ENV PYENV_ROOT=/opt/pyenv \
     RBENV_ROOT=/opt/rbenv \
     GEM_HOME=${GEM_HOME}
 ENV PATH=${PYENV_ROOT}/shims:${PYENV_ROOT}/bin:${RBENV_ROOT}/shims:${RBENV_ROOT}/bin:$PATH
 
-RUN dnf -y update \
+RUN dnf -y upgrade \
     && dnf -y install dnf-plugins-core \
     && dnf config-manager --set-enabled crb \
     && dnf -y groupinstall "Development Tools" \
@@ -64,6 +92,7 @@ RUN umask 0002 \
     && git clone https://github.com/pyenv/pyenv-update.git ${PYENV_ROOT}/plugins/pyenv-update \
     && ${PYENV_ROOT}/bin/pyenv install ${PYTHON_VERSION} \
     && ${PYENV_ROOT}/bin/pyenv global  ${PYTHON_VERSION} \
+    && "${PYENV_ROOT}/versions/${PYTHON_VERSION}/bin/python" -m pip install --no-cache-dir "pip==${PIP_VERSION}" \
     && python --version && pip --version
 
 # ---- rbenv & Ruby + Bundler ----
@@ -97,9 +126,10 @@ LABEL maintainer="Erhard Wais <erhard.wais@boehringer-ingelheim.com>, Josef Hart
 ARG TARGETPLATFORM TARGETOS TARGETARCH TARGETVARIANT BUILDPLATFORM BUILDOS BUILDARCH BUILDVARIANT
 # Pull in global args needed in this stage
 ARG AGE_VERSION AWS_CDK_VERSION BATS_CORE_VERSION BUNDLER_VERSION GEM_HOME
-ARG GO_VERSION HELM_VERSION KUBECTL_VERSION NODEJS_VERSION
-ARG OC_VERSION OPENSTACK_RELEASE OPENSTACK_VENV
-ARG OPENTOFU_VERSION PACKER_VERSION PYTHON_VERSION RUBY_VERSION
+ARG GO_VERSION HELM_VERSION KUBECTL_VERSION NODEJS_VERSION NPM_VERSION
+ARG NPM_BUNDLED_PATCHES
+ARG OC_VERSION OPENSTACK_OVERRIDES OPENSTACK_RELEASE OPENSTACK_VENV
+ARG OPENTOFU_VERSION PACKER_VERSION PIP_VERSION PYTHON_VERSION RUBY_VERSION
 ARG SOPS_VERSION STARSHIP_VERSION TASK_VERSION TENV_VERSION
 ARG TERRAFORM_CONFIG_INSPECT_VERSION TERRAFORM_DOCS_VERSION TERRAFORM_VERSION
 ARG TFLINT_VERSION TRIVY_VERSION YQ_VERSION ZOXIDE_VERSION
@@ -114,9 +144,13 @@ ENV AGE_VERSION=${AGE_VERSION} \
     HELM_VERSION=${HELM_VERSION} \
     KUBECTL_VERSION=${KUBECTL_VERSION} \
     NODEJS_VERSION=${NODEJS_VERSION} \
+    NPM_VERSION=${NPM_VERSION} \
+    NPM_BUNDLED_PATCHES="${NPM_BUNDLED_PATCHES}" \
+    OPENSTACK_OVERRIDES="${OPENSTACK_OVERRIDES}" \
     OPENSTACK_RELEASE=${OPENSTACK_RELEASE} \
     OPENTOFU_VERSION=${OPENTOFU_VERSION} \
     PACKER_VERSION=${PACKER_VERSION} \
+    PYTHON_VERSION=${PYTHON_VERSION} \
     RBENV_ROOT=/opt/rbenv \
     RBENV_SHELL=bash \
     RUBY_VERSION=${RUBY_VERSION} \
@@ -394,6 +428,17 @@ RUN set -eux; \
     bundle clean --force; \
     BUNDLE_FROZEN=true bundle check
 
+# Gems that ship their own (frozen) Mozilla CA bundle trust exactly what the OS
+# trusts instead (INFIAAS-11916): their copies still trusted the compromised
+# eMudhra/emSign intermediates, and httpclient/ms_rest have no newer release.
+# The list is explicit; an entry that no longer matches fails the build.
+RUN link_system_ca_bundle /etc/pki/tls/certs/ca-bundle.crt \
+    ${GEM_HOME}/ruby/*/gems/aws-sdk-core-*/ca-bundle.crt \
+    ${GEM_HOME}/ruby/*/gems/excon-*/data/cacert.pem \
+    ${GEM_HOME}/ruby/*/gems/httpclient-*/lib/httpclient/cacert.pem \
+    ${GEM_HOME}/ruby/*/gems/httpclient-*/lib/httpclient/cacert1024.pem \
+    ${GEM_HOME}/ruby/*/gems/ms_rest-*/ca-cert.pem
+
 # xorriso (from buildlang)
 COPY --from=buildlang /usr/bin/xorriso /usr/bin/xorriso
 COPY --from=buildlang /usr/lib64/libisoburn.so.* /usr/lib64/
@@ -411,7 +456,12 @@ RUN pip config set global.cert /etc/ssl/certs/ca-bundle.crt \
 # ─── Python user‑level libraries via uv ─────────────────────────────────────
 COPY pyproject.toml /tmp/pyproject.toml
 COPY uv.lock       /tmp/uv.lock
-RUN uv sync --directory /tmp --no-managed-python --frozen
+# --no-cache (INFIAAS-9587): the uv cache in $HOME/.cache/uv is never used
+# after this step but shipped wheel copies (uv itself, cryptography, PyJWT, …)
+# that scanners report on top of the installed venv. Fail the build if a cache
+# directory is still left behind.
+RUN uv sync --directory /tmp --no-managed-python --frozen --no-cache \
+    && test ! -e "${HOME}/.cache/uv"
 ENV PATH=/tmp/.venv/bin:$PATH
 
 # ─── Azure CLI (signed repo) ────────────────────────────────────────────────
@@ -422,16 +472,9 @@ RUN rpm --import https://packages.microsoft.com/keys/microsoft.asc \
     && dnf clean all
 
 # ─── GCP CLI (Google Cloud SDK signed repo) ────────────────────────────────
-RUN ARCH_GCP=$([[ "$TARGETARCH" == "amd64" ]] && echo "x86_64" || echo "aarch64") \
-    && cat > /etc/yum.repos.d/google-cloud-sdk.repo <<EOF
-[google-cloud-cli]
-name=Google Cloud CLI
-baseurl=https://packages.cloud.google.com/yum/repos/cloud-sdk-el9-${ARCH_GCP}
-enabled=1
-gpgcheck=1
-repo_gpgcheck=0
-gpgkey=https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
-EOF
+# Static repo file (was a heredoc that hadolint cannot parse); dnf's $basearch
+# selects cloud-sdk-el9-x86_64 / -aarch64 per TARGETARCH.
+COPY files/yum.repos.d/google-cloud-sdk.repo /etc/yum.repos.d/google-cloud-sdk.repo
 RUN dnf -y install google-cloud-cli \
     && gcloud version \
     && dnf clean all
@@ -460,7 +503,7 @@ RUN if [ "x${TARGETARCH}" = "xamd64" ]; then \
     && sam --version
 
 
-# Node.js + signed SHASUMS verification + AWS CDK
+# Node.js + signed SHASUMS verification + npm (pinned, registry-integrity-checked) + AWS CDK
 RUN ARCH_NODE=$([[ "$TARGETARCH" == "amd64" ]] && echo "x64" || echo "arm64") \
     && VER="${NODEJS_VERSION}" \
     && BASE="https://nodejs.org/dist/v${VER}" \
@@ -471,9 +514,16 @@ RUN ARCH_NODE=$([[ "$TARGETARCH" == "amd64" ]] && echo "x64" || echo "arm64") \
     && xzcat "$FILE" | tar xpf - -C /opt/ \
     && mv "/opt/node-v${VER}-${TARGETOS}-${ARCH_NODE}" /opt/node \
     && rm -f "$FILE" \
+    && /opt/node/bin/npm install -g "npm@${NPM_VERSION}" \
     && /opt/node/bin/npm install -g aws-cdk@${AWS_CDK_VERSION} \
     && chown -R 1001:0 /opt/node && chmod +x /opt/node/bin/* \
     && node --version && cdk --version
+
+# npm's own bundled dependencies (e.g. undici) lag their fixes even in the
+# newest npm; swap in the fixed releases, registry-integrity-checked by npm pack.
+RUN npm_patch_bundled ${NPM_BUNDLED_PATCHES} \
+    && chown -R 1001:0 /opt/node/lib/node_modules/npm/node_modules \
+    && npm --version
 
 
 # tenv + Terraform + OpenTofu
@@ -524,20 +574,8 @@ RUN --mount=type=secret,id=tenv_github_token,required=false \
     && tofu -version \
     && chown -R 1001:0 "${TENV_ROOT}" && chmod -R 2775 "${TENV_ROOT}"
 
-# Safe tenv profile
-RUN cat > /etc/profile.d/tenv.sh <<'EOF'
-if command -v tenv >/dev/null 2>&1; then
-  if tenv --help 2>&1 | grep -q 'update-path'; then
-    TENV_NEW_PATH="$((/usr/bin/tenv update-path) 2>/dev/null || true)"
-    if [ -n "$TENV_NEW_PATH" ]; then
-      case ":$PATH:" in *":$TENV_NEW_PATH:"*) : ;; *) PATH="$TENV_NEW_PATH:$PATH" ;; esac
-    fi
-  elif tenv --help 2>&1 | grep -q 'init'; then
-    eval "$(/usr/bin/tenv init - bash 2>/dev/null)" || true
-  fi
-fi
-export PATH
-EOF
+# Safe tenv profile (static file; was a heredoc that hadolint cannot parse)
+COPY files/profile.d/tenv.sh /etc/profile.d/tenv.sh
 
 # HashiCorp tools — verify signed checksums
 RUN ARCH=$([[ "$TARGETARCH" == "amd64" ]] && echo "amd64" || echo "arm64") \
@@ -702,12 +740,17 @@ RUN arch="${TARGETARCH:-$(echo "${TARGETPLATFORM:-linux/amd64}" | cut -d/ -f2)}"
     && oc version --client
 
 # --- OpenStack CLI -----------------------------------------------------------
-# Versions should match upper constraints https://opendev.org/openstack/requirements/src/branch/stable/${OPENSTACK_RELEASE}/upper-constraints.txt
+# Versions match the upper constraints (minus OPENSTACK_OVERRIDES) https://opendev.org/openstack/requirements/src/branch/stable/${OPENSTACK_RELEASE}/upper-constraints.txt
+# The venv's pip comes from ensurepip; pin it to the same pip as the pyenv
+# interpreter's (PIP_VERSION, INFIAAS-11916) before it downloads anything.
 RUN python -m venv ${OPENSTACK_VENV} \
+    && ${OPENSTACK_VENV}/bin/python -m pip install --no-cache-dir "pip==${PIP_VERSION}" \
     && ${OPENSTACK_VENV}/bin/pip install --no-cache-dir \
     python-openstackclient \
     python-barbicanclient \
     --constraint https://opendev.org/openstack/requirements/raw/branch/stable/${OPENSTACK_RELEASE}/upper-constraints.txt \
+    && ${OPENSTACK_VENV}/bin/pip install --no-cache-dir ${OPENSTACK_OVERRIDES} \
+    && ${OPENSTACK_VENV}/bin/pip check \
     && ln -s ${OPENSTACK_VENV}/bin/openstack /usr/local/bin/openstack \
     && openstack --version
 

@@ -23,6 +23,15 @@ load 'test_helper/common.bash'
   assert_success
 }
 
+# INFIAAS-11916: the user toolchain is pinned by GO_VERSION (ENV). 4.8 has no
+# 02_pinned_versions.bats, so the exact version is asserted here.
+@test "go matches GO_VERSION (user toolchain)" {
+  [ -n "${GO_VERSION:-}" ] || fail "GO_VERSION is not set in the image ENV"
+  run go version
+  assert_success
+  assert_output --regexp "^go version go${GO_VERSION//./\\.} linux/(amd64|arm64)$"
+}
+
 # --- New: common dev tools that previously had no tests ----------------------
 
 @test "make is installed" { check_binary make; }
